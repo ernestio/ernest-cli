@@ -71,17 +71,6 @@ func TestSuccessLogout(t *testing.T) {
 
 // ********************* List *********************
 
-func TestListDatacenters(t *testing.T) {
-	convey.Convey("Given I get all datacenters", t, func() {
-		server := mockRequest("/datacenters/", "GET", 200, ``)
-		m := Manager{URL: server.URL}
-		_, err := m.ListDatacenters("token")
-		convey.Convey("Then It does not fail", func() {
-			convey.So(err, convey.ShouldBeNil)
-		})
-	})
-}
-
 func TestListGroups(t *testing.T) {
 	convey.Convey("Given I get all groups", t, func() {
 		server := mockRequest("/clients/", "GET", 200, ``)
