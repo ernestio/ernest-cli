@@ -9,10 +9,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/smartystreets/goconvey/convey"
 )
 
 func mockRequest(route string, method string, status int, output string) *httptest.Server {
@@ -30,15 +28,4 @@ func mockRequest(route string, method string, status int, output string) *httpte
 	}).Methods(method)
 
 	return httptest.NewServer(r)
-}
-
-func TestSuccessLogout(t *testing.T) {
-	convey.Convey("Given I do a success logout", t, func() {
-		server := mockRequest("/session/", "DELETE", 200, ``)
-		m := Manager{URL: server.URL}
-		err := m.Logout("foo")
-		convey.Convey("Then It does not fail", func() {
-			convey.So(err, convey.ShouldBeNil)
-		})
-	})
 }
