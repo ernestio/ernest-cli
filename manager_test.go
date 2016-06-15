@@ -69,18 +69,6 @@ func TestSuccessLogout(t *testing.T) {
 	})
 }
 
-func TestCreateUser(t *testing.T) {
-	t.Skip()
-	convey.Convey("Given I create a client", t, func() {
-		server := mockRequest("/clients/", "POST", 200, ``)
-		m := Manager{URL: server.URL}
-		err := m.CreateUser("name", "email", "user", "password", "adminuser", "adminpassword")
-		convey.Convey("Then It does not fail", func() {
-			convey.So(err, convey.ShouldBeNil)
-		})
-	})
-}
-
 // ********************* List *********************
 
 func TestListDatacenters(t *testing.T) {
