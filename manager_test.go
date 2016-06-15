@@ -32,32 +32,6 @@ func mockRequest(route string, method string, status int, output string) *httpte
 	return httptest.NewServer(r)
 }
 
-func TestForbiddenLogin(t *testing.T) {
-	convey.Convey("Given I do a failed login", t, func() {
-		server := mockRequest("/session/", "POST", 403, "")
-		m := Manager{URL: server.URL}
-		body, token, err := m.Login("foo", "bar")
-		convey.Convey("Then I should receive an access denied error", func() {
-			convey.So(err, convey.ShouldNotBeNil)
-			convey.So(body, convey.ShouldEqual, `{"user_name":"foo", "user_password": "bar"}`)
-			convey.So(token, convey.ShouldEqual, "")
-		})
-	})
-}
-
-func TestSuccessLogin(t *testing.T) {
-	convey.Convey("Given I do a success login", t, func() {
-		server := mockRequest("/session/", "POST", 200, ``)
-		m := Manager{URL: server.URL}
-		body, token, err := m.Login("foo", "bar")
-		convey.Convey("Then I should receive a valid token", func() {
-			convey.So(err, convey.ShouldBeNil)
-			convey.So(body, convey.ShouldEqual, ``)
-			convey.So(token, convey.ShouldEqual, `foo`)
-		})
-	})
-}
-
 func TestSuccessLogout(t *testing.T) {
 	convey.Convey("Given I do a success logout", t, func() {
 		server := mockRequest("/session/", "DELETE", 200, ``)
