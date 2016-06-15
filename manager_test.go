@@ -81,56 +81,6 @@ func TestCreateUser(t *testing.T) {
 	})
 }
 
-// ********************* Destroy *******************
-
-func TestDestroy(t *testing.T) {
-	convey.Convey("Given a service", t, func() {
-		server := mockRequest("/services/foo", "DELETE", 200, ``)
-		m := Manager{URL: server.URL}
-		err := m.Destroy("token", "foo", false)
-		convey.Convey("Then It does not fail", func() {
-			convey.So(err, convey.ShouldBeNil)
-		})
-	})
-}
-
-// ********************* Reset *******************
-
-func TestResetService(t *testing.T) {
-	convey.Convey("Given a service", t, func() {
-		server := mockRequest("/services/foo/reset/", "POST", 200, ``)
-		m := Manager{URL: server.URL}
-		err := m.ResetService("foo", "token")
-		convey.Convey("Then It does not fail", func() {
-			convey.So(err, convey.ShouldBeNil)
-		})
-	})
-}
-
-// ********************* Status *******************
-
-func TestServiceStatus(t *testing.T) {
-	convey.Convey("Given a service", t, func() {
-		server := mockRequest("/services/foo", "GET", 200, ``)
-		m := Manager{URL: server.URL}
-		_, err := m.ServiceStatus("token", "foo")
-		convey.Convey("Then It does not fail", func() {
-			convey.So(err, convey.ShouldBeNil)
-		})
-	})
-}
-
-func TestServiceBuildStatus(t *testing.T) {
-	convey.Convey("Given a service and a build id", t, func() {
-		server := mockRequest("/services/foo/builds/1234567890", "GET", 200, ``)
-		m := Manager{URL: server.URL}
-		_, err := m.ServiceBuildStatus("token", "foo", "1234567890")
-		convey.Convey("Then It does not fail", func() {
-			convey.So(err, convey.ShouldBeNil)
-		})
-	})
-}
-
 // ********************* List *********************
 
 func TestListDatacenters(t *testing.T) {
@@ -138,41 +88,6 @@ func TestListDatacenters(t *testing.T) {
 		server := mockRequest("/datacenters/", "GET", 200, ``)
 		m := Manager{URL: server.URL}
 		_, err := m.ListDatacenters("token")
-		convey.Convey("Then It does not fail", func() {
-			convey.So(err, convey.ShouldBeNil)
-		})
-	})
-}
-
-func TestListServices(t *testing.T) {
-	convey.Convey("Given I get all services", t, func() {
-		server := mockRequest("/services/", "GET", 200, ``)
-		m := Manager{URL: server.URL}
-		_, err := m.ListServices("token")
-		convey.Convey("Then It does not fail", func() {
-			convey.So(err, convey.ShouldBeNil)
-		})
-	})
-}
-
-func TestListBuilds(t *testing.T) {
-	convey.Convey("Given a service", t, func() {
-		convey.Convey("Given I get all builds", func() {
-			server := mockRequest("/services/foo/builds/", "GET", 200, ``)
-			m := Manager{URL: server.URL}
-			_, err := m.ListBuilds("foo", "token")
-			convey.Convey("Then It does not fail", func() {
-				convey.So(err, convey.ShouldBeNil)
-			})
-		})
-	})
-}
-
-func TestListUsers(t *testing.T) {
-	convey.Convey("Given I get all users", t, func() {
-		server := mockRequest("/users/", "GET", 200, ``)
-		m := Manager{URL: server.URL}
-		_, err := m.ListUsers("token")
 		convey.Convey("Then It does not fail", func() {
 			convey.So(err, convey.ShouldBeNil)
 		})
