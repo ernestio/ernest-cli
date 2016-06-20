@@ -35,13 +35,22 @@ lint:
 dist: dist-linux dist-darwin dist-windows
 
 dist-linux:
-	GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o ernest-${VERSION}-linux-x64
+	GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o ernest-${VERSION}-linux-amd64
+	zip ernest-${VERSION}-linux-amd64.zip ernest-${VERSION}-linux-amd64 README.md LICENSE
+	GOOS=linux GOARCH=386 go build ${LDFLAGS} -o ernest-${VERSION}-linux-386
+	zip ernest-${VERSION}-linux-386.zip ernest-${VERSION}-linux-386 README.md LICENSE
 
 dist-darwin:
-	GOOS=darwin GOARCH=amd64 go build ${LDFLAGS} -o ernest-${VERSION}-darwin-x64
+	GOOS=darwin GOARCH=amd64 go build ${LDFLAGS} -o ernest-${VERSION}-darwin-amd64
+	zip ernest-${VERSION}-darwin-amd64.zip ernest-${VERSION}-darwin-amd64 README.md LICENSE
+	GOOS=darwin GOARCH=386 go build ${LDFLAGS} -o ernest-${VERSION}-darwin-386
+	zip ernest-${VERSION}-darwin-386.zip ernest-${VERSION}-darwin-386 README.md LICENSE
 
 dist-windows:
-	GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -o ernest-${VERSION}-windows-x64.exe
+	GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -o ernest-${VERSION}-windows-amd64.exe
+	zip ernest-${VERSION}-windows-amd64.zip ernest-${VERSION}-windows-amd64.exe README.md LICENSE
+	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o ernest-${VERSION}-windows-386.exe
+	zip ernest-${VERSION}-windows-386.zip ernest-${VERSION}-windows-386.exe README.md LICENSE
 
 clean:
 	go clean
