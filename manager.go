@@ -9,9 +9,11 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"runtime"
 
@@ -21,6 +23,11 @@ import (
 // Manager manages all api communications
 type Manager struct {
 	URL string `json:"url"`
+}
+
+// Token holds the JWT token that is received when authenticating
+type Token struct {
+	Token string `json:"token"`
 }
 
 // Service ...
@@ -77,7 +84,7 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 	url = m.URL + url
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(payload))
 	if token != "" {
-		req.Header.Add("X-AUTH-TOKEN", token)
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	}
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
@@ -146,26 +153,43 @@ func (m *Manager) getSession(token string) (session Session, err error) {
 	return session, err
 }
 
-// ********************* Login & Logout *******************
+// ********************* Login *******************
 
 // Login does a login action against the api
-func (m *Manager) Login(username string, password string) (token string, body string, err error) {
-	payload := []byte(`{"user_name":"` + username + `", "user_password": "` + password + `"}`)
+func (m *Manager) Login(username string, password string) (token string, err error) {
+	var t Token
 
-	body, res, err := m.doRequest("/session/", "POST", payload, "", "")
+	f := url.Values{}
+	f.Add("username", username)
+	f.Add("password", password)
+
+	url := m.URL + "/auth"
+	req, err := http.NewRequest("POST", url, nil)
+	req.Form = f
+
+	resp, err := m.client().Do(req)
 	if err != nil {
-		return body, "", err
+		return "", err
 	}
 
-	token = res.Header.Get("X-Auth-Token")
+	if resp.StatusCode != 200 {
+		return "", errors.New("Unauthorized")
+	}
+	defer resp.Body.Close()
 
-	return token, username, nil
-}
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		color.Red(err.Error())
+	}
 
-// Logout clear local authentication credentials
-func (m *Manager) Logout(token string) error {
-	_, _, err := m.doRequest("/session/", "DELETE", nil, token, "")
-	return err
+	err = json.Unmarshal(responseBody, &t)
+	if err != nil {
+		color.Red(err.Error())
+	}
+
+	token = t.Token
+
+	return token, nil
 }
 
 // ********************* Update *******************
@@ -205,7 +229,7 @@ func (m *Manager) CreateDatacenter(token string, name string, user string, passw
 
 // CreateUser ...
 func (m *Manager) CreateUser(name string, email string, user string, password string, adminuser string, adminpassword string) error {
-	token, _, err := m.Login(adminuser, adminpassword)
+	token, err := m.Login(adminuser, adminpassword)
 	c, err := m.createClient(token, name)
 	if err != nil {
 		color.Red(err.Error() + ": Group " + name + " already exists")

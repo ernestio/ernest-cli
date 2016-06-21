@@ -164,7 +164,7 @@ var PasswordUser = cli.Command{
 			if cuser.IsAdmin {
 				token = cfg.Token
 			} else {
-				token, _, err = m.Login(adminuser, adminpassword)
+				token, err = m.Login(adminuser, adminpassword)
 				if err != nil {
 					color.Red(err.Error())
 					return err
@@ -277,7 +277,7 @@ var DisableUser = cli.Command{
 			return errors.New("Password not specified")
 		}
 
-		token, _, err := m.Login(adminuser, adminpassword)
+		token, err := m.Login(adminuser, adminpassword)
 		if err != nil {
 			color.Red(err.Error())
 			return err

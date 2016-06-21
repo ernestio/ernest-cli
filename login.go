@@ -68,7 +68,7 @@ var Login = cli.Command{
 			password = c.String("password")
 		}
 
-		token, username, err := m.Login(username, password)
+		token, err := m.Login(username, password)
 		if err != nil {
 			color.Red(err.Error())
 			os.Exit(1)

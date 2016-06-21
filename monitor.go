@@ -7,6 +7,7 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -61,7 +62,7 @@ func Monitorize(host, token, stream string) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
-	client.Headers["X-Auth-Token"] = token
+	client.Headers["Authorization"] = fmt.Sprintf("Bearer %s", token)
 
 	err := client.Subscribe(stream, func(msg *sse.Event) {
 		if msg.Data != nil {

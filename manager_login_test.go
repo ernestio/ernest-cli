@@ -12,12 +12,11 @@ import (
 
 func TestForbiddenLogin(t *testing.T) {
 	convey.Convey("Given I do a failed login", t, func() {
-		server := mockRequest("/session/", "POST", 403, "")
+		server := mockRequest("/auth", "POST", 403, "")
 		m := Manager{URL: server.URL}
-		body, token, err := m.Login("foo", "bar")
+		token, err := m.Login("foo", "bar")
 		convey.Convey("Then I should receive an access denied error", func() {
 			convey.So(err, convey.ShouldNotBeNil)
-			convey.So(body, convey.ShouldEqual, `{"user_name":"foo", "user_password": "bar"}`)
 			convey.So(token, convey.ShouldEqual, "")
 		})
 	})
@@ -25,13 +24,12 @@ func TestForbiddenLogin(t *testing.T) {
 
 func TestSuccessLogin(t *testing.T) {
 	convey.Convey("Given I do a success login", t, func() {
-		server := mockRequest("/session/", "POST", 200, ``)
+		server := mockRequest("/auth", "POST", 200, `{"token": "valid-token"}`)
 		m := Manager{URL: server.URL}
-		body, token, err := m.Login("foo", "bar")
+		token, err := m.Login("foo", "bar")
 		convey.Convey("Then I should receive a valid token", func() {
 			convey.So(err, convey.ShouldBeNil)
-			convey.So(body, convey.ShouldEqual, ``)
-			convey.So(token, convey.ShouldEqual, `foo`)
+			convey.So(token, convey.ShouldEqual, "valid-token")
 		})
 	})
 }
