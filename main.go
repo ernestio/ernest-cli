@@ -22,6 +22,7 @@ func main() {
 		Target,
 		Info,
 		Login,
+		Logout,
 		CmdUser,
 		CmdGroup,
 		CmdDatacenter,
