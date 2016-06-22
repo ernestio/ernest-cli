@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -164,8 +165,10 @@ func (m *Manager) Login(username string, password string) (token string, err err
 	f.Add("password", password)
 
 	url := m.URL + "/auth"
-	req, err := http.NewRequest("POST", url, nil)
+	req, err := http.NewRequest("POST", url, strings.NewReader(f.Encode()))
 	req.Form = f
+	req.PostForm = f
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 	resp, err := m.client().Do(req)
 	if err != nil {
