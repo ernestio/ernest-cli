@@ -261,7 +261,7 @@ func (m *Manager) GetUUID(token string, payload []byte) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	body, _, err := m.doRequest("/services/uuid/", "POST", []byte(`{"id":"`+id+`"}`), token, "")
+	body, _, _ := m.doRequest("/services/uuid/", "POST", []byte(`{"id":"`+id+`"}`), token, "")
 	var dat map[string]interface{}
 	json.Unmarshal([]byte(body), &dat)
 
