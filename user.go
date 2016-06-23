@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"text/tabwriter"
 
 	"github.com/fatih/color"
@@ -39,7 +40,7 @@ var ListUsers = cli.Command{
 
 		fmt.Fprintln(w, "NAME\tID\tEMAIL")
 		for _, user := range users {
-			str := fmt.Sprintf("%s\t%s\t%s", user.Name, user.ID, user.Email)
+			str := fmt.Sprintf("%s\t%d\t%s", user.Username, user.ID, user.Email)
 			fmt.Fprintln(w, str)
 		}
 		w.Flush()
@@ -283,7 +284,9 @@ var DisableUser = cli.Command{
 			return err
 		}
 
-		m.ChangePasswordByAdmin(token, usr, randString(16))
+		id, _ := strconv.Atoi(usr)
+
+		m.ChangePasswordByAdmin(token, id, randString(16))
 
 		color.Green("User successfully disabled.")
 		return nil

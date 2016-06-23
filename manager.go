@@ -51,11 +51,11 @@ type Datacenter struct {
 
 // User ...
 type User struct {
-	ID       string `json:"user_id"`
-	Name     string `json:"user_name"`
-	Email    string `json:"user_email"`
-	ClientID string `json:"client_id"`
-	IsAdmin  bool   `json:"user_admin"`
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	GroupID  int    `json:"group_id"`
+	IsAdmin  bool   `json:"admin"`
 }
 
 // Group ...
@@ -199,9 +199,9 @@ func (m *Manager) Login(username string, password string) (token string, err err
 // ********************* Update *******************
 
 // ChangePassword ...
-func (m *Manager) ChangePassword(token string, userid string, oldpassword string, newpassword string) error {
+func (m *Manager) ChangePassword(token string, userid int, oldpassword string, newpassword string) error {
 	payload := []byte(`{"old_password":"` + oldpassword + `", "new_password": "` + newpassword + `"}`)
-	_, _, err := m.doRequest("/users/"+userid, "PUT", payload, token, "application/yaml")
+	_, _, err := m.doRequest("/users/"+string(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		return err
 	}
@@ -209,9 +209,9 @@ func (m *Manager) ChangePassword(token string, userid string, oldpassword string
 }
 
 // ChangePasswordByAdmin ...
-func (m *Manager) ChangePasswordByAdmin(token string, userid string, newpassword string) error {
+func (m *Manager) ChangePasswordByAdmin(token string, userid int, newpassword string) error {
 	payload := []byte(`{"new_password": "` + newpassword + `"}`)
-	_, _, err := m.doRequest("/users/"+userid, "PUT", payload, token, "application/yaml")
+	_, _, err := m.doRequest("/users/"+string(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		return err
 	}
