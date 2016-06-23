@@ -16,6 +16,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
@@ -110,26 +111,25 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 
 func (m *Manager) createClient(token string, name string) (string, error) {
 	payload := []byte(`{"name":"` + name + `"}`)
-	body, _, err := m.doRequest("/api/groups", "POST", payload, token, "")
+	body, _, err := m.doRequest("/api/groups/", "POST", payload, token, "")
 	if err != nil {
-		fmt.Println(err.Error())
 		return body, err
 	}
 
 	color.Green("SUCCESS: Group " + name + " created")
 
-	var client struct {
-		ID string `json:"client_id"`
+	var group struct {
+		ID int `json:"id"`
 	}
-	err = json.Unmarshal([]byte(body), &client)
+	err = json.Unmarshal([]byte(body), &group)
 	if err != nil {
 		return "", errors.New("ERROR: Couldn't read response from server")
 	}
-	return client.ID, nil
+	return strconv.Itoa(group.ID), nil
 }
 
 func (m *Manager) createUser(token string, client string, user string, password string, email string) error {
-	payload := []byte(`{"client_id": "` + client + `", "user_name":"` + user + `", "user_email": "` + email + `", "user_password": "` + password + `"}`)
+	payload := []byte(`{"group_id": ` + client + `, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
 	_, _, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
 		return err
