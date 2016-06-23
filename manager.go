@@ -60,8 +60,8 @@ type User struct {
 
 // Group ...
 type Group struct {
-	ID   string `json:"client_id"`
-	Name string `json:"client_name"`
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 // Session ...
@@ -109,9 +109,10 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 }
 
 func (m *Manager) createClient(token string, name string) (string, error) {
-	payload := []byte(`{"client_name":"` + name + `"}`)
-	body, _, err := m.doRequest("/clients/", "POST", payload, token, "")
+	payload := []byte(`{"name":"` + name + `"}`)
+	body, _, err := m.doRequest("/groups", "POST", payload, token, "")
 	if err != nil {
+		fmt.Println(err.Error())
 		return body, err
 	}
 
@@ -392,7 +393,7 @@ func (m *Manager) ListBuilds(name string, token string) (builds []Service, err e
 
 // ListUsers ...
 func (m *Manager) ListUsers(token string) (users []User, err error) {
-	body, _, err := m.doRequest("/users/", "GET", []byte(""), token, "")
+	body, _, err := m.doRequest("/api/users/", "GET", []byte(""), token, "")
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +403,7 @@ func (m *Manager) ListUsers(token string) (users []User, err error) {
 
 // ListGroups ...
 func (m *Manager) ListGroups(token string) (groups []Group, err error) {
-	body, _, err := m.doRequest("/clients/", "GET", []byte(""), token, "")
+	body, _, err := m.doRequest("/api/groups/", "GET", []byte(""), token, "")
 	if err != nil {
 		return nil, err
 	}
