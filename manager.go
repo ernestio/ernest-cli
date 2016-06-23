@@ -46,7 +46,7 @@ type Service struct {
 
 // Datacenter ...
 type Datacenter struct {
-	ID   string `json:"datacenter_id"`
+	ID   int    `json:"id"`
 	Name string `json:"datacenter_name"`
 }
 
@@ -222,7 +222,7 @@ func (m *Manager) ChangePasswordByAdmin(token string, userid int, newpassword st
 
 // CreateDatacenter ...
 func (m *Manager) CreateDatacenter(token string, name string, user string, password string, url string, network string, vseURL string) (string, error) {
-	payload := []byte(`{"datacenter_name": "` + name + `", "datacenter_type": "vcloud", "datacenter_region": "LON-001", "datacenter_username":"` + user + `", "datacenter_password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
+	payload := []byte(`{"name": "` + name + `", "type": "vcloud", "region": "LON-001", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
 	body, _, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		return body, err
