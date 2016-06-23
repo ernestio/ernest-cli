@@ -110,7 +110,7 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 
 func (m *Manager) createClient(token string, name string) (string, error) {
 	payload := []byte(`{"name":"` + name + `"}`)
-	body, _, err := m.doRequest("/groups", "POST", payload, token, "")
+	body, _, err := m.doRequest("/api/groups", "POST", payload, token, "")
 	if err != nil {
 		fmt.Println(err.Error())
 		return body, err
@@ -130,7 +130,7 @@ func (m *Manager) createClient(token string, name string) (string, error) {
 
 func (m *Manager) createUser(token string, client string, user string, password string, email string) error {
 	payload := []byte(`{"client_id": "` + client + `", "user_name":"` + user + `", "user_email": "` + email + `", "user_password": "` + password + `"}`)
-	_, _, err := m.doRequest("/users/", "POST", payload, token, "")
+	_, _, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
 		return err
 	}
@@ -139,18 +139,18 @@ func (m *Manager) createUser(token string, client string, user string, password 
 }
 
 func (m *Manager) getUser(token string, userid string) (user User, err error) {
-	res, _, err := m.doRequest("/users/"+userid, "GET", nil, token, "application/yaml")
+	res, _, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
 	json.Unmarshal([]byte(res), &user)
 	return user, err
 }
 
 func (m *Manager) deleteUser(token string, user string) error {
-	_, _, err := m.doRequest("/users/"+user, "DELETE", nil, token, "application/yaml")
+	_, _, err := m.doRequest("/api/users/"+user, "DELETE", nil, token, "application/yaml")
 	return err
 }
 
 func (m *Manager) getSession(token string) (session Session, err error) {
-	res, _, err := m.doRequest("/session/", "GET", nil, token, "application/yaml")
+	res, _, err := m.doRequest("/api/session/", "GET", nil, token, "application/yaml")
 	json.Unmarshal([]byte(res), &session)
 	return session, err
 }
@@ -201,7 +201,7 @@ func (m *Manager) Login(username string, password string) (token string, err err
 // ChangePassword ...
 func (m *Manager) ChangePassword(token string, userid int, oldpassword string, newpassword string) error {
 	payload := []byte(`{"old_password":"` + oldpassword + `", "new_password": "` + newpassword + `"}`)
-	_, _, err := m.doRequest("/users/"+string(userid), "PUT", payload, token, "application/yaml")
+	_, _, err := m.doRequest("/api/users/"+string(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func (m *Manager) ChangePassword(token string, userid int, oldpassword string, n
 // ChangePasswordByAdmin ...
 func (m *Manager) ChangePasswordByAdmin(token string, userid int, newpassword string) error {
 	payload := []byte(`{"new_password": "` + newpassword + `"}`)
-	_, _, err := m.doRequest("/users/"+string(userid), "PUT", payload, token, "application/yaml")
+	_, _, err := m.doRequest("/api/users/"+string(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		return err
 	}
@@ -223,7 +223,7 @@ func (m *Manager) ChangePasswordByAdmin(token string, userid int, newpassword st
 // CreateDatacenter ...
 func (m *Manager) CreateDatacenter(token string, name string, user string, password string, url string, network string, vseURL string) (string, error) {
 	payload := []byte(`{"datacenter_name": "` + name + `", "datacenter_type": "vcloud", "datacenter_region": "LON-001", "datacenter_username":"` + user + `", "datacenter_password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
-	body, _, err := m.doRequest("/datacenters/", "POST", payload, token, "")
+	body, _, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		return body, err
 	}
@@ -251,7 +251,7 @@ func (m *Manager) CreateUser(name string, email string, user string, password st
 
 // GetUser ...
 func (m *Manager) GetUser(token string, userid string) (user User, err error) {
-	res, _, err := m.doRequest("/users/"+userid, "GET", nil, token, "application/yaml")
+	res, _, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
 	json.Unmarshal([]byte(res), &user)
 	return user, err
 }
@@ -262,7 +262,7 @@ func (m *Manager) GetUUID(token string, payload []byte) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	body, _, _ := m.doRequest("/services/uuid/", "POST", []byte(`{"id":"`+id+`"}`), token, "")
+	body, _, _ := m.doRequest("/api/services/uuid/", "POST", []byte(`{"id":"`+id+`"}`), token, "")
 	var dat map[string]interface{}
 	json.Unmarshal([]byte(body), &dat)
 
@@ -298,7 +298,7 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 		println("Additionally you can trace your service on ernest monitor tool with id: " + streamID)
 	}
 
-	if body, _, err := m.doRequest("/services/", "POST", payload, token, "application/yaml"); err != nil {
+	if body, _, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
 		return "", errors.New(body)
 	}
 	if monit == true {
@@ -311,7 +311,7 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 
 // Destroy ...
 func (m *Manager) Destroy(token string, name string, monit bool) error {
-	body, _, err := m.doRequest("/services/"+name, "DELETE", nil, token, "application/yaml")
+	body, _, err := m.doRequest("/api/services/"+name, "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		return err
 	}
@@ -333,7 +333,7 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 
 // ResetService ...
 func (m *Manager) ResetService(name string, token string) error {
-	_, _, err := m.doRequest("/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
+	_, _, err := m.doRequest("/api/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
 	return err
 }
 
@@ -341,7 +341,7 @@ func (m *Manager) ResetService(name string, token string) error {
 
 // ServiceStatus ...
 func (m *Manager) ServiceStatus(token string, serviceName string) (service Service, err error) {
-	body, _, err := m.doRequest("/services/"+serviceName, "GET", []byte(""), token, "")
+	body, _, err := m.doRequest("/api/services/"+serviceName, "GET", []byte(""), token, "")
 	if err != nil {
 		return service, err
 	}
@@ -351,7 +351,7 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service Servi
 
 // ServiceBuildStatus ...
 func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID string) (service Service, err error) {
-	body, _, err := m.doRequest("/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
+	body, _, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
 	if err != nil {
 		return service, err
 	}
@@ -363,7 +363,7 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 
 // ListDatacenters ...
 func (m *Manager) ListDatacenters(token string) (datacenters []Datacenter, err error) {
-	body, _, err := m.doRequest("/datacenters/", "GET", []byte(""), token, "")
+	body, _, err := m.doRequest("/api/datacenters/", "GET", []byte(""), token, "")
 	if err != nil {
 		return nil, err
 	}
@@ -373,7 +373,7 @@ func (m *Manager) ListDatacenters(token string) (datacenters []Datacenter, err e
 
 // ListServices ...
 func (m *Manager) ListServices(token string) (services []Service, err error) {
-	body, _, err := m.doRequest("/services/", "GET", []byte(""), token, "")
+	body, _, err := m.doRequest("/api/services/", "GET", []byte(""), token, "")
 	if err != nil {
 		return nil, err
 	}
@@ -383,7 +383,7 @@ func (m *Manager) ListServices(token string) (services []Service, err error) {
 
 // ListBuilds ...
 func (m *Manager) ListBuilds(name string, token string) (builds []Service, err error) {
-	body, _, err := m.doRequest("/services/"+name+"/builds/", "GET", []byte(""), token, "")
+	body, _, err := m.doRequest("/api/services/"+name+"/builds/", "GET", []byte(""), token, "")
 	if err != nil {
 		return nil, err
 	}
