@@ -47,7 +47,7 @@ type Service struct {
 // Datacenter ...
 type Datacenter struct {
 	ID   int    `json:"id"`
-	Name string `json:"datacenter_name"`
+	Name string `json:"name"`
 }
 
 // User ...
