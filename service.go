@@ -9,9 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"text/tabwriter"
-	"time"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -40,13 +38,7 @@ var ListServices = cli.Command{
 
 		fmt.Fprintln(w, "NAME\tUPDATED\tSTATUS\tENDPOINT")
 		for _, service := range services {
-			timestamp, err := strconv.ParseInt(service.Version, 10, 64)
-			if err != nil {
-				panic(err)
-			}
-			updated := time.Unix(timestamp, 0)
-
-			str := fmt.Sprintf("%s\t%s\t%s\t%s", service.Name, updated, service.Status, service.Endpoint)
+			str := fmt.Sprintf("%s\t%s\t%s\t%s", service.Name, service.Version, service.Status, service.Endpoint)
 			fmt.Fprintln(w, str)
 		}
 		w.Flush()
@@ -153,12 +145,7 @@ var HistoryService = cli.Command{
 
 			fmt.Fprintln(w, "NAME\tBUILD ID\tUPDATED\tSTATUS")
 			for _, service := range services {
-				timestamp, err := strconv.ParseInt(service.Version, 10, 64)
-				if err != nil {
-					panic(err)
-				}
-				updated := time.Unix(timestamp, 0)
-				str := fmt.Sprintf("%s\t%s\t%s\t%s", service.Name, service.ID, updated, service.Status)
+				str := fmt.Sprintf("%s\t%s\t%s\t%s", service.Name, service.ID, service.Version, service.Status)
 				fmt.Fprintln(w, str)
 			}
 			w.Flush()

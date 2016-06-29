@@ -18,6 +18,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/fatih/color"
 )
@@ -34,14 +35,14 @@ type Token struct {
 
 // Service ...
 type Service struct {
-	ID         string `json:"service_id"`
-	Name       string `json:"service_name"`
-	Datacenter string `json:"datacenter_id"`
-	Version    string `json:"service_version"`
-	Status     string `json:"service_status"`
-	Definition string `json:"service_definition"`
-	Result     string `json:"service_result"`
-	Endpoint   string `json:"service_endpoint"`
+	ID         string    `json:"id"`
+	Name       string    `json:"name"`
+	Datacenter int       `json:"datacenter_id"`
+	Version    time.Time `json:"version"`
+	Status     string    `json:"status"`
+	Definition string    `json:"definition"`
+	Result     string    `json:"result"`
+	Endpoint   string    `json:"endpoint"`
 }
 
 // Datacenter ...
