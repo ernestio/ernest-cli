@@ -33,7 +33,10 @@ func (NullWriter) Write([]byte) (int, error) { return 0, nil }
 // PrettyPrint unmarshals received messages and print it
 func PrettyPrint(body []byte) {
 	m := Message{}
-	json.Unmarshal(body, &m)
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return
+	}
 
 	if m.Body == "error" || m.Body == "success" {
 		os.Exit(0)

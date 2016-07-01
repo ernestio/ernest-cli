@@ -141,7 +141,10 @@ func (m *Manager) createUser(token string, client string, user string, password 
 
 func (m *Manager) getUser(token string, userid string) (user User, err error) {
 	res, _, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
-	json.Unmarshal([]byte(res), &user)
+	err = json.Unmarshal([]byte(res), &user)
+	if err != nil {
+		return user, err
+	}
 	return user, err
 }
 
@@ -152,8 +155,14 @@ func (m *Manager) deleteUser(token string, user string) error {
 
 func (m *Manager) getSession(token string) (session Session, err error) {
 	res, _, err := m.doRequest("/api/session/", "GET", nil, token, "application/yaml")
-	json.Unmarshal([]byte(res), &session)
-	return session, err
+	if err != nil {
+		return session, err
+	}
+	err = json.Unmarshal([]byte(res), &session)
+	if err != nil {
+		return session, err
+	}
+	return session, nil
 }
 
 // ********************* Login *******************
@@ -253,8 +262,14 @@ func (m *Manager) CreateUser(name string, email string, user string, password st
 // GetUser ...
 func (m *Manager) GetUser(token string, userid string) (user User, err error) {
 	res, _, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
-	json.Unmarshal([]byte(res), &user)
-	return user, err
+	if err != nil {
+		return user, err
+	}
+	err = json.Unmarshal([]byte(res), &user)
+	if err != nil {
+		return user, err
+	}
+	return user, nil
 }
 
 // GetUUID ...
@@ -265,7 +280,10 @@ func (m *Manager) GetUUID(token string, payload []byte) string {
 	}
 	body, _, _ := m.doRequest("/api/services/uuid/", "POST", []byte(`{"id":"`+id+`"}`), token, "")
 	var dat map[string]interface{}
-	json.Unmarshal([]byte(body), &dat)
+	err = json.Unmarshal([]byte(body), &dat)
+	if err != nil {
+		return ""
+	}
 
 	if str, ok := dat["uuid"].(string); ok {
 		return str
@@ -318,7 +336,10 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 	}
 
 	var res map[string]interface{}
-	json.Unmarshal([]byte(body), &res)
+	err = json.Unmarshal([]byte(body), &res)
+	if err != nil {
+		return err
+	}
 
 	if monit == true {
 		if str, ok := res["stream_id"].(string); ok {
@@ -327,7 +348,7 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 		}
 	}
 
-	return err
+	return nil
 }
 
 // ********************* Reset *******************
@@ -346,8 +367,11 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service Servi
 	if err != nil {
 		return service, err
 	}
-	json.Unmarshal([]byte(body), &service)
-	return service, err
+	err = json.Unmarshal([]byte(body), &service)
+	if err != nil {
+		return service, err
+	}
+	return service, nil
 }
 
 // ServiceBuildStatus ...
@@ -356,8 +380,11 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 	if err != nil {
 		return service, err
 	}
-	json.Unmarshal([]byte(body), &service)
-	return service, err
+	err = json.Unmarshal([]byte(body), &service)
+	if err != nil {
+		return service, err
+	}
+	return service, nil
 }
 
 // ********************* List *********************
@@ -368,7 +395,10 @@ func (m *Manager) ListDatacenters(token string) (datacenters []Datacenter, err e
 	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal([]byte(body), &datacenters)
+	err = json.Unmarshal([]byte(body), &datacenters)
+	if err != nil {
+		return nil, err
+	}
 	return datacenters, err
 }
 
@@ -378,7 +408,10 @@ func (m *Manager) ListServices(token string) (services []Service, err error) {
 	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal([]byte(body), &services)
+	err = json.Unmarshal([]byte(body), &services)
+	if err != nil {
+		return nil, err
+	}
 	return services, err
 }
 
@@ -388,7 +421,10 @@ func (m *Manager) ListBuilds(name string, token string) (builds []Service, err e
 	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal([]byte(body), &builds)
+	err = json.Unmarshal([]byte(body), &builds)
+	if err != nil {
+		return nil, err
+	}
 	return builds, err
 }
 
@@ -398,7 +434,10 @@ func (m *Manager) ListUsers(token string) (users []User, err error) {
 	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal([]byte(body), &users)
+	err = json.Unmarshal([]byte(body), &users)
+	if err != nil {
+		return nil, err
+	}
 	return users, err
 }
 
@@ -408,6 +447,9 @@ func (m *Manager) ListGroups(token string) (groups []Group, err error) {
 	if err != nil {
 		return nil, err
 	}
-	json.Unmarshal([]byte(body), &groups)
+	err = json.Unmarshal([]byte(body), &groups)
+	if err != nil {
+		return nil, err
+	}
 	return groups, err
 }
