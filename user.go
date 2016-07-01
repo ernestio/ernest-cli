@@ -155,14 +155,16 @@ var PasswordUser = cli.Command{
 			color.Red(err.Error())
 		}
 
-		cuser, err := m.getUser(cfg.Token, session.UserID)
-		if err != nil {
-			color.Red(err.Error())
-		}
+		/*
+			cuser, err := m.getUser(cfg.Token, session.UserID)
+			if err != nil {
+				color.Red(err.Error())
+			}
+		*/
 
-		if adminuser != "" && adminpassword != "" || cuser.IsAdmin {
+		if adminuser != "" && adminpassword != "" || session.IsAdmin {
 			token := ""
-			if cuser.IsAdmin {
+			if session.IsAdmin {
 				token = cfg.Token
 			} else {
 				token, err = m.Login(adminuser, adminpassword)

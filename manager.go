@@ -68,10 +68,11 @@ type Group struct {
 
 // Session ...
 type Session struct {
-	UserID    string `json:"user_id"`
-	ClientID  string `json:"client_id"`
-	UserName  string `json:"user_name"`
-	UserEmail string `json:"user_email"`
+	UserID  int    `json:"id"`
+	GroupID int    `json:"group_id"`
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	IsAdmin bool   `json:"admin"`
 }
 
 func (m *Manager) client() *http.Client {
