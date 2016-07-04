@@ -24,7 +24,7 @@ func setup(c *cli.Context) (*Manager, *Config) {
 	if config == nil {
 		config = &Config{}
 		if c.Command.Name != "target" {
-			color.Red("Environment not configured, please setup the target for ernest")
+			color.Red("Environment not configured, please use target command")
 		}
 	}
 	m := Manager{URL: config.URL}

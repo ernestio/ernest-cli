@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"text/tabwriter"
 
 	"github.com/fatih/color"
@@ -39,7 +40,7 @@ var ListUsers = cli.Command{
 
 		fmt.Fprintln(w, "NAME\tID\tEMAIL")
 		for _, user := range users {
-			str := fmt.Sprintf("%s\t%s\t%s", user.Name, user.ID, user.Email)
+			str := fmt.Sprintf("%s\t%d\t%s", user.Username, user.ID, user.Email)
 			fmt.Fprintln(w, str)
 		}
 		w.Flush()
@@ -154,17 +155,19 @@ var PasswordUser = cli.Command{
 			color.Red(err.Error())
 		}
 
-		cuser, err := m.getUser(cfg.Token, session.UserID)
-		if err != nil {
-			color.Red(err.Error())
-		}
+		/*
+			cuser, err := m.getUser(cfg.Token, session.UserID)
+			if err != nil {
+				color.Red(err.Error())
+			}
+		*/
 
-		if adminuser != "" && adminpassword != "" || cuser.IsAdmin {
+		if adminuser != "" && adminpassword != "" || session.IsAdmin {
 			token := ""
-			if cuser.IsAdmin {
+			if session.IsAdmin {
 				token = cfg.Token
 			} else {
-				token, _, err = m.Login(adminuser, adminpassword)
+				token, err = m.Login(adminuser, adminpassword)
 				if err != nil {
 					color.Red(err.Error())
 					return err
@@ -277,13 +280,15 @@ var DisableUser = cli.Command{
 			return errors.New("Password not specified")
 		}
 
-		token, _, err := m.Login(adminuser, adminpassword)
+		token, err := m.Login(adminuser, adminpassword)
 		if err != nil {
 			color.Red(err.Error())
 			return err
 		}
 
-		m.ChangePasswordByAdmin(token, usr, randString(16))
+		id, _ := strconv.Atoi(usr)
+
+		m.ChangePasswordByAdmin(token, id, randString(16))
 
 		color.Green("User successfully disabled.")
 		return nil

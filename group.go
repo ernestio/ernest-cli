@@ -26,16 +26,16 @@ var ListGroups = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
-		orgs, err := m.ListGroups(cfg.Token)
+		groups, err := m.ListGroups(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
 		}
 
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-
-		for _, org := range orgs {
-			str := fmt.Sprintf("%s", org.Name)
+		fmt.Fprintln(w, "NAME")
+		for _, group := range groups {
+			str := fmt.Sprintf("%s", group.Name)
 			fmt.Fprintln(w, str)
 		}
 		w.Flush()

@@ -35,7 +35,6 @@ var Logout = cli.Command{
 			os.Exit(1)
 		}
 		color.Green("Log out succesful.")
-		m.Logout(cfg.Token)
 		return nil
 	},
 }

@@ -23,7 +23,7 @@ func mockRequest(route string, method string, status int, output string) *httpte
 			s = buf.String()
 		}
 		w.WriteHeader(status)
-		w.Header().Set("X-Auth-Token", "")
+		w.Header().Set("Authorization", "")
 		fmt.Fprint(w, s)
 	}).Methods(method)
 

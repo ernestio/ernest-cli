@@ -7,6 +7,7 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -32,7 +33,10 @@ func (NullWriter) Write([]byte) (int, error) { return 0, nil }
 // PrettyPrint unmarshals received messages and print it
 func PrettyPrint(body []byte) {
 	m := Message{}
-	json.Unmarshal(body, &m)
+	err := json.Unmarshal(body, &m)
+	if err != nil {
+		return
+	}
 
 	if m.Body == "error" || m.Body == "success" {
 		os.Exit(0)
@@ -61,7 +65,7 @@ func Monitorize(host, token, stream string) {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
-	client.Headers["X-Auth-Token"] = token
+	client.Headers["Authorization"] = fmt.Sprintf("Bearer %s", token)
 
 	err := client.Subscribe(stream, func(msg *sse.Event) {
 		if msg.Data != nil {
