@@ -12,7 +12,7 @@ import (
 
 func TestListDatacenters(t *testing.T) {
 	convey.Convey("Given I get all datacenters", t, func() {
-		server := mockRequest("/datacenters/", "GET", 200, ``)
+		server := mockRequest("/api/datacenters/", "GET", 200, `[]`)
 		m := Manager{URL: server.URL}
 		_, err := m.ListDatacenters("token")
 		convey.Convey("Then It does not fail", func() {

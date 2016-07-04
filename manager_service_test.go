@@ -12,7 +12,7 @@ import (
 
 func TestListServices(t *testing.T) {
 	convey.Convey("Given I get all services", t, func() {
-		server := mockRequest("/services/", "GET", 200, ``)
+		server := mockRequest("/api/services/", "GET", 200, `[]`)
 		m := Manager{URL: server.URL}
 		_, err := m.ListServices("token")
 		convey.Convey("Then It does not fail", func() {
@@ -24,7 +24,7 @@ func TestListServices(t *testing.T) {
 func TestListBuilds(t *testing.T) {
 	convey.Convey("Given a service", t, func() {
 		convey.Convey("Given I get all builds", func() {
-			server := mockRequest("/services/foo/builds/", "GET", 200, ``)
+			server := mockRequest("/api/services/foo/builds/", "GET", 200, `[]`)
 			m := Manager{URL: server.URL}
 			_, err := m.ListBuilds("foo", "token")
 			convey.Convey("Then It does not fail", func() {
@@ -36,7 +36,7 @@ func TestListBuilds(t *testing.T) {
 
 func TestServiceStatus(t *testing.T) {
 	convey.Convey("Given a service", t, func() {
-		server := mockRequest("/services/foo", "GET", 200, ``)
+		server := mockRequest("/api/services/foo/", "GET", 200, `{}`)
 		m := Manager{URL: server.URL}
 		_, err := m.ServiceStatus("token", "foo")
 		convey.Convey("Then It does not fail", func() {
@@ -47,7 +47,7 @@ func TestServiceStatus(t *testing.T) {
 
 func TestServiceBuildStatus(t *testing.T) {
 	convey.Convey("Given a service and a build id", t, func() {
-		server := mockRequest("/services/foo/builds/1234567890", "GET", 200, ``)
+		server := mockRequest("/api/services/foo/builds/1234567890/", "GET", 200, `{}`)
 		m := Manager{URL: server.URL}
 		_, err := m.ServiceBuildStatus("token", "foo", "1234567890")
 		convey.Convey("Then It does not fail", func() {
@@ -58,7 +58,7 @@ func TestServiceBuildStatus(t *testing.T) {
 
 func TestResetService(t *testing.T) {
 	convey.Convey("Given a service", t, func() {
-		server := mockRequest("/services/foo/reset/", "POST", 200, ``)
+		server := mockRequest("/api/services/foo/reset/", "POST", 200, ``)
 		m := Manager{URL: server.URL}
 		err := m.ResetService("foo", "token")
 		convey.Convey("Then It does not fail", func() {
@@ -69,7 +69,7 @@ func TestResetService(t *testing.T) {
 
 func TestDestroy(t *testing.T) {
 	convey.Convey("Given a service", t, func() {
-		server := mockRequest("/services/foo", "DELETE", 200, ``)
+		server := mockRequest("/api/services/foo", "DELETE", 200, `{}`)
 		m := Manager{URL: server.URL}
 		err := m.Destroy("token", "foo", false)
 		convey.Convey("Then It does not fail", func() {

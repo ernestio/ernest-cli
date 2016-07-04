@@ -12,7 +12,7 @@ import (
 
 func TestListGroups(t *testing.T) {
 	convey.Convey("Given I get all groups", t, func() {
-		server := mockRequest("/clients/", "GET", 200, ``)
+		server := mockRequest("/api/groups/", "GET", 200, `[]`)
 		m := Manager{URL: server.URL}
 		_, err := m.ListGroups("token")
 		convey.Convey("Then It does not fail", func() {
