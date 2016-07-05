@@ -212,7 +212,7 @@ func (m *Manager) Login(username string, password string) (token string, err err
 // ChangePassword ...
 func (m *Manager) ChangePassword(token string, userid int, oldpassword string, newpassword string) error {
 	payload := []byte(`{"old_password":"` + oldpassword + `", "new_password": "` + newpassword + `"}`)
-	_, _, err := m.doRequest("/api/users/"+string(userid), "PUT", payload, token, "application/yaml")
+	_, _, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		return err
 	}
