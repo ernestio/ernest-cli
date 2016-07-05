@@ -225,7 +225,7 @@ var PasswordUser = cli.Command{
 				return errors.New("New password doesn't match.")
 			}
 
-			err = m.ChangePassword(cfg.Token, user.ID, oldpassword, newpassword)
+			err = m.ChangePassword(cfg.Token, user.ID, user.Username, user.GroupID, oldpassword, newpassword)
 			if err != nil {
 				color.Red(err.Error())
 				return err
