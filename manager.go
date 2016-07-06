@@ -220,8 +220,8 @@ func (m *Manager) ChangePassword(token string, userid int, username string, user
 }
 
 // ChangePasswordByAdmin ...
-func (m *Manager) ChangePasswordByAdmin(token string, userid int, newpassword string) error {
-	payload := []byte(`{"new_password": "` + newpassword + `"}`)
+func (m *Manager) ChangePasswordByAdmin(token string, userid int, username string, usergroup int, newpassword string) error {
+	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "group_id": ` + strconv.Itoa(usergroup) + `, "password": "` + newpassword + `"}`)
 	_, _, err := m.doRequest("/api/users/"+string(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		return err

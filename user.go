@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"text/tabwriter"
 
 	"github.com/fatih/color"
@@ -155,13 +154,6 @@ var PasswordUser = cli.Command{
 			color.Red(err.Error())
 		}
 
-		/*
-			cuser, err := m.getUser(cfg.Token, session.UserID)
-			if err != nil {
-				color.Red(err.Error())
-			}
-		*/
-
 		if adminuser != "" && adminpassword != "" || session.IsAdmin {
 			token := ""
 			if session.IsAdmin {
@@ -194,7 +186,7 @@ var PasswordUser = cli.Command{
 				return err
 			}
 
-			err = m.ChangePasswordByAdmin(token, user.ID, newpassword)
+			err = m.ChangePasswordByAdmin(token, user.ID, user.Username, user.GroupID, newpassword)
 			if err != nil {
 				color.Red(err.Error())
 				return err
@@ -286,9 +278,13 @@ var DisableUser = cli.Command{
 			return err
 		}
 
-		id, _ := strconv.Atoi(usr)
+		user, err := m.GetUser(token, usr)
+		if err != nil {
+			color.Red(err.Error())
+			return err
+		}
 
-		m.ChangePasswordByAdmin(token, id, randString(16))
+		m.ChangePasswordByAdmin(token, user.ID, user.Username, user.GroupID, randString(16))
 
 		color.Green("User successfully disabled.")
 		return nil
