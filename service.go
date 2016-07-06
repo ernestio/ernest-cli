@@ -37,9 +37,13 @@ var ListServices = cli.Command{
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
 		fmt.Fprintln(w, "NAME\tUPDATED\tSTATUS\tENDPOINT")
+		prev := ""
 		for _, service := range services {
-			str := fmt.Sprintf("%s\t%s\t%s\t%s", service.Name, service.Version, service.Status, service.Endpoint)
-			fmt.Fprintln(w, str)
+			if prev != service.Name {
+				str := fmt.Sprintf("%s\t%s\t%s\t%s", service.Name, service.Version, service.Status, service.Endpoint)
+				fmt.Fprintln(w, str)
+			}
+			prev = service.Name
 		}
 		w.Flush()
 		return nil
