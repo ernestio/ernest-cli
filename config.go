@@ -56,7 +56,7 @@ func saveConfig(c *Config) error {
 	if err != nil {
 		return errors.New("Can't save config file")
 	}
-	err = ioutil.WriteFile(getConfigPath(), body, 0400)
+	err = ioutil.WriteFile(getConfigPath(), body, 0600)
 	if err != nil {
 		return errors.New("Can't save config file")
 	}
