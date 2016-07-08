@@ -36,7 +36,7 @@ func TestListBuilds(t *testing.T) {
 
 func TestServiceStatus(t *testing.T) {
 	convey.Convey("Given a service", t, func() {
-		server := mockRequest("/api/services/foo/", "GET", 200, `{}`)
+		server := mockRequest("/api/services/foo", "GET", 200, `{}`)
 		m := Manager{URL: server.URL}
 		_, err := m.ServiceStatus("token", "foo")
 		convey.Convey("Then It does not fail", func() {
@@ -47,7 +47,7 @@ func TestServiceStatus(t *testing.T) {
 
 func TestServiceBuildStatus(t *testing.T) {
 	convey.Convey("Given a service and a build id", t, func() {
-		server := mockRequest("/api/services/foo/builds/1234567890/", "GET", 200, `{}`)
+		server := mockRequest("/api/services/foo/builds/1234567890", "GET", 200, `{}`)
 		m := Manager{URL: server.URL}
 		_, err := m.ServiceBuildStatus("token", "foo", "1234567890")
 		convey.Convey("Then It does not fail", func() {

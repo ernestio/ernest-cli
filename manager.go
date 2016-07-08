@@ -364,7 +364,7 @@ func (m *Manager) ResetService(name string, token string) error {
 
 // ServiceStatus ...
 func (m *Manager) ServiceStatus(token string, serviceName string) (service Service, err error) {
-	body, _, err := m.doRequest("/api/services/"+serviceName+"/", "GET", []byte(""), token, "")
+	body, _, err := m.doRequest("/api/services/"+serviceName, "GET", []byte(""), token, "")
 	if err != nil {
 		return service, err
 	}
@@ -377,7 +377,7 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service Servi
 
 // ServiceBuildStatus ...
 func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID string) (service Service, err error) {
-	body, _, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID+"/", "GET", []byte(""), token, "")
+	body, _, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
 	if err != nil {
 		return service, err
 	}
