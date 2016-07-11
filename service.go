@@ -6,10 +6,15 @@ package main
 
 // CmdDatacenter subcommand
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
+	"strings"
 	"text/tabwriter"
+
+	"gopkg.in/yaml.v2"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -221,7 +226,24 @@ var DefinitionService = cli.Command{
 					color.Red(err.Error())
 					os.Exit(1)
 				}
-				fmt.Println(service.Definition)
+
+				r := strings.NewReader(service.Definition)
+				decoder := json.NewDecoder(r)
+				var d interface{}
+				for {
+					if err := decoder.Decode(&d); err == io.EOF {
+						break
+					} else if err != nil {
+						panic(err)
+					}
+					yml, err := yaml.Marshal(d)
+					if err != nil {
+						panic(err)
+					}
+					fmt.Println("---")
+					fmt.Println(string(yml))
+				}
+
 			}
 		}
 		return nil
