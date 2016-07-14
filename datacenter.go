@@ -46,11 +46,11 @@ var ListDatacenters = cli.Command{
 	},
 }
 
-// CreateDatacenter ...
-var CreateDatacenter = cli.Command{
-	Name:  "create",
-	Usage: "Create a new datacenter.",
-	Description: `Create a new datacenter on the targeted instance of Ernest.
+// CreateVcloudDatacenter ...
+var CreateVcloudDatacenter = cli.Command{
+	Name:  "vcloud",
+	Usage: "Create a new vcloud datacenter.",
+	Description: `Create a new vcloud datacenter on the targeted instance of Ernest.
 
    Example:
     $ ernest datacenter create --datacenter-user username --datacenter-password xxxx --datacenter-org MY-ORG-NAME --vse-url http://vse.url mydatacenter https://myernest.com MY-PUBLIC-NETWORK
@@ -106,12 +106,22 @@ var CreateDatacenter = cli.Command{
 	},
 }
 
+// CreateDatacenters ...
+var CreateDatacenters = cli.Command{
+	Name:        "create",
+	Usage:       "Create a new datacenter.",
+	Description: "Create a new datacenter on the targeted instance of Ernest.",
+	Subcommands: []cli.Command{
+		CreateVcloudDatacenter,
+	},
+}
+
 // CmdDatacenter ...
 var CmdDatacenter = cli.Command{
 	Name:  "datacenter",
 	Usage: "Datacenter related subcommands",
 	Subcommands: []cli.Command{
 		ListDatacenters,
-		CreateDatacenter,
+		CreateDatacenters,
 	},
 }
