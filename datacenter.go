@@ -46,6 +46,23 @@ var ListDatacenters = cli.Command{
 	},
 }
 
+// CreateAWSDatacenter ...
+var CreateAWSDatacenter = cli.Command{
+	Name:  "aws",
+	Usage: "Create a new aws datacenter.",
+	Description: `Create a new AWS datacenter on the targeted instance of Ernest.
+
+	Example:
+	$ ernest datacenter create aws
+	`,
+	ArgsUsage: "",
+	Flags:     []cli.Flag{},
+	Action: func(c *cli.Context) error {
+		fmt.Println("create aws")
+		return nil
+	},
+}
+
 // CreateVcloudDatacenter ...
 var CreateVcloudDatacenter = cli.Command{
 	Name:  "vcloud",
@@ -53,7 +70,7 @@ var CreateVcloudDatacenter = cli.Command{
 	Description: `Create a new vcloud datacenter on the targeted instance of Ernest.
 
    Example:
-    $ ernest datacenter create --datacenter-user username --datacenter-password xxxx --datacenter-org MY-ORG-NAME --vse-url http://vse.url mydatacenter https://myernest.com MY-PUBLIC-NETWORK
+    $ ernest datacenter create vcloud --datacenter-user username --datacenter-password xxxx --datacenter-org MY-ORG-NAME --vse-url http://vse.url mydatacenter https://myernest.com MY-PUBLIC-NETWORK
 	`,
 	ArgsUsage: "<datacenter-name> <vcloud-url> <network-name>",
 	Flags: []cli.Flag{
@@ -77,6 +94,10 @@ var CreateVcloudDatacenter = cli.Command{
 			Value: "",
 			Usage: "VSE URL",
 		},
+		cli.BoolFlag{
+			Name:  "fake",
+			Usage: "Fake datacenter",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 3 {
@@ -97,8 +118,12 @@ var CreateVcloudDatacenter = cli.Command{
 			color.Red(msg)
 			return errors.New("Password not specified")
 		}
+		rtype := "vcloud"
+		if c.Bool("fake") {
+			rtype = "fakevcloud"
+		}
 		m, cfg := setup(c)
-		_, err := m.CreateDatacenter(cfg.Token, name, user, password, c.Args()[1], c.Args()[2], c.String("vse-url"))
+		_, err := m.CreateDatacenter(cfg.Token, name, rtype, user, password, c.Args()[1], c.Args()[2], c.String("vse-url"))
 		if err != nil {
 			color.Red(err.Error())
 		}
@@ -113,6 +138,7 @@ var CreateDatacenters = cli.Command{
 	Description: "Create a new datacenter on the targeted instance of Ernest.",
 	Subcommands: []cli.Command{
 		CreateVcloudDatacenter,
+		CreateAWSDatacenter,
 	},
 }
 

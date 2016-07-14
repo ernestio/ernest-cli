@@ -233,8 +233,8 @@ func (m *Manager) ChangePasswordByAdmin(token string, userid int, username strin
 // ********************* Create *******************
 
 // CreateDatacenter ...
-func (m *Manager) CreateDatacenter(token string, name string, user string, password string, url string, network string, vseURL string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type": "vcloud", "region": "LON-001", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
+func (m *Manager) CreateDatacenter(token string, name string, rtype string, user string, password string, url string, network string, vseURL string) (string, error) {
+	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region": "LON-001", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
 	body, _, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		return body, err
