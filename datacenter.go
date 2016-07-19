@@ -53,12 +53,63 @@ var CreateAWSDatacenter = cli.Command{
 	Description: `Create a new AWS datacenter on the targeted instance of Ernest.
 
 	Example:
-	$ ernest datacenter create aws
-	`,
-	ArgsUsage: "",
-	Flags:     []cli.Flag{},
+	 $ ernest datacenter create aws --region region --token token --secret secret my_datacenter
+	 `,
+	ArgsUsage: "<datacenter-name>",
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "region",
+			Value: "",
+			Usage: "Datacenter region",
+		},
+		cli.StringFlag{
+			Name:  "token",
+			Value: "",
+			Usage: "AWS Token",
+		},
+		cli.StringFlag{
+			Name:  "secret",
+			Value: "",
+			Usage: "AWS Secret",
+		},
+		cli.BoolFlag{
+			Name:  "fake",
+			Usage: "Fake datacenter",
+		},
+	},
 	Action: func(c *cli.Context) error {
-		fmt.Println("create aws")
+		if len(c.Args()) < 1 {
+			msg := "You should specify the datacenter name"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
+		name := c.Args()[0]
+
+		token := c.String("token")
+		if token == "" {
+			msg := "Token not specified"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
+		secret := c.String("secret")
+		if token == "" {
+			msg := "Secret not specified"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
+		rtype := "aws"
+
+		if c.Bool("fake") {
+			rtype = "fakeaws"
+		}
+		m, cfg := setup(c)
+		_, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, token, secret)
+		if err != nil {
+			color.Red(err.Error())
+		}
 		return nil
 	},
 }
@@ -123,7 +174,7 @@ var CreateVcloudDatacenter = cli.Command{
 			rtype = "fakevcloud"
 		}
 		m, cfg := setup(c)
-		_, err := m.CreateDatacenter(cfg.Token, name, rtype, user, password, c.Args()[1], c.Args()[2], c.String("vse-url"))
+		_, err := m.CreateVcloudDatacenter(cfg.Token, name, rtype, user, password, c.Args()[1], c.Args()[2], c.String("vse-url"))
 		if err != nil {
 			color.Red(err.Error())
 		}

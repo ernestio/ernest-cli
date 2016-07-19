@@ -45,13 +45,6 @@ type Service struct {
 	Endpoint   string    `json:"endpoint"`
 }
 
-// Datacenter ...
-type Datacenter struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
-}
-
 // User ...
 type User struct {
 	ID       int    `json:"id"`
@@ -232,17 +225,6 @@ func (m *Manager) ChangePasswordByAdmin(token string, userid int, username strin
 
 // ********************* Create *******************
 
-// CreateDatacenter ...
-func (m *Manager) CreateDatacenter(token string, name string, rtype string, user string, password string, url string, network string, vseURL string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region": "LON-001", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
-	body, _, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
-	if err != nil {
-		return body, err
-	}
-	color.Green("SUCCESS: Datacenter " + name + " created")
-	return body, err
-}
-
 // CreateUser ...
 func (m *Manager) CreateUser(name string, email string, user string, password string, adminuser string, adminpassword string) error {
 	token, err := m.Login(adminuser, adminpassword)
@@ -390,19 +372,6 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 }
 
 // ********************* List *********************
-
-// ListDatacenters ...
-func (m *Manager) ListDatacenters(token string) (datacenters []Datacenter, err error) {
-	body, _, err := m.doRequest("/api/datacenters/", "GET", []byte(""), token, "")
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal([]byte(body), &datacenters)
-	if err != nil {
-		return nil, err
-	}
-	return datacenters, err
-}
 
 // ListServices ...
 func (m *Manager) ListServices(token string) (services []Service, err error) {
