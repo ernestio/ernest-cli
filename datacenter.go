@@ -94,7 +94,7 @@ var CreateAWSDatacenter = cli.Command{
 		}
 
 		secret := c.String("secret")
-		if token == "" {
+		if secret == "" {
 			msg := "Secret not specified"
 			color.Red(msg)
 			return errors.New(msg)
