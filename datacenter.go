@@ -101,7 +101,7 @@ var CreateAWSDatacenter = cli.Command{
 		}
 
 		region := c.String("region")
-		if token == "" {
+		if region == "" {
 			msg := "Region not specified"
 			color.Red(msg)
 			return errors.New(msg)
