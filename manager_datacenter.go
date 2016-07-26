@@ -29,8 +29,8 @@ func (m *Manager) CreateVcloudDatacenter(token string, name string, rtype string
 }
 
 // CreateAWSDatacenter ...
-func (m *Manager) CreateAWSDatacenter(token string, name string, rtype string, awstoken string, awssecret string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region": "LON-001", "username":"` + name + `", "token":"` + awstoken + `", "secret":"` + awssecret + `"}`)
+func (m *Manager) CreateAWSDatacenter(token string, name string, rtype string, region string, awstoken string, awssecret string) (string, error) {
+	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region":"` + region + `", "username":"` + name + `", "token":"` + awstoken + `", "secret":"` + awssecret + `"}`)
 	body, _, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		return body, err

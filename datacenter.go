@@ -100,13 +100,20 @@ var CreateAWSDatacenter = cli.Command{
 			return errors.New(msg)
 		}
 
+		region := c.String("region")
+		if token == "" {
+			msg := "Region not specified"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
 		rtype := "aws"
 
 		if c.Bool("fake") {
 			rtype = "fakeaws"
 		}
 		m, cfg := setup(c)
-		_, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, token, secret)
+		_, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, region, token, secret)
 		if err != nil {
 			color.Red(err.Error())
 		}
