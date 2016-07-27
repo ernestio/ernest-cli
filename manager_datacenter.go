@@ -19,7 +19,7 @@ type Datacenter struct {
 
 // CreateVcloudDatacenter ...
 func (m *Manager) CreateVcloudDatacenter(token string, name string, rtype string, user string, password string, url string, network string, vseURL string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region": "LON-001", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
+	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region": "", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
 	body, _, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		return body, err
