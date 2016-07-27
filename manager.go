@@ -442,6 +442,18 @@ func (m *Manager) ListUsers(token string) (users []User, err error) {
 	return users, err
 }
 
+// CreateGroup ...
+func (m *Manager) CreateGroup(token string, group string) error {
+	payload := []byte(`{"name": ` + group + `}`)
+	_, _, err := m.doRequest("/api/groups/", "POST", payload, token, "")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	color.Green("SUCCESS: Group " + group + " created")
+	return nil
+}
+
 // ListGroups ...
 func (m *Manager) ListGroups(token string) (groups []Group, err error) {
 	body, _, err := m.doRequest("/api/groups/", "GET", []byte(""), token, "")

@@ -6,6 +6,7 @@ package main
 
 // CmdUser subcommand
 import (
+	"errors"
 	"fmt"
 	"os"
 	"text/tabwriter"
@@ -13,6 +14,29 @@ import (
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
+
+// CreateGroup ...
+var CreateGroup = cli.Command{
+	Name:      "create",
+	Usage:     "Create a group.",
+	ArgsUsage: " ",
+	Description: `Create a group.
+
+   Example:
+    $ ernest group create <name>
+	`,
+	Action: func(c *cli.Context) error {
+		if len(c.Args()) < 1 {
+			msg := "You should specify the group name"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+		m, cfg := setup(c)
+		name := c.Args()[0]
+		err := m.CreateGroup(cfg.Token, name)
+		return err
+	},
+}
 
 // ListGroups ...
 var ListGroups = cli.Command{
@@ -49,5 +73,6 @@ var CmdGroup = cli.Command{
 	Usage: "Group related subcommands",
 	Subcommands: []cli.Command{
 		ListGroups,
+		CreateGroup,
 	},
 }
