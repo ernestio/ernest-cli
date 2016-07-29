@@ -90,14 +90,12 @@ var CreateUser = cli.Command{
 		pwd := c.Args()[1]
 		user := c.String("user")
 		if user == "" {
-			msg := "Password not specified"
-			color.Red(msg)
+			color.Red("Password not specified")
 			return errors.New("Password not specified")
 		}
 		password := c.String("password")
 		if password == "" {
-			msg := "Password not specified"
-			color.Red(msg)
+			color.Red("Password not specified")
 			return errors.New("Password not specified")
 		}
 		m, _ := setup(c)
@@ -259,15 +257,14 @@ var DisableUser = cli.Command{
 		m, _ := setup(c)
 		usr := c.Args()[0]
 
+		msg := "Password not specified"
 		adminuser := c.String("user")
 		if adminuser == "" {
-			msg := "Password not specified"
 			color.Red(msg)
 			return errors.New("Password not specified")
 		}
 		adminpassword := c.String("password")
 		if adminpassword == "" {
-			msg := "Password not specified"
 			color.Red(msg)
 			return errors.New("Password not specified")
 		}
