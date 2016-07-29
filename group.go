@@ -15,6 +15,30 @@ import (
 	"github.com/urfave/cli"
 )
 
+// AddUser ...
+var AddUser = cli.Command{
+	Name:      "add-user",
+	Usage:     "Adds a user to a group.",
+	ArgsUsage: " ",
+	Description: `Adds a user to a group.
+
+	  Example:
+		  $ ernest group add-user <user-id> <group-id>
+	`,
+	Action: func(c *cli.Context) error {
+		if len(c.Args()) < 2 {
+			msg := "You should specify an user id and a group id."
+			color.Red(msg)
+			return errors.New(msg)
+		}
+		m, cfg := setup(c)
+		userid := c.Args()[0]
+		groupid := c.Args()[1]
+		err := m.GroupAddUser(cfg.Token, userid, groupid)
+		return err
+	},
+}
+
 // CreateGroup ...
 var CreateGroup = cli.Command{
 	Name:      "create",
@@ -74,5 +98,6 @@ var CmdGroup = cli.Command{
 	Subcommands: []cli.Command{
 		ListGroups,
 		CreateGroup,
+		AddUser,
 	},
 }

@@ -466,3 +466,15 @@ func (m *Manager) ListGroups(token string) (groups []Group, err error) {
 	}
 	return groups, err
 }
+
+// GroupAddUser ...
+func (m *Manager) GroupAddUser(token string, userid string, groupid string) error {
+	payload := []byte(`{"userid": "` + userid + `", "groupid: "` + groupid + `"}`)
+	_, _, err := m.doRequest("/api/groups/"+groupid+"/users/", "POST", payload, token, "")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	color.Green("SUCCESS: Added user " + userid + " to group " + groupid)
+	return nil
+}
