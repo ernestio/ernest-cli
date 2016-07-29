@@ -444,7 +444,7 @@ func (m *Manager) ListUsers(token string) (users []User, err error) {
 
 // CreateGroup ...
 func (m *Manager) CreateGroup(token string, group string) error {
-	payload := []byte(`{"name": ` + group + `}`)
+	payload := []byte(`{"name": "` + group + `"}`)
 	_, _, err := m.doRequest("/api/groups/", "POST", payload, token, "")
 	if err != nil {
 		fmt.Println(err)

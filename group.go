@@ -57,9 +57,9 @@ var ListGroups = cli.Command{
 
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-		fmt.Fprintln(w, "NAME")
+		fmt.Fprintln(w, "NAME\tID")
 		for _, group := range groups {
-			str := fmt.Sprintf("%s", group.Name)
+			str := fmt.Sprintf("%d\t%s", group.ID, group.Name)
 			fmt.Fprintln(w, str)
 		}
 		w.Flush()
