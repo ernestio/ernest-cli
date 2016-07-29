@@ -104,8 +104,6 @@ func (m *Manager) getSession(token string) (session Session, err error) {
 	return session, nil
 }
 
-// ********************* Get *******************
-
 // GetUUID ...
 func (m *Manager) GetUUID(token string, payload []byte) string {
 	id, err := buildServiceUUID(payload)
