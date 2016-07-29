@@ -13,11 +13,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"runtime"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -164,47 +162,6 @@ func (m *Manager) getSession(token string) (session Session, err error) {
 		return session, err
 	}
 	return session, nil
-}
-
-// ********************* Login *******************
-
-// Login does a login action against the api
-func (m *Manager) Login(username string, password string) (token string, err error) {
-	var t Token
-
-	f := url.Values{}
-	f.Add("username", username)
-	f.Add("password", password)
-
-	url := m.URL + "/auth"
-	req, err := http.NewRequest("POST", url, strings.NewReader(f.Encode()))
-	req.Form = f
-	req.PostForm = f
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-
-	resp, err := m.client().Do(req)
-	if err != nil {
-		return "", err
-	}
-
-	if resp.StatusCode != 200 {
-		return "", errors.New("Unauthorized")
-	}
-	defer resp.Body.Close()
-
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		color.Red(err.Error())
-	}
-
-	err = json.Unmarshal(responseBody, &t)
-	if err != nil {
-		color.Red(err.Error())
-	}
-
-	token = t.Token
-
-	return token, nil
 }
 
 // ********************* Update *******************
@@ -469,7 +426,7 @@ func (m *Manager) ListGroups(token string) (groups []Group, err error) {
 
 // GroupAddUser ...
 func (m *Manager) GroupAddUser(token string, userid string, groupid string) error {
-	payload := []byte(`{"userid": "` + userid + `", "groupid: "` + groupid + `"}`)
+	payload := []byte(`{"userid": "` + userid + `", "groupid": "` + groupid + `"}`)
 	_, _, err := m.doRequest("/api/groups/"+groupid+"/users/", "POST", payload, token, "")
 	if err != nil {
 		fmt.Println(err)
