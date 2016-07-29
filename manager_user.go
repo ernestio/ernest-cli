@@ -1,0 +1,108 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+package main
+
+import (
+	"encoding/json"
+	"os"
+	"strconv"
+
+	"github.com/fatih/color"
+)
+
+// User ...
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	GroupID  int    `json:"group_id"`
+	IsAdmin  bool   `json:"admin"`
+}
+
+func (m *Manager) createUser(token string, client string, user string, password string, email string) error {
+	payload := []byte(`{"group_id": ` + client + `, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
+	_, _, err := m.doRequest("/api/users/", "POST", payload, token, "")
+	if err != nil {
+		return err
+	}
+	color.Green("SUCCESS: User " + user + " created")
+	return nil
+}
+
+func (m *Manager) getUser(token string, userid string) (user User, err error) {
+	res, _, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
+	err = json.Unmarshal([]byte(res), &user)
+	if err != nil {
+		return user, err
+	}
+	return user, err
+}
+
+func (m *Manager) deleteUser(token string, user string) error {
+	_, _, err := m.doRequest("/api/users/"+user, "DELETE", nil, token, "application/yaml")
+	return err
+}
+
+// ListUsers ...
+func (m *Manager) ListUsers(token string) (users []User, err error) {
+	body, _, err := m.doRequest("/api/users/", "GET", []byte(""), token, "")
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal([]byte(body), &users)
+	if err != nil {
+		return nil, err
+	}
+	return users, err
+}
+
+// GetUser ...
+func (m *Manager) GetUser(token string, userid string) (user User, err error) {
+	res, _, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
+	if err != nil {
+		return user, err
+	}
+	err = json.Unmarshal([]byte(res), &user)
+	if err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
+// CreateUser ...
+func (m *Manager) CreateUser(name string, email string, user string, password string, adminuser string, adminpassword string) error {
+	token, err := m.Login(adminuser, adminpassword)
+	if err != nil {
+		color.Red(err.Error())
+		os.Exit(1)
+	}
+	c, err := m.createClient(token, name)
+	if err != nil {
+		color.Red(err.Error() + ": Group " + name + " already exists")
+		os.Exit(1)
+	}
+	res := m.createUser(token, c, user, password, email)
+	return res
+}
+
+// ChangePassword ...
+func (m *Manager) ChangePassword(token string, userid int, username string, usergroup int, oldpassword string, newpassword string) error {
+	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "group_id": ` + strconv.Itoa(usergroup) + `, "password": "` + newpassword + `", "oldpassword": "` + oldpassword + `"}`)
+	_, _, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// ChangePasswordByAdmin ...
+func (m *Manager) ChangePasswordByAdmin(token string, userid int, username string, usergroup int, newpassword string) error {
+	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "group_id": ` + strconv.Itoa(usergroup) + `, "password": "` + newpassword + `"}`)
+	_, _, err := m.doRequest("/api/users/"+string(userid), "PUT", payload, token, "application/yaml")
+	if err != nil {
+		return err
+	}
+	return nil
+}
