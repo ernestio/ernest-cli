@@ -21,30 +21,6 @@ type User struct {
 	IsAdmin  bool   `json:"admin"`
 }
 
-func (m *Manager) createUser(token string, client string, user string, password string, email string) error {
-	payload := []byte(`{"group_id": ` + client + `, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
-	_, _, err := m.doRequest("/api/users/", "POST", payload, token, "")
-	if err != nil {
-		return err
-	}
-	color.Green("SUCCESS: User " + user + " created")
-	return nil
-}
-
-func (m *Manager) getUser(token string, userid string) (user User, err error) {
-	res, _, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
-	err = json.Unmarshal([]byte(res), &user)
-	if err != nil {
-		return user, err
-	}
-	return user, err
-}
-
-func (m *Manager) deleteUser(token string, user string) error {
-	_, _, err := m.doRequest("/api/users/"+user, "DELETE", nil, token, "application/yaml")
-	return err
-}
-
 // ListUsers ...
 func (m *Manager) ListUsers(token string) (users []User, err error) {
 	body, _, err := m.doRequest("/api/users/", "GET", []byte(""), token, "")
@@ -83,8 +59,14 @@ func (m *Manager) CreateUser(name string, email string, user string, password st
 		color.Red(err.Error() + ": Group " + name + " already exists")
 		os.Exit(1)
 	}
-	res := m.createUser(token, c, user, password, email)
-	return res
+
+	payload := []byte(`{"group_id": ` + c + `, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
+	_, _, err = m.doRequest("/api/users/", "POST", payload, token, "")
+	if err != nil {
+		return err
+	}
+	color.Green("SUCCESS: User " + user + " created")
+	return nil
 }
 
 // ChangePassword ...
