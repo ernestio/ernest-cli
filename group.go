@@ -38,6 +38,30 @@ var DeleteGroup = cli.Command{
 	},
 }
 
+// RemoveUser ...
+var RemoveUser = cli.Command{
+	Name:      "remove-user",
+	Usage:     "Removes an user from a group.",
+	ArgsUsage: " ",
+	Description: `Removes an user from a group.
+
+		Example:
+		  $ ernest group remove-user <user-id> <group-id>
+	`,
+	Action: func(c *cli.Context) error {
+		if len(c.Args()) < 2 {
+			msg := "You should specify an user id and a group id."
+			color.Red(msg)
+			return errors.New(msg)
+		}
+		m, cfg := setup(c)
+		userid := c.Args()[0]
+		groupid := c.Args()[1]
+		err := m.GroupRemoveUser(cfg.Token, userid, groupid)
+		return err
+	},
+}
+
 // AddUser ...
 var AddUser = cli.Command{
 	Name:      "add-user",
@@ -123,5 +147,6 @@ var CmdGroup = cli.Command{
 		ListGroups,
 		CreateGroup,
 		AddUser,
+		RemoveUser,
 	},
 }

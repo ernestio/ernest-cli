@@ -64,3 +64,14 @@ func (m *Manager) GroupAddUser(token string, userid string, groupid string) erro
 	color.Green("SUCCESS: Added user " + userid + " to group " + groupid)
 	return nil
 }
+
+// GroupRemoveUser ...
+func (m *Manager) GroupRemoveUser(token string, userid string, groupid string) error {
+	_, _, err := m.doRequest("/api/groups/"+groupid+"/users/"+userid, "DELETE", []byte(""), token, "")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	color.Green("SUCCESS: Removed user " + userid + " from group " + groupid)
+	return nil
+}
