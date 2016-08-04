@@ -15,6 +15,29 @@ import (
 	"github.com/urfave/cli"
 )
 
+// Delete ...
+var DeleteGroup = cli.Command{
+	Name:      "delete",
+	Usage:     "Deletes a group.",
+	ArgsUsage: " ",
+	Description: `Deletes a group.
+
+	  Example:
+		  $ ernest group delete <group-id>
+	`,
+	Action: func(c *cli.Context) error {
+		if len(c.Args()) < 1 {
+			msg := "You should specify a group id."
+			color.Red(msg)
+			return errors.New(msg)
+		}
+		m, cfg := setup(c)
+		groupid := c.Args()[0]
+		err := m.DeleteGroup(cfg.Token, groupid)
+		return err
+	},
+}
+
 // AddUser ...
 var AddUser = cli.Command{
 	Name:      "add-user",
@@ -96,6 +119,7 @@ var CmdGroup = cli.Command{
 	Name:  "group",
 	Usage: "Group related subcommands",
 	Subcommands: []cli.Command{
+		DeleteGroup,
 		ListGroups,
 		CreateGroup,
 		AddUser,

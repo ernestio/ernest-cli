@@ -17,6 +17,17 @@ type Group struct {
 	Name string `json:"name"`
 }
 
+// DeleteGroup ...
+func (m *Manager) DeleteGroup(token string, group string) error {
+	_, _, err := m.doRequest("/api/groups/"+group, "DELETE", []byte(""), token, "")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	color.Green("SUCCESS: Group " + group + " deleted")
+	return nil
+}
+
 // CreateGroup ...
 func (m *Manager) CreateGroup(token string, group string) error {
 	payload := []byte(`{"name": "` + group + `"}`)
