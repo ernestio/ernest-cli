@@ -75,3 +75,26 @@ func (m *Manager) GroupRemoveUser(token string, userid string, groupid string) e
 	color.Green("SUCCESS: Removed user " + userid + " from group " + groupid)
 	return nil
 }
+
+// GroupAddDatacenter ...
+func (m *Manager) GroupAddDatacenter(token string, datacenterid string, groupid string) error {
+	payload := []byte(`{"userid": "` + datacenterid + `", "groupid": "` + groupid + `"}`)
+	_, _, err := m.doRequest("/api/groups/"+groupid+"/users/", "POST", payload, token, "")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	color.Green("SUCCESS: Added user " + datacenterid + " to group " + groupid)
+	return nil
+}
+
+// GroupRemoveDatacenter ...
+func (m *Manager) GroupRemoveDatacenter(token string, datacenterid string, groupid string) error {
+	_, _, err := m.doRequest("/api/groups/"+groupid+"/users/"+datacenterid, "DELETE", []byte(""), token, "")
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	color.Green("SUCCESS: Removed user " + datacenterid + " from group " + groupid)
+	return nil
+}

@@ -15,7 +15,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Delete ...
+// DeleteGroup ...
 var DeleteGroup = cli.Command{
 	Name:      "delete",
 	Usage:     "Deletes a group.",
@@ -34,6 +34,54 @@ var DeleteGroup = cli.Command{
 		m, cfg := setup(c)
 		groupid := c.Args()[0]
 		err := m.DeleteGroup(cfg.Token, groupid)
+		return err
+	},
+}
+
+// RemoveDatacenter ...
+var RemoveDatacenter = cli.Command{
+	Name:      "remove-datacenter",
+	Usage:     "Removes a datacenter from a group.",
+	ArgsUsage: " ",
+	Description: `Removes an datacenter from a group.
+
+		Example:
+		  $ ernest group remove-datacenter <datacenter-id> <group-id>
+	`,
+	Action: func(c *cli.Context) error {
+		if len(c.Args()) < 2 {
+			msg := "You should specify an datacenter id and a group id."
+			color.Red(msg)
+			return errors.New(msg)
+		}
+		m, cfg := setup(c)
+		datacenterid := c.Args()[0]
+		groupid := c.Args()[1]
+		err := m.GroupRemoveDatacenter(cfg.Token, datacenterid, groupid)
+		return err
+	},
+}
+
+// AddDatacenter ...
+var AddDatacenter = cli.Command{
+	Name:      "add-datacenter",
+	Usage:     "Adds a datacenter to a group.",
+	ArgsUsage: " ",
+	Description: `Adds a datacenter to a group.
+
+	  Example:
+		  $ ernest group add-datacenter <datacenter-id> <group-id>
+	`,
+	Action: func(c *cli.Context) error {
+		if len(c.Args()) < 2 {
+			msg := "You should specify a datacenter id and a group id."
+			color.Red(msg)
+			return errors.New(msg)
+		}
+		m, cfg := setup(c)
+		datacenterid := c.Args()[0]
+		groupid := c.Args()[1]
+		err := m.GroupAddUser(cfg.Token, datacenterid, groupid)
 		return err
 	},
 }
