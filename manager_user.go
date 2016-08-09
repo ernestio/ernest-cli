@@ -6,7 +6,6 @@ package main
 
 import (
 	"encoding/json"
-	"os"
 	"strconv"
 
 	"github.com/fatih/color"
@@ -49,14 +48,8 @@ func (m *Manager) GetUser(token string, userid string) (user User, err error) {
 
 // CreateUser ...
 func (m *Manager) CreateUser(token string, name string, email string, user string, password string) error {
-	c, err := m.createClient(token, name)
-	if err != nil {
-		color.Red(err.Error() + ": Group " + name + " already exists")
-		os.Exit(1)
-	}
-
-	payload := []byte(`{"group_id": ` + c + `, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
-	_, _, err = m.doRequest("/api/users/", "POST", payload, token, "")
+	payload := []byte(`{"group_id": 0, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
+	_, _, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
 		return err
 	}
