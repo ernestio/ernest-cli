@@ -48,12 +48,7 @@ func (m *Manager) GetUser(token string, userid string) (user User, err error) {
 }
 
 // CreateUser ...
-func (m *Manager) CreateUser(name string, email string, user string, password string, adminuser string, adminpassword string) error {
-	token, err := m.Login(adminuser, adminpassword)
-	if err != nil {
-		color.Red(err.Error())
-		os.Exit(1)
-	}
+func (m *Manager) CreateUser(token string, name string, email string, user string, password string) error {
 	c, err := m.createClient(token, name)
 	if err != nil {
 		color.Red(err.Error() + ": Group " + name + " already exists")
