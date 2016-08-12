@@ -84,7 +84,7 @@ func (m *Manager) GroupAddDatacenter(token string, datacenterid string, groupid 
 		fmt.Println(err)
 		return err
 	}
-	color.Green("SUCCESS: Added user " + datacenterid + " to group " + groupid)
+	color.Green("SUCCESS: Added datacenter " + datacenterid + " to group " + groupid)
 	return nil
 }
 
@@ -95,6 +95,6 @@ func (m *Manager) GroupRemoveDatacenter(token string, datacenterid string, group
 		fmt.Println(err)
 		return err
 	}
-	color.Green("SUCCESS: Removed user " + datacenterid + " from group " + groupid)
+	color.Green("SUCCESS: Removed datacenter " + datacenterid + " from group " + groupid)
 	return nil
 }
