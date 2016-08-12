@@ -81,7 +81,7 @@ var AddDatacenter = cli.Command{
 		m, cfg := setup(c)
 		datacenterid := c.Args()[0]
 		groupid := c.Args()[1]
-		err := m.GroupAddUser(cfg.Token, datacenterid, groupid)
+		err := m.GroupAddDatacenter(cfg.Token, datacenterid, groupid)
 		return err
 	},
 }
