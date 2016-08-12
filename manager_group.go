@@ -78,7 +78,7 @@ func (m *Manager) GroupRemoveUser(token string, userid string, groupid string) e
 
 // GroupAddDatacenter ...
 func (m *Manager) GroupAddDatacenter(token string, datacenterid string, groupid string) error {
-	payload := []byte(`{"userid": "` + datacenterid + `", "groupid": "` + groupid + `"}`)
+	payload := []byte(`{"datacenterid": "` + datacenterid + `", "groupid": "` + groupid + `"}`)
 	_, _, err := m.doRequest("/api/groups/"+groupid+"/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		fmt.Println(err)
