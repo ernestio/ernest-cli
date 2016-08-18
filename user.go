@@ -54,25 +54,15 @@ var CreateUser = cli.Command{
 	Description: `Create a new user on the targeted instance of Ernest.
 
    Example:
-    $ ernest user create --user <adminuser> --password <adminpassword> <username> <password>
+    $ ernest user create <username> <password>
 
    You can also add an email to the user with the flag --email
 
    Example:
-    $ ernest user create --user <adminuser> --password <adminpassword> --email username@example.com <username> <password>
+    $ ernest user create --email username@example.com <username> <password>
 	`,
 	ArgsUsage: "<username> <password>",
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user",
-			Value: "",
-			Usage: "Admin user credentials",
-		},
-		cli.StringFlag{
-			Name:  "password",
-			Value: "",
-			Usage: "Admin password credentials",
-		},
 		cli.StringFlag{
 			Name:  "email",
 			Value: "",
@@ -88,20 +78,8 @@ var CreateUser = cli.Command{
 		usr := c.Args()[0]
 		email := c.String("email")
 		pwd := c.Args()[1]
-		user := c.String("user")
-		if user == "" {
-			msg := "Password not specified"
-			color.Red(msg)
-			return errors.New("Password not specified")
-		}
-		password := c.String("password")
-		if password == "" {
-			msg := "Password not specified"
-			color.Red(msg)
-			return errors.New("Password not specified")
-		}
-		m, _ := setup(c)
-		err := m.CreateUser(usr, email, usr, pwd, user, password)
+		m, cfg := setup(c)
+		err := m.CreateUser(cfg.Token, usr, email, usr, pwd)
 		if err != nil {
 			color.Red(err.Error())
 			return err
@@ -259,15 +237,14 @@ var DisableUser = cli.Command{
 		m, _ := setup(c)
 		usr := c.Args()[0]
 
+		msg := "Password not specified"
 		adminuser := c.String("user")
 		if adminuser == "" {
-			msg := "Password not specified"
 			color.Red(msg)
 			return errors.New("Password not specified")
 		}
 		adminpassword := c.String("password")
 		if adminpassword == "" {
-			msg := "Password not specified"
 			color.Red(msg)
 			return errors.New("Password not specified")
 		}
