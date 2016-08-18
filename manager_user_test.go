@@ -26,7 +26,7 @@ func TestCreateUser(t *testing.T) {
 	convey.Convey("Given I create a client", t, func() {
 		server := mockRequest("/api/groups/", "POST", 200, `{}`)
 		m := Manager{URL: server.URL}
-		err := m.CreateUser("name", "email", "user", "password", "adminuser", "adminpassword")
+		err := m.CreateUser("token", "name", "email", "user", "password")
 		convey.Convey("Then It does not fail", func() {
 			convey.So(err, convey.ShouldBeNil)
 		})
