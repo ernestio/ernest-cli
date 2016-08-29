@@ -36,9 +36,9 @@ var ListDatacenters = cli.Command{
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
-		fmt.Fprintln(w, "NAME\tTYPE")
+		fmt.Fprintln(w, "NAME\tID\tTYPE")
 		for _, datacenter := range datacenters {
-			str := fmt.Sprintf("%s\t%s", datacenter.Name, datacenter.Type)
+			str := fmt.Sprintf("%s\t%d\t%s", datacenter.Name, datacenter.ID, datacenter.Type)
 			fmt.Fprintln(w, str)
 		}
 		w.Flush()
