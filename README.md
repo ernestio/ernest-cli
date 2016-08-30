@@ -14,7 +14,7 @@ Ernest helps you deploy your vcloud infrastructure with a few shell commands.
 In order to install it and have it running, you just need to run the following commands:
 
 ```
-$ git clone git@github.com:r3labs/ernest-cli.git
+$ git clone git@github.com:ErnestIO/ernest-cli.git
 $ cd ernest
 $ make
 $ make install

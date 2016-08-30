@@ -41,9 +41,9 @@ var ListDatacenters = cli.Command{
 			return nil
 		}
 
-		fmt.Fprintln(w, "NAME\tID")
+		fmt.Fprintln(w, "NAME\tID\tTYPE")
 		for _, datacenter := range datacenters {
-			str := fmt.Sprintf("%s\t%d", datacenter.Name, datacenter.ID)
+			str := fmt.Sprintf("%s\t%d\t%s", datacenter.Name, datacenter.ID, datacenter.Type)
 			fmt.Fprintln(w, str)
 		}
 		w.Flush()
@@ -51,14 +51,89 @@ var ListDatacenters = cli.Command{
 	},
 }
 
-// CreateDatacenter ...
-var CreateDatacenter = cli.Command{
-	Name:  "create",
-	Usage: "Create a new datacenter.",
-	Description: `Create a new datacenter on the targeted instance of Ernest.
+// CreateAWSDatacenter ...
+var CreateAWSDatacenter = cli.Command{
+	Name:  "aws",
+	Usage: "Create a new aws datacenter.",
+	Description: `Create a new AWS datacenter on the targeted instance of Ernest.
+
+	Example:
+	 $ ernest datacenter create aws --region region --token token --secret secret my_datacenter
+	 `,
+	ArgsUsage: "<datacenter-name>",
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "region",
+			Value: "",
+			Usage: "Datacenter region",
+		},
+		cli.StringFlag{
+			Name:  "token",
+			Value: "",
+			Usage: "AWS Token",
+		},
+		cli.StringFlag{
+			Name:  "secret",
+			Value: "",
+			Usage: "AWS Secret",
+		},
+		cli.BoolFlag{
+			Name:  "fake",
+			Usage: "Fake datacenter",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		if len(c.Args()) < 1 {
+			msg := "You should specify the datacenter name"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
+		name := c.Args()[0]
+
+		token := c.String("token")
+		if token == "" {
+			msg := "Token not specified"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
+		secret := c.String("secret")
+		if secret == "" {
+			msg := "Secret not specified"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
+		region := c.String("region")
+		if region == "" {
+			msg := "Region not specified"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
+		rtype := "aws"
+
+		if c.Bool("fake") {
+			rtype = "aws-fake"
+		}
+		m, cfg := setup(c)
+		_, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, region, token, secret)
+		if err != nil {
+			color.Red(err.Error())
+		}
+		return nil
+	},
+}
+
+// CreateVcloudDatacenter ...
+var CreateVcloudDatacenter = cli.Command{
+	Name:  "vcloud",
+	Usage: "Create a new vcloud datacenter.",
+	Description: `Create a new vcloud datacenter on the targeted instance of Ernest.
 
    Example:
-    $ ernest datacenter create --datacenter-user username --datacenter-password xxxx --datacenter-org MY-ORG-NAME --vse-url http://vse.url mydatacenter https://myernest.com MY-PUBLIC-NETWORK
+    $ ernest datacenter create vcloud --datacenter-user username --datacenter-password xxxx --datacenter-org MY-ORG-NAME --vse-url http://vse.url mydatacenter https://myernest.com MY-PUBLIC-NETWORK
 	`,
 	ArgsUsage: "<datacenter-name> <vcloud-url> <network-name>",
 	Flags: []cli.Flag{
@@ -82,6 +157,10 @@ var CreateDatacenter = cli.Command{
 			Value: "",
 			Usage: "VSE URL",
 		},
+		cli.BoolFlag{
+			Name:  "fake",
+			Usage: "Fake datacenter",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 3 {
@@ -102,12 +181,27 @@ var CreateDatacenter = cli.Command{
 			color.Red(msg)
 			return errors.New("Password not specified")
 		}
+		rtype := "vcloud"
+		if c.Bool("fake") {
+			rtype = "vcloud-fake"
+		}
 		m, cfg := setup(c)
-		_, err := m.CreateDatacenter(cfg.Token, name, user, password, c.Args()[1], c.Args()[2], c.String("vse-url"))
+		_, err := m.CreateVcloudDatacenter(cfg.Token, name, rtype, user, password, c.Args()[1], c.Args()[2], c.String("vse-url"))
 		if err != nil {
 			color.Red(err.Error())
 		}
 		return nil
+	},
+}
+
+// CreateDatacenters ...
+var CreateDatacenters = cli.Command{
+	Name:        "create",
+	Usage:       "Create a new datacenter.",
+	Description: "Create a new datacenter on the targeted instance of Ernest.",
+	Subcommands: []cli.Command{
+		CreateVcloudDatacenter,
+		CreateAWSDatacenter,
 	},
 }
 
@@ -117,6 +211,6 @@ var CmdDatacenter = cli.Command{
 	Usage: "Datacenter related subcommands",
 	Subcommands: []cli.Command{
 		ListDatacenters,
-		CreateDatacenter,
+		CreateDatacenters,
 	},
 }
