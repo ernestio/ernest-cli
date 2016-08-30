@@ -37,7 +37,7 @@ var ListDatacenters = cli.Command{
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
 		if len(datacenters) == 0 {
-			fmt.Println("There is no datacenters created yet.")
+			fmt.Println("There are no datacenters created yet.")
 			return nil
 		}
 
