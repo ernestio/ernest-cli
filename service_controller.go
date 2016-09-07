@@ -229,6 +229,50 @@ var DefinitionService = cli.Command{
 	},
 }
 
+// InfoService : Shows detailed information of a service by its name
+var InfoService = cli.Command{
+	Name:      "info",
+	Aliases:   []string{"i"},
+	ArgsUsage: "<service_name>",
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "build",
+			Value: "",
+			Usage: "Build ID",
+		},
+	},
+	Usage: "$ ernest service info <my_service> --build <specific build>",
+	Description: `Will show detailed information of the last build of a specified service.
+	In case you specify --build option you will be able to output the detailed information of specific build of a service.
+
+   Examples:
+    $ ernest service definition myservice
+    $ ernest service definition myservice --build build1
+	`,
+	Action: func(c *cli.Context) error {
+		var err error
+		var service Service
+		if len(c.Args()) < 1 {
+			color.Red("You should specify the service name")
+		} else {
+			m, cfg := setup(c)
+			name := c.Args()[0]
+			if c.String("build") != "" {
+				build := c.String("build")
+				service, err = m.ServiceBuildStatus(cfg.Token, name, build)
+			} else {
+				service, err = m.ServiceStatus(cfg.Token, name)
+			}
+			if err != nil {
+				color.Red(err.Error())
+				os.Exit(1)
+			}
+			printServiceInfo(&service)
+		}
+		return nil
+	},
+}
+
 // CmdService ...
 var CmdService = cli.Command{
 	Name:  "service",
@@ -240,6 +284,7 @@ var CmdService = cli.Command{
 		HistoryService,
 		ResetService,
 		DefinitionService,
+		InfoService,
 		MonitorService,
 	},
 }

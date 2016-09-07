@@ -9,22 +9,9 @@ import (
 	"errors"
 	"io/ioutil"
 	"runtime"
-	"time"
 
 	"github.com/fatih/color"
 )
-
-// Service ...
-type Service struct {
-	ID         string    `json:"id"`
-	Name       string    `json:"name"`
-	Datacenter int       `json:"datacenter_id"`
-	Version    time.Time `json:"version"`
-	Status     string    `json:"status"`
-	Definition string    `json:"definition"`
-	Result     string    `json:"result"`
-	Endpoint   string    `json:"endpoint"`
-}
 
 // ListServices ...
 func (m *Manager) ListServices(token string) (services []Service, err error) {
@@ -54,9 +41,18 @@ func (m *Manager) ListBuilds(name string, token string) (builds []Service, err e
 
 // ServiceStatus ...
 func (m *Manager) ServiceStatus(token string, serviceName string) (service Service, err error) {
-	body, _, err := m.doRequest("/api/services/"+serviceName, "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/services/"+serviceName, "GET", []byte(""), token, "")
 	if err != nil {
+		if resp.StatusCode == 403 {
+			return service, errors.New("You don't have permissions to perform this action")
+		}
+		if resp.StatusCode == 404 {
+			return service, errors.New("Specified service not found")
+		}
 		return service, err
+	}
+	if body == "null" {
+		return service, errors.New("Unexpected endpoint response : " + string(body))
 	}
 	err = json.Unmarshal([]byte(body), &service)
 	if err != nil {
@@ -67,9 +63,18 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service Servi
 
 // ServiceBuildStatus ...
 func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID string) (service Service, err error) {
-	body, _, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
 	if err != nil {
+		if resp.StatusCode == 403 {
+			return service, errors.New("You don't have permissions to perform this action")
+		}
+		if resp.StatusCode == 404 {
+			return service, errors.New("Specified build not found")
+		}
 		return service, err
+	}
+	if body == "null" {
+		return service, errors.New("Unexpected endpoint response : " + string(body))
 	}
 	err = json.Unmarshal([]byte(body), &service)
 	if err != nil {
