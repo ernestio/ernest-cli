@@ -21,6 +21,7 @@ deps: dev-deps
 	go get -u gopkg.in/yaml.v2
 	go get -u github.com/howeyc/gopass
 	go get -u github.com/r3labs/sse
+	go get -u github.com/olekukonko/tablewriter
 
 dev-deps:
 	go get -u github.com/golang/lint/golint
