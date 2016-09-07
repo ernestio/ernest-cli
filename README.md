@@ -6,15 +6,15 @@ Ernest helps you deploy your vcloud infrastructure with a few shell commands.
 
 ## Build status
 
-* Master [![CircleCI](https://circleci.com/gh/ErnestIO/ernest-cli/tree/master.svg?style=svg)](https://circleci.com/gh/ErnestIO/ernest-cli/tree/master)
-* Develop [![CircleCI](https://circleci.com/gh/ErnestIO/ernest-cli/tree/develop.svg?style=svg)](https://circleci.com/gh/ErnestIO/ernest-cli/tree/develop)
+* Master [![CircleCI](https://circleci.com/gh/ernestio/ernest-cli/tree/master.svg?style=svg)](https://circleci.com/gh/ernestio/ernest-cli/tree/master)
+* Develop [![CircleCI](https://circleci.com/gh/ernestio/ernest-cli/tree/develop.svg?style=svg)](https://circleci.com/gh/ernestio/ernest-cli/tree/develop)
 
 ## Installation
 
 In order to install it and have it running, you just need to run the following commands:
 
 ```
-$ git clone git@github.com:ErnestIO/ernest-cli.git
+$ git clone git@github.com:ernestio/ernest-cli.git
 $ cd ernest
 $ make
 $ make install
