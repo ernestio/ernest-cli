@@ -16,7 +16,7 @@ type Service struct {
 	Endpoint   string    `json:"endpoint"`
 	Networks   []struct {
 		Name   string `json:"name"`
-		Subnet string `json:"subnet"`
+		Subnet string `json:"network_aws_id"`
 	} `json:"networks"`
 	Instances []struct {
 		Name          string `json:"name"`
