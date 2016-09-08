@@ -10,7 +10,6 @@ import (
 func printServiceInfo(service *Service) {
 	fmt.Println("Name : " + service.Name)
 	fmt.Println("Datacenter : " + service.Name)
-	fmt.Println("Service IP : " + service.Endpoint)
 
 	if len(service.Networks) == 0 {
 		fmt.Println("\nNetworks (empty)")
@@ -38,6 +37,19 @@ func printServiceInfo(service *Service) {
 		table.Render()
 	}
 
+	if len(service.Nats) == 0 {
+		fmt.Println("\nNAT gateways (empty)")
+		fmt.Println("")
+	} else {
+		fmt.Println("\nNAT gateways:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "Group ID"})
+		for _, v := range service.Nats {
+			table.Append([]string{v.Name, v.NatGatewayAWSID})
+		}
+		table.Render()
+	}
+
 	if len(service.SecurityGroups) == 0 {
 		fmt.Println("\nSecurity groups (empty)")
 		fmt.Println("")
@@ -46,7 +58,7 @@ func printServiceInfo(service *Service) {
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Group ID"})
 		for _, v := range service.SecurityGroups {
-			table.Append([]string{v.Name, v.NatGatewayAWSID})
+			table.Append([]string{v.Name, v.SecurityGroupAWSID})
 		}
 		table.Render()
 	}

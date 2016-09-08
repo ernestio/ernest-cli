@@ -24,8 +24,12 @@ type Service struct {
 		PublicIP      string `json:"public_ip"`
 		IP            string `json:"ip"`
 	} `json:"instances"`
-	SecurityGroups []struct {
+	Nats []struct {
 		Name            string `json:"name"`
 		NatGatewayAWSID string `json:"nat_gateway_aws_id"`
+	} `json:"nats"`
+	SecurityGroups []struct {
+		Name               string `json:"name"`
+		SecurityGroupAWSID string `json:"security_group_aws_id"`
 	} `json:"nats"`
 }
