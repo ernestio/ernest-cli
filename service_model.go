@@ -31,5 +31,5 @@ type Service struct {
 	SecurityGroups []struct {
 		Name               string `json:"name"`
 		SecurityGroupAWSID string `json:"security_group_aws_id"`
-	} `json:"nats"`
+	} `json:"security_groups"`
 }
