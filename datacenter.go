@@ -118,9 +118,9 @@ var CreateAWSDatacenter = cli.Command{
 			rtype = "aws-fake"
 		}
 		m, cfg := setup(c)
-		_, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, region, token, secret)
+		body, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, region, token, secret)
 		if err != nil {
-			color.Red(err.Error())
+			color.Red(body)
 		}
 		return nil
 	},
@@ -186,9 +186,9 @@ var CreateVcloudDatacenter = cli.Command{
 			rtype = "vcloud-fake"
 		}
 		m, cfg := setup(c)
-		_, err := m.CreateVcloudDatacenter(cfg.Token, name, rtype, user, password, c.Args()[1], c.Args()[2], c.String("vse-url"))
+		body, err := m.CreateVcloudDatacenter(cfg.Token, name, rtype, user, password, c.Args()[1], c.Args()[2], c.String("vse-url"))
 		if err != nil {
-			color.Red(err.Error())
+			color.Red(body)
 		}
 		return nil
 	},

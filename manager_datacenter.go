@@ -20,9 +20,13 @@ type Datacenter struct {
 // CreateVcloudDatacenter ...
 func (m *Manager) CreateVcloudDatacenter(token string, name string, rtype string, user string, password string, url string, network string, vseURL string) (string, error) {
 	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region": "", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
-	body, _, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
+	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
-		return body, err
+		if res.StatusCode == 409 {
+			return "Datacenter name already in use", err
+		} else {
+			return body, err
+		}
 	}
 	color.Green("SUCCESS: Datacenter " + name + " created")
 	return body, err
@@ -31,9 +35,13 @@ func (m *Manager) CreateVcloudDatacenter(token string, name string, rtype string
 // CreateAWSDatacenter ...
 func (m *Manager) CreateAWSDatacenter(token string, name string, rtype string, region string, awstoken string, awssecret string) (string, error) {
 	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region":"` + region + `", "username":"` + name + `", "token":"` + awstoken + `", "secret":"` + awssecret + `"}`)
-	body, _, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
+	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
-		return body, err
+		if res.StatusCode == 409 {
+			return "Datacenter name already in use", err
+		} else {
+			return body, err
+		}
 	}
 	color.Green("SUCCESS: Datacenter " + name + " created")
 	return body, err
