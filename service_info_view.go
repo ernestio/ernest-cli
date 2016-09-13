@@ -9,7 +9,6 @@ import (
 
 func printServiceInfo(service *Service) {
 	fmt.Println("Name : " + service.Name)
-	fmt.Println("Datacenter : " + service.Name)
 
 	if len(service.Networks) == 0 {
 		fmt.Println("\nNetworks (empty)")
