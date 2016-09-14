@@ -169,6 +169,10 @@ var ListGroups = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("Please login to perform this action")
+			os.Exit(1)
+		}
 		groups, err := m.ListGroups(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
