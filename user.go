@@ -71,10 +71,16 @@ var CreateUser = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			msg := "You should specify an user username and a password"
+			msg := "You should specify the username and password"
 			color.Red(msg)
 			return errors.New(msg)
 		}
+		if len(c.Args()) < 2 {
+			msg := "You should specify the user password"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
 		usr := c.Args()[0]
 		email := c.String("email")
 		pwd := c.Args()[1]
