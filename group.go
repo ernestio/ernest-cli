@@ -118,18 +118,18 @@ var AddUser = cli.Command{
 	Description: `Adds a user to a group.
 
 	  Example:
-		  $ ernest group add-user <user-id> <group-id>
+		  $ ernest group add-user <user-name> <group-name>
 	`,
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 2 {
-			msg := "You should specify an user id and a group id."
+			msg := "You should specify an user name and a group name."
 			color.Red(msg)
 			return errors.New(msg)
 		}
 		m, cfg := setup(c)
-		userid := c.Args()[0]
-		groupid := c.Args()[1]
-		err := m.GroupAddUser(cfg.Token, userid, groupid)
+		user := c.Args()[0]
+		group := c.Args()[1]
+		err := m.GroupAddUser(cfg.Token, user, group)
 		return err
 	},
 }
