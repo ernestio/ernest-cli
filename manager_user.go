@@ -6,6 +6,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
 
 	"github.com/fatih/color"
@@ -22,8 +23,14 @@ type User struct {
 
 // ListUsers ...
 func (m *Manager) ListUsers(token string) (users []User, err error) {
-	body, _, err := m.doRequest("/api/users/", "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/users/", "GET", []byte(""), token, "")
 	if err != nil {
+		if resp.StatusCode == 400 {
+			return users, errors.New("You're not allowed to perform this action, please log in")
+		}
+		if resp.StatusCode == 404 {
+			return users, errors.New("Couldn't found any users")
+		}
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &users)

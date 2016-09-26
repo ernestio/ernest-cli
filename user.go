@@ -31,7 +31,7 @@ var ListUsers = cli.Command{
 		users, err := m.ListUsers(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
-			return err
+			return nil
 		}
 
 		w := new(tabwriter.Writer)
