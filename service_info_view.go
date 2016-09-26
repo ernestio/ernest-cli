@@ -9,6 +9,9 @@ import (
 
 func printServiceInfo(service *Service) {
 	fmt.Println("Name : " + service.Name)
+	if service.Vpc != "" {
+		fmt.Println("VPC : " + service.Vpc)
+	}
 
 	if len(service.Networks) == 0 {
 		fmt.Println("\nNetworks (empty)")
