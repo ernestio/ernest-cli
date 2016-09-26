@@ -8,8 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
-
-	"github.com/fatih/color"
 )
 
 // User ...
@@ -56,11 +54,16 @@ func (m *Manager) GetUser(token string, userid string) (user User, err error) {
 // CreateUser ...
 func (m *Manager) CreateUser(token string, name string, email string, user string, password string) error {
 	payload := []byte(`{"group_id": 0, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
-	_, _, err := m.doRequest("/api/users/", "POST", payload, token, "")
+	_, resp, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
+		if resp.StatusCode == 400 {
+			return errors.New("You're not allowed to perform this action, please log in")
+		}
+		if resp.StatusCode == 403 {
+			return errors.New("You're not allowed to perform this action, please contact your admin.")
+		}
 		return err
 	}
-	color.Green("SUCCESS: User " + user + " created")
 	return nil
 }
 
