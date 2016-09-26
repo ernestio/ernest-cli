@@ -1,3 +1,6 @@
 ernest
 cover.out
 ernest-cli
+*-darwin-*
+*-linux-*
+*-windows-*
