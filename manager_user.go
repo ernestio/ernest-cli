@@ -56,6 +56,9 @@ func (m *Manager) CreateUser(token string, name string, email string, user strin
 	payload := []byte(`{"group_id": 0, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
 	_, resp, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
+		if resp.StatusCode == 409 {
+			return errors.New("Specified username already existis please choose a different one.")
+		}
 		if resp.StatusCode == 400 {
 			return errors.New("You're not allowed to perform this action, please log in")
 		}
