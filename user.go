@@ -15,7 +15,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// ListUsers ...
+// ListUsers : Gets a list of accessible users
 var ListUsers = cli.Command{
 	Name:      "list",
 	Usage:     "List available users.",
@@ -46,7 +46,7 @@ var ListUsers = cli.Command{
 	},
 }
 
-// CreateUser ...
+// CreateUser : Creates a new user
 var CreateUser = cli.Command{
 	Name:  "create",
 	Usage: "Create a new user.",
@@ -92,7 +92,7 @@ var CreateUser = cli.Command{
 	},
 }
 
-// PasswordUser ...
+// PasswordUser : Allows users or admins to change its passwords
 var PasswordUser = cli.Command{
 	Name:  "change-password",
 	Usage: "Change password of available users.",
