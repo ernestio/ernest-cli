@@ -6,7 +6,6 @@ package main
 
 // CmdUser subcommand
 import (
-	"errors"
 	"fmt"
 	"os"
 	"text/tabwriter"
@@ -209,65 +208,48 @@ var PasswordUser = cli.Command{
 	},
 }
 
-// DisableUser ...
+// DisableUser : Will disable a user (change its password)
 var DisableUser = cli.Command{
 	Name:  "disable",
 	Usage: "Disable available users.",
 	Description: `Disable available users.
 
 	Example:
-	 $ ernest user disable --user <adminuser> --password <adminpassword> <user-id>
+	 $ ernest user disable <user-name>
  `,
 	ArgsUsage: "<username>",
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user",
-			Value: "",
-			Usage: "Admin user credentials",
-		},
-		cli.StringFlag{
-			Name:  "password",
-			Value: "",
-			Usage: "Admin password credentials",
-		},
-	},
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			msg := "You should specify an user ID"
-			color.Red(msg)
-			return errors.New("You should specify an user ID")
+			color.Red("You should specify an username")
+			return nil
 		}
 
-		m, _ := setup(c)
-		usr := c.Args()[0]
+		m, cfg := setup(c)
+		username := c.Args()[0]
 
-		msg := "Password not specified"
-		adminuser := c.String("user")
-		if adminuser == "" {
-			color.Red(msg)
-			return errors.New("Password not specified")
-		}
-		adminpassword := c.String("password")
-		if adminpassword == "" {
-			color.Red(msg)
-			return errors.New("Password not specified")
+		session, err := m.getSession(cfg.Token)
+		if err != nil {
+			color.Red("You don’t have permissions to perform this action")
+			return nil
 		}
 
-		token, err := m.Login(adminuser, adminpassword)
+		if session.IsAdmin == false {
+			color.Red("You don’t have permissions to perform this action")
+			return nil
+		}
+
+		user, err := m.GetUserByUsername(cfg.Token, username)
 		if err != nil {
 			color.Red(err.Error())
 			return err
 		}
 
-		user, err := m.GetUser(token, usr)
-		if err != nil {
+		if err = m.ChangePasswordByAdmin(cfg.Token, user.ID, user.Username, user.GroupID, randString(16)); err != nil {
 			color.Red(err.Error())
-			return err
+			return nil
 		}
 
-		m.ChangePasswordByAdmin(token, user.ID, user.Username, user.GroupID, randString(16))
-
-		color.Green("User successfully disabled.")
+		color.Green("Account `" + username + "` has been disabled")
 		return nil
 	},
 }
