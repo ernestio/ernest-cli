@@ -7,11 +7,11 @@ package main
 // CmdUser subcommand
 import (
 	"errors"
-	"fmt"
 	"os"
-	"text/tabwriter"
+	"strconv"
 
 	"github.com/fatih/color"
+	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
 
@@ -170,22 +170,23 @@ var ListGroups = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("Please login to perform this action")
-			os.Exit(1)
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
 		}
 		groups, err := m.ListGroups(cfg.Token)
 		if err != nil {
-			color.Red(err.Error())
+			color.Red("We didn't found any accessible group")
+			return nil
 		}
 
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-		fmt.Fprintln(w, "NAME\tID")
-		for _, group := range groups {
-			str := fmt.Sprintf("%s\t%d", group.Name, group.ID)
-			fmt.Fprintln(w, str)
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"ID", "Name"})
+		for _, g := range groups {
+			id := strconv.Itoa(g.ID)
+			table.Append([]string{id, g.Name})
 		}
-		w.Flush()
+		table.Render()
+
 		return nil
 	},
 }
