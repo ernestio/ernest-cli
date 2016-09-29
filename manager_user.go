@@ -38,6 +38,17 @@ func (m *Manager) ListUsers(token string) (users []User, err error) {
 	return users, err
 }
 
+// GetUserByUserame : Gets a user by name
+func (m *Manager) GetUserByUsername(token string, name string) (user User, err error) {
+	users, err := m.ListUsers(token)
+	for _, u := range users {
+		if u.Username == name {
+			return u, nil
+		}
+	}
+	return user, errors.New("User not found")
+}
+
 // GetUser ...
 func (m *Manager) GetUser(token string, userid string) (user User, err error) {
 	res, _, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
@@ -83,7 +94,7 @@ func (m *Manager) ChangePassword(token string, userid int, username string, user
 // ChangePasswordByAdmin ...
 func (m *Manager) ChangePasswordByAdmin(token string, userid int, username string, usergroup int, newpassword string) error {
 	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "group_id": ` + strconv.Itoa(usergroup) + `, "password": "` + newpassword + `"}`)
-	_, _, err := m.doRequest("/api/users/"+string(userid), "PUT", payload, token, "application/yaml")
+	_, _, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		return err
 	}
