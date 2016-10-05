@@ -7,11 +7,11 @@ package main
 // CmdUser subcommand
 import (
 	"errors"
-	"fmt"
 	"os"
-	"text/tabwriter"
+	"strconv"
 
 	"github.com/fatih/color"
+	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
 
@@ -20,21 +20,42 @@ var DeleteGroup = cli.Command{
 	Name:      "delete",
 	Usage:     "Deletes a group.",
 	ArgsUsage: " ",
-	Description: `Deletes a group.
+	Description: `Deletes a group by name
 
 	  Example:
-		  $ ernest group delete <group-id>
+		  $ ernest group delete <name>
 	`,
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			msg := "You should specify a group id."
+			msg := "You should specify the group name"
 			color.Red(msg)
 			return errors.New(msg)
 		}
+
 		m, cfg := setup(c)
-		groupid := c.Args()[0]
-		err := m.DeleteGroup(cfg.Token, groupid)
-		return err
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+		session, err := m.getSession(cfg.Token)
+		if err != nil {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		if session.IsAdmin == false {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		name := c.Args()[0]
+		err = m.DeleteGroup(cfg.Token, c.Args()[0])
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("Group '" + name + "' successfully deleted")
+		return nil
 	},
 }
 
@@ -49,16 +70,42 @@ var RemoveDatacenter = cli.Command{
 		  $ ernest group remove-datacenter <datacenter-id> <group-id>
 	`,
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 2 {
-			msg := "You should specify an datacenter id and a group id."
+		if len(c.Args()) < 1 {
+			msg := "You should specify the datacenter name and group name"
 			color.Red(msg)
 			return errors.New(msg)
 		}
+		if len(c.Args()) < 2 {
+			msg := "You should specify the group name"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
 		m, cfg := setup(c)
-		datacenterid := c.Args()[0]
-		groupid := c.Args()[1]
-		err := m.GroupRemoveDatacenter(cfg.Token, datacenterid, groupid)
-		return err
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+		session, err := m.getSession(cfg.Token)
+		if err != nil {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		if session.IsAdmin == false {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		datacenter := c.Args()[0]
+		group := c.Args()[1]
+		err = m.GroupRemoveDatacenter(cfg.Token, datacenter, group)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("Datacenter '" + datacenter + "' is not assigned anymore to group '" + group + "'")
+		return nil
 	},
 }
 
@@ -70,19 +117,45 @@ var AddDatacenter = cli.Command{
 	Description: `Adds a datacenter to a group.
 
 	  Example:
-		  $ ernest group add-datacenter <datacenter-id> <group-id>
+		  $ ernest group add-datacenter <datacenter-name> <group-name>
 	`,
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 2 {
-			msg := "You should specify a datacenter id and a group id."
+		if len(c.Args()) < 1 {
+			msg := "You should specify the datacenter name and group name"
 			color.Red(msg)
 			return errors.New(msg)
 		}
+		if len(c.Args()) < 2 {
+			msg := "You should specify the group name"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
 		m, cfg := setup(c)
-		datacenterid := c.Args()[0]
-		groupid := c.Args()[1]
-		err := m.GroupAddDatacenter(cfg.Token, datacenterid, groupid)
-		return err
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+		session, err := m.getSession(cfg.Token)
+		if err != nil {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		if session.IsAdmin == false {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		datacenter := c.Args()[0]
+		group := c.Args()[1]
+		err = m.GroupAddDatacenter(cfg.Token, datacenter, group)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("Datacenter '" + datacenter + "' is now assigned to group '" + group + "'")
+		return nil
 	},
 }
 
@@ -97,20 +170,46 @@ var RemoveUser = cli.Command{
 		  $ ernest group remove-user <user-id> <group-id>
 	`,
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 2 {
-			msg := "You should specify an user id and a group id."
+		if len(c.Args()) < 1 {
+			msg := "You should specify the username and group name"
 			color.Red(msg)
 			return errors.New(msg)
 		}
+		if len(c.Args()) < 2 {
+			msg := "You should specify the group name"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
 		m, cfg := setup(c)
-		userid := c.Args()[0]
-		groupid := c.Args()[1]
-		err := m.GroupRemoveUser(cfg.Token, userid, groupid)
-		return err
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+		session, err := m.getSession(cfg.Token)
+		if err != nil {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		if session.IsAdmin == false {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		user := c.Args()[0]
+		group := c.Args()[1]
+		err = m.GroupRemoveUser(cfg.Token, user, group)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("User '" + user + "' is not assigned anymore to group '" + group + "'")
+		return nil
 	},
 }
 
-// AddUser ...
+// AddUser : Adds a user to a group
 var AddUser = cli.Command{
 	Name:      "add-user",
 	Usage:     "Adds a user to a group.",
@@ -121,20 +220,46 @@ var AddUser = cli.Command{
 		  $ ernest group add-user <user-name> <group-name>
 	`,
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 2 {
-			msg := "You should specify an user name and a group name."
+		if len(c.Args()) < 1 {
+			msg := "You should specify the username and group name"
 			color.Red(msg)
 			return errors.New(msg)
 		}
+		if len(c.Args()) < 2 {
+			msg := "You should specify the group name"
+			color.Red(msg)
+			return errors.New(msg)
+		}
+
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+		session, err := m.getSession(cfg.Token)
+		if err != nil {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		if session.IsAdmin == false {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
 		user := c.Args()[0]
 		group := c.Args()[1]
-		err := m.GroupAddUser(cfg.Token, user, group)
-		return err
+		err = m.GroupAddUser(cfg.Token, user, group)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("User '" + user + "' is now assigned to group '" + group + "'")
+		return nil
 	},
 }
 
-// CreateGroup ...
+// CreateGroup : Creates a group
 var CreateGroup = cli.Command{
 	Name:      "create",
 	Usage:     "Create a group.",
@@ -146,14 +271,34 @@ var CreateGroup = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			msg := "You should specify the group name"
-			color.Red(msg)
-			return errors.New(msg)
+			color.Red("You should specify the group name")
+			return nil
 		}
+
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+		session, err := m.getSession(cfg.Token)
+		if err != nil {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
+		if session.IsAdmin == false {
+			color.Red("You don't have permissions to perform this action")
+			return nil
+		}
+
 		name := c.Args()[0]
-		err := m.CreateGroup(cfg.Token, name)
-		return err
+		err = m.CreateGroup(cfg.Token, c.Args()[0])
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("Group '" + name + "' successfully created, you can add users with 'ernest group add-user username " + name + "'")
+		return nil
 	},
 }
 
@@ -169,19 +314,24 @@ var ListGroups = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
 		groups, err := m.ListGroups(cfg.Token)
 		if err != nil {
-			color.Red(err.Error())
+			color.Red("We didn't found any accessible group")
+			return nil
 		}
 
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-		fmt.Fprintln(w, "NAME\tID")
-		for _, group := range groups {
-			str := fmt.Sprintf("%s\t%d", group.Name, group.ID)
-			fmt.Fprintln(w, str)
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"ID", "Name"})
+		for _, g := range groups {
+			id := strconv.Itoa(g.ID)
+			table.Append([]string{id, g.Name})
 		}
-		w.Flush()
+		table.Render()
+
 		return nil
 	},
 }

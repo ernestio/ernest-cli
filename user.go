@@ -6,17 +6,18 @@ package main
 
 // CmdUser subcommand
 import (
-	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"text/tabwriter"
 
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
+	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
 
-// ListUsers ...
+// ListUsers : Gets a list of accessible users
 var ListUsers = cli.Command{
 	Name:      "list",
 	Usage:     "List available users.",
@@ -31,23 +32,29 @@ var ListUsers = cli.Command{
 		users, err := m.ListUsers(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
-			return err
+			return nil
 		}
 
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
-		fmt.Fprintln(w, "NAME\tID\tEMAIL")
-		for _, user := range users {
-			str := fmt.Sprintf("%s\t%d\t%s", user.Username, user.ID, user.Email)
-			fmt.Fprintln(w, str)
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"ID", "Name", "Group", "Admin"})
+		for _, u := range users {
+			id := strconv.Itoa(u.ID)
+			admin := "no"
+			if u.IsAdmin == true {
+				admin = "yes"
+			}
+			table.Append([]string{id, u.Username, u.GroupName, admin})
 		}
-		w.Flush()
+		table.Render()
+
 		return nil
 	},
 }
 
-// CreateUser ...
+// CreateUser : Creates a new user
 var CreateUser = cli.Command{
 	Name:  "create",
 	Usage: "Create a new user.",
@@ -71,14 +78,12 @@ var CreateUser = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			msg := "You should specify the username and password"
-			color.Red(msg)
-			return errors.New(msg)
+			color.Red("You should specify an user username and a password")
+			return nil
 		}
 		if len(c.Args()) < 2 {
-			msg := "You should specify the user password"
-			color.Red(msg)
-			return errors.New(msg)
+			color.Red("You should specify the user password")
+			return nil
 		}
 
 		usr := c.Args()[0]
@@ -88,117 +93,115 @@ var CreateUser = cli.Command{
 		err := m.CreateUser(cfg.Token, usr, email, usr, pwd)
 		if err != nil {
 			color.Red(err.Error())
-			return err
+			return nil
 		}
+		color.Green("User " + usr + " successfully created")
 		return nil
 	},
 }
 
-// PasswordUser ...
+// PasswordUser : Allows users or admins to change its passwords
 var PasswordUser = cli.Command{
-	Name:      "password",
-	Usage:     "Change password of available users.",
-	ArgsUsage: "<user-id>",
+	Name:  "change-password",
+	Usage: "Change password of available users.",
 	Description: `Change password of available users.
 
    Example:
-    $ ernest user password <user-id>
+    $ ernest user change-password
 
-    or changing a password by being admin:
+    or changing a change-password by being admin:
 
-    $ ernest user password --user <adminuser> --password <adminpassword> <user-id>
+    $ ernest user change-password --user <username> --current-password <current-password> --password <new-password>
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user",
 			Value: "",
-			Usage: "Admin user credentials",
+			Usage: "The username of the user to change password",
 		},
 		cli.StringFlag{
 			Name:  "password",
 			Value: "",
-			Usage: "Admin password credentials",
+			Usage: "The new user password",
+		},
+		cli.StringFlag{
+			Name:  "current-password",
+			Value: "",
+			Usage: "The current user password",
 		},
 	},
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			msg := "You should specify an user ID"
-			color.Red(msg)
-			return errors.New("You should specify an user ID")
-		}
-
 		m, cfg := setup(c)
-		usr := c.Args()[0]
 
-		adminuser := c.String("user")
-		adminpassword := c.String("password")
+		username := c.String("user")
+		password := c.String("password")
+		currentPassword := c.String("current-password")
 
 		session, err := m.getSession(cfg.Token)
 		if err != nil {
-			color.Red(err.Error())
+			color.Red("You don’t have permissions to perform this action")
+			return nil
 		}
 
-		if adminuser != "" && adminpassword != "" || session.IsAdmin {
-			token := ""
-			if session.IsAdmin {
-				token = cfg.Token
-			} else {
-				token, err = m.Login(adminuser, adminpassword)
-				if err != nil {
-					color.Red(err.Error())
-					return err
+		if session.IsAdmin == false && username != "" {
+			color.Red("You don’t have permissions to perform this action")
+			return nil
+		}
+
+		if session.IsAdmin && username != "" {
+			if password == "" {
+				color.Red("Please provide a valid password for the user with `--password`")
+				return nil
+			}
+			// Just change the password with the given values for the given user
+			usr, err := m.GetUserByUsername(cfg.Token, username)
+			if err = m.ChangePasswordByAdmin(cfg.Token, usr.ID, usr.Username, usr.GroupID, password); err != nil {
+				color.Red(err.Error())
+				return nil
+			}
+			color.Green("`" + usr.Username + "` password has been changed")
+		} else {
+			// Ask the user for credentials
+			var users []User
+			if users, err = m.ListUsers(cfg.Token); err != nil {
+				color.Red("You don’t have permissions to perform this action")
+				return nil
+			}
+			if len(users) == 0 {
+				color.Red("You don’t have permissions to perform this action")
+				return nil
+			}
+
+			var user User
+			for _, u := range users {
+				if u.Username == cfg.User {
+					user = u
+					break
 				}
 			}
 
-			user, err := m.GetUser(token, usr)
-			if err != nil {
-				color.Red(err.Error())
-				return err
+			oldpassword := currentPassword
+			newpassword := password
+			rnewpassword := password
+
+			if oldpassword == "" || newpassword == "" {
+				fmt.Printf("You're about to change your password, please respond the questions below: \n")
+				fmt.Printf("Current password: ")
+				opass, _ := gopass.GetPasswdMasked()
+				oldpassword = string(opass)
+
+				fmt.Printf("New password: ")
+				npass, _ := gopass.GetPasswdMasked()
+				newpassword = string(npass)
+
+				fmt.Printf("Confirm new password: ")
+				rnpass, _ := gopass.GetPasswdMasked()
+				rnewpassword = string(rnpass)
 			}
-
-			fmt.Printf("New Password: ")
-			npass, _ := gopass.GetPasswdMasked()
-			newpassword := string(npass)
-
-			fmt.Printf("Repeat new Password: ")
-			rnpass, _ := gopass.GetPasswdMasked()
-			rnewpassword := string(rnpass)
 
 			if newpassword != rnewpassword {
-				msg := "New password doesn't match."
-				color.Red(msg)
-				return err
-			}
-
-			err = m.ChangePasswordByAdmin(token, user.ID, user.Username, user.GroupID, newpassword)
-			if err != nil {
-				color.Red(err.Error())
-				return err
-			}
-		} else {
-
-			user, err := m.GetUser(cfg.Token, usr)
-			if err != nil {
-				color.Red(err.Error())
-				return err
-			}
-
-			fmt.Printf("Old Password: ")
-			opass, _ := gopass.GetPasswdMasked()
-			oldpassword := string(opass)
-
-			fmt.Printf("New Password: ")
-			npass, _ := gopass.GetPasswdMasked()
-			newpassword := string(npass)
-
-			fmt.Printf("Repeat new Password: ")
-			rnpass, _ := gopass.GetPasswdMasked()
-			rnewpassword := string(rnpass)
-
-			if newpassword != rnewpassword {
-				msg := "New password doesn't match."
-				color.Red(msg)
-				return errors.New("New password doesn't match.")
+				color.Red("Aborting... New password and confirmation doesn't match.")
+				return nil
 			}
 
 			err = m.ChangePassword(cfg.Token, user.ID, user.Username, user.GroupID, oldpassword, newpassword)
@@ -206,70 +209,55 @@ var PasswordUser = cli.Command{
 				color.Red(err.Error())
 				return err
 			}
+			color.Green("Your password has been changed")
 		}
+
 		return nil
 	},
 }
 
-// DisableUser ...
+// DisableUser : Will disable a user (change its password)
 var DisableUser = cli.Command{
 	Name:  "disable",
 	Usage: "Disable available users.",
 	Description: `Disable available users.
 
 	Example:
-	 $ ernest user disable --user <adminuser> --password <adminpassword> <user-id>
+	 $ ernest user disable <user-name>
  `,
 	ArgsUsage: "<username>",
-	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user",
-			Value: "",
-			Usage: "Admin user credentials",
-		},
-		cli.StringFlag{
-			Name:  "password",
-			Value: "",
-			Usage: "Admin password credentials",
-		},
-	},
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			msg := "You should specify an user ID"
-			color.Red(msg)
-			return errors.New("You should specify an user ID")
+			color.Red("You should specify an username")
+			return nil
 		}
 
-		m, _ := setup(c)
-		usr := c.Args()[0]
+		m, cfg := setup(c)
+		username := c.Args()[0]
 
-		msg := "Password not specified"
-		adminuser := c.String("user")
-		if adminuser == "" {
-			color.Red(msg)
-			return errors.New("Password not specified")
-		}
-		adminpassword := c.String("password")
-		if adminpassword == "" {
-			color.Red(msg)
-			return errors.New("Password not specified")
+		session, err := m.getSession(cfg.Token)
+		if err != nil {
+			color.Red("You don’t have permissions to perform this action")
+			return nil
 		}
 
-		token, err := m.Login(adminuser, adminpassword)
+		if session.IsAdmin == false {
+			color.Red("You don’t have permissions to perform this action")
+			return nil
+		}
+
+		user, err := m.GetUserByUsername(cfg.Token, username)
 		if err != nil {
 			color.Red(err.Error())
 			return err
 		}
 
-		user, err := m.GetUser(token, usr)
-		if err != nil {
+		if err = m.ChangePasswordByAdmin(cfg.Token, user.ID, user.Username, user.GroupID, randString(16)); err != nil {
 			color.Red(err.Error())
-			return err
+			return nil
 		}
 
-		m.ChangePasswordByAdmin(token, user.ID, user.Username, user.GroupID, randString(16))
-
-		color.Green("User successfully disabled.")
+		color.Green("Account `" + username + "` has been disabled")
 		return nil
 	},
 }

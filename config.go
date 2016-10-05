@@ -17,9 +17,10 @@ import (
 
 // Config is the configuration struct for this app
 type Config struct {
-	URL   string `json:"url"`
-	Token string `json:"token"`
-	User  string `json:"user"`
+	URL    string `json:"url"`
+	Token  string `json:"token"`
+	User   string `json:"user"`
+	UserID string `json:"userid"`
 }
 
 // Get config defined on the .ernest file

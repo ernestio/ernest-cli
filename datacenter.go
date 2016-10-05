@@ -7,9 +7,6 @@ package main
 // CmdDatacenter subcommand
 import (
 	"errors"
-	"fmt"
-	"os"
-	"text/tabwriter"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -27,26 +24,18 @@ var ListDatacenters = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
 		datacenters, err := m.ListDatacenters(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
-			return err
-		}
-
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-
-		if len(datacenters) == 0 {
-			fmt.Println("There are no datacenters created yet.")
 			return nil
 		}
 
-		fmt.Fprintln(w, "NAME\tID\tTYPE")
-		for _, datacenter := range datacenters {
-			str := fmt.Sprintf("%s\t%d\t%s", datacenter.Name, datacenter.ID, datacenter.Type)
-			fmt.Fprintln(w, str)
-		}
-		w.Flush()
+		printDatacenterList(datacenters)
+
 		return nil
 	},
 }

@@ -6,24 +6,30 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"strconv"
-
-	"github.com/fatih/color"
 )
 
 // User ...
 type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	GroupID  int    `json:"group_id"`
-	IsAdmin  bool   `json:"admin"`
+	ID        int    `json:"id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	GroupID   int    `json:"group_id"`
+	GroupName string `json:"group_name"`
+	IsAdmin   bool   `json:"admin"`
 }
 
 // ListUsers ...
 func (m *Manager) ListUsers(token string) (users []User, err error) {
-	body, _, err := m.doRequest("/api/users/", "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/users/", "GET", []byte(""), token, "")
 	if err != nil {
+		if resp.StatusCode == 400 {
+			return users, errors.New("You're not allowed to perform this action, please log in")
+		}
+		if resp.StatusCode == 404 {
+			return users, errors.New("Couldn't found any users")
+		}
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &users)
@@ -31,6 +37,17 @@ func (m *Manager) ListUsers(token string) (users []User, err error) {
 		return nil, err
 	}
 	return users, err
+}
+
+// GetUserByUserame : Gets a user by name
+func (m *Manager) GetUserByUsername(token string, name string) (user User, err error) {
+	users, err := m.ListUsers(token)
+	for _, u := range users {
+		if u.Username == name {
+			return u, nil
+		}
+	}
+	return user, errors.New("User not found")
 }
 
 // GetUser ...
@@ -49,11 +66,19 @@ func (m *Manager) GetUser(token string, userid string) (user User, err error) {
 // CreateUser ...
 func (m *Manager) CreateUser(token string, name string, email string, user string, password string) error {
 	payload := []byte(`{"group_id": 0, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
-	_, _, err := m.doRequest("/api/users/", "POST", payload, token, "")
+	_, resp, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
+		if resp.StatusCode == 409 {
+			return errors.New("Specified username already existis please choose a different one.")
+		}
+		if resp.StatusCode == 400 {
+			return errors.New("You're not allowed to perform this action, please log in")
+		}
+		if resp.StatusCode == 403 {
+			return errors.New("You're not allowed to perform this action, please contact your admin.")
+		}
 		return err
 	}
-	color.Green("SUCCESS: User " + user + " created")
 	return nil
 }
 
@@ -70,7 +95,7 @@ func (m *Manager) ChangePassword(token string, userid int, username string, user
 // ChangePasswordByAdmin ...
 func (m *Manager) ChangePasswordByAdmin(token string, userid int, username string, usergroup int, newpassword string) error {
 	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "group_id": ` + strconv.Itoa(usergroup) + `, "password": "` + newpassword + `"}`)
-	_, _, err := m.doRequest("/api/users/"+string(userid), "PUT", payload, token, "application/yaml")
+	_, _, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		return err
 	}

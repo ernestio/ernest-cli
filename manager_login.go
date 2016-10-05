@@ -37,7 +37,7 @@ func (m *Manager) Login(username string, password string) (token string, err err
 	}
 
 	if resp.StatusCode != 200 {
-		return "", errors.New("Unauthorized")
+		return "", errors.New("The keypair user / password does not match any user on the database, please try again")
 	}
 	defer resp.Body.Close()
 

@@ -80,7 +80,7 @@ var Login = cli.Command{
 			color.Red("Can't write config file")
 			os.Exit(1)
 		}
-		color.Green("Log in succesful.")
+		color.Green("Welcome back " + username)
 		return nil
 	},
 }
