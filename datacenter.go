@@ -7,13 +7,8 @@ package main
 // CmdDatacenter subcommand
 import (
 	"errors"
-	"fmt"
-	"os"
-	"strconv"
-	"text/tabwriter"
 
 	"github.com/fatih/color"
-	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
 
@@ -39,21 +34,7 @@ var ListDatacenters = cli.Command{
 			return nil
 		}
 
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-
-		if len(datacenters) == 0 {
-			fmt.Println("There are no datacenters created yet.")
-			return nil
-		}
-
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Group", "Type"})
-		for _, d := range datacenters {
-			id := strconv.Itoa(d.ID)
-			table.Append([]string{id, d.Name, d.GroupName, d.Type})
-		}
-		table.Render()
+		printDatacenterList(datacenters)
 
 		return nil
 	},

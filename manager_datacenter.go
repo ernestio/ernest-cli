@@ -12,11 +12,16 @@ import (
 
 // Datacenter ...
 type Datacenter struct {
-	ID        int    `json:"id"`
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	GroupID   int    `json:"group_id"`
-	GroupName string `json:"group_name"`
+	ID              int    `json:"id"`
+	Name            string `json:"name"`
+	Type            string `json:"type"`
+	GroupID         int    `json:"group_id"`
+	GroupName       string `json:"group_name"`
+	Region          string `json:"region"`
+	VCloudURL       string `json:"vcloud_url"`
+	VseURL          string `json:"vse_url"`
+	ExternalNetwork string `json:"external_network"`
+	Username        string `json:"username"`
 }
 
 // CreateVcloudDatacenter ...
