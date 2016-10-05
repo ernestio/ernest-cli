@@ -8,10 +8,12 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"text/tabwriter"
 
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
+	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
 
@@ -36,12 +38,18 @@ var ListUsers = cli.Command{
 		w := new(tabwriter.Writer)
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
-		fmt.Fprintln(w, "NAME\tID\tEMAIL")
-		for _, user := range users {
-			str := fmt.Sprintf("%s\t%d\t%s", user.Username, user.ID, user.Email)
-			fmt.Fprintln(w, str)
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"ID", "Name", "Group", "Admin"})
+		for _, u := range users {
+			id := strconv.Itoa(u.ID)
+			admin := "no"
+			if u.IsAdmin == true {
+				admin = "yes"
+			}
+			table.Append([]string{id, u.Username, u.GroupName, admin})
 		}
-		w.Flush()
+		table.Render()
+
 		return nil
 	},
 }

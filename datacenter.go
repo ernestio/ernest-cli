@@ -9,9 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"text/tabwriter"
 
 	"github.com/fatih/color"
+	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
 
@@ -27,10 +29,14 @@ var ListDatacenters = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
 		datacenters, err := m.ListDatacenters(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
-			return err
+			return nil
 		}
 
 		w := new(tabwriter.Writer)
@@ -41,12 +47,14 @@ var ListDatacenters = cli.Command{
 			return nil
 		}
 
-		fmt.Fprintln(w, "NAME\tID\tTYPE")
-		for _, datacenter := range datacenters {
-			str := fmt.Sprintf("%s\t%d\t%s", datacenter.Name, datacenter.ID, datacenter.Type)
-			fmt.Fprintln(w, str)
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"ID", "Name", "Group", "Type"})
+		for _, d := range datacenters {
+			id := strconv.Itoa(d.ID)
+			table.Append([]string{id, d.Name, d.GroupName, d.Type})
 		}
-		w.Flush()
+		table.Render()
+
 		return nil
 	},
 }

@@ -12,11 +12,12 @@ import (
 
 // User ...
 type User struct {
-	ID       int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	GroupID  int    `json:"group_id"`
-	IsAdmin  bool   `json:"admin"`
+	ID        int    `json:"id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	GroupID   int    `json:"group_id"`
+	GroupName string `json:"group_name"`
+	IsAdmin   bool   `json:"admin"`
 }
 
 // ListUsers ...
