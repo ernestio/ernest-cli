@@ -6,7 +6,7 @@ package main
 
 // CmdDatacenter subcommand
 import (
-	"errors"
+	"fmt"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -40,7 +40,7 @@ var ListDatacenters = cli.Command{
 	},
 }
 
-// CreateAWSDatacenter ...
+// CreateAWSDatacenter : Creates an AWS datacenter
 var CreateAWSDatacenter = cli.Command{
 	Name:  "aws",
 	Usage: "Create a new aws datacenter.",
@@ -48,6 +48,15 @@ var CreateAWSDatacenter = cli.Command{
 
 	Example:
 	 $ ernest datacenter create aws --region region --token token --secret secret my_datacenter
+
+   Template example:
+    $ ernest datacenter create aws --template mydatacenter.yml mydatacenter
+    Where mydatacenter.yaml will look like:
+      ---
+      fake: true
+      token: token
+      secret: secret
+      region: region
 	 `,
 	ArgsUsage: "<datacenter-name>",
 	Flags: []cli.Flag{
@@ -66,85 +75,152 @@ var CreateAWSDatacenter = cli.Command{
 			Value: "",
 			Usage: "AWS Secret",
 		},
+		cli.StringFlag{
+			Name:  "template",
+			Value: "",
+			Usage: "Datacenter template",
+		},
 		cli.BoolFlag{
 			Name:  "fake",
 			Usage: "Fake datacenter",
 		},
 	},
 	Action: func(c *cli.Context) error {
+		var errs []string
+		var token, secret, region string
+		var fake bool
+		m, cfg := setup(c)
+
 		if len(c.Args()) < 1 {
 			msg := "You should specify the datacenter name"
 			color.Red(msg)
-			return errors.New(msg)
+			return nil
 		}
 
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
 		name := c.Args()[0]
 
-		token := c.String("token")
+		template := c.String("template")
+		if template != "" {
+			var t DatacenterTemplate
+			if err := getDatacenterTemplate(template, &t); err != nil {
+				color.Red(err.Error())
+				return nil
+			}
+			token = t.Token
+			secret = t.Secret
+			region = t.Region
+			fake = t.Fake
+		}
+		if c.String("token") != "" {
+			token = c.String("token")
+		}
+		if c.String("secret") != "" {
+			secret = c.String("secret")
+		}
+		if c.String("region") != "" {
+			region = c.String("region")
+		}
+		if c.Bool("bool") {
+			fake = c.Bool("fake")
+		}
+
 		if token == "" {
-			msg := "Token not specified"
-			color.Red(msg)
-			return errors.New(msg)
+			errs = append(errs, "Specify a valid token with --token flag")
 		}
 
-		secret := c.String("secret")
 		if secret == "" {
-			msg := "Secret not specified"
-			color.Red(msg)
-			return errors.New(msg)
+			errs = append(errs, "Specify a valid secret with --secret flag")
 		}
 
-		region := c.String("region")
 		if region == "" {
-			msg := "Region not specified"
-			color.Red(msg)
-			return errors.New(msg)
+			errs = append(errs, "Specify a valid region with --region flag")
+		}
+
+		if len(errs) > 0 {
+			color.Red("Please, fix the error shown below to continue")
+			for _, e := range errs {
+				fmt.Println("  - " + e)
+			}
+			return nil
 		}
 
 		rtype := "aws"
 
-		if c.Bool("fake") {
+		if fake {
 			rtype = "aws-fake"
 		}
-		m, cfg := setup(c)
 		body, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, region, token, secret)
 		if err != nil {
 			color.Red(body)
+		} else {
+			color.Green("Datacenter '" + name + "' successfully created ")
 		}
 		return nil
 	},
 }
 
-// CreateVcloudDatacenter ...
+// CreateVcloudDatacenter : Creates a VCloud Datacenter
 var CreateVcloudDatacenter = cli.Command{
 	Name:  "vcloud",
 	Usage: "Create a new vcloud datacenter.",
 	Description: `Create a new vcloud datacenter on the targeted instance of Ernest.
 
    Example:
-    $ ernest datacenter create vcloud --datacenter-user username --datacenter-password xxxx --datacenter-org MY-ORG-NAME --vse-url http://vse.url mydatacenter https://myernest.com MY-PUBLIC-NETWORK
+    $ ernest datacenter create vcloud --user username --password xxxx --org MY-ORG-NAME --vse-url http://vse.url --vcloud-url https://myernest.com --public-network MY-PUBLIC-NETWORK mydatacenter
+
+   Template example:
+    $ ernest datacenter create vcloud --template mydatacenter.yml mydatacenter
+    Where mydatacenter.yaml will look like:
+      ---
+      fake: true
+      org: org
+      password: pwd
+      public-network: MY-NETWORK
+      user: bla
+      vcloud-url: "http://ss.com"
+      vse-url: "http://ss.com"
+
 	`,
-	ArgsUsage: "<datacenter-name> <vcloud-url> <network-name>",
+	ArgsUsage: "<datacenter-name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "datacenter-user",
+			Name:  "user",
 			Value: "",
-			Usage: "User to be configured with the datacenter",
+			Usage: "Your VCloud valid user name",
 		},
 		cli.StringFlag{
-			Name:  "datacenter-password",
+			Name:  "password",
 			Value: "",
-			Usage: "Password related with user",
+			Usage: "Your VCloud valid password",
 		},
 		cli.StringFlag{
-			Name:  "datacenter-org",
+			Name:  "org",
 			Value: "",
-			Usage: "vCloud Organization name",
+			Usage: "Your vCloud Organization",
 		},
 		cli.StringFlag{
 			Name:  "vse-url",
 			Value: "",
 			Usage: "VSE URL",
+		},
+		cli.StringFlag{
+			Name:  "vcloud-url",
+			Value: "",
+			Usage: "VCloud URL",
+		},
+		cli.StringFlag{
+			Name:  "public-network",
+			Value: "",
+			Usage: "Public Network",
+		},
+		cli.StringFlag{
+			Name:  "template",
+			Value: "",
+			Usage: "Datacenter template",
 		},
 		cli.BoolFlag{
 			Name:  "fake",
@@ -152,32 +228,88 @@ var CreateVcloudDatacenter = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 3 {
-			msg := "You should specify the datacenter name, vcloud URL and network name"
-			color.Red(msg)
-			return errors.New(msg)
-		}
-		name := c.Args()[0]
-		user := c.String("datacenter-user") + "@" + c.String("datacenter-org")
-		if user == "" {
-			msg := "User not specified"
-			color.Red(msg)
-			return errors.New(msg)
-		}
-		password := c.String("datacenter-password")
-		if password == "" {
-			msg := "Password not specified"
-			color.Red(msg)
-			return errors.New("Password not specified")
-		}
-		rtype := "vcloud"
-		if c.Bool("fake") {
-			rtype = "vcloud-fake"
+		var errs []string
+
+		if len(c.Args()) == 0 {
+			color.Red("You should specify the datacenter name")
+			return nil
 		}
 		m, cfg := setup(c)
-		body, err := m.CreateVcloudDatacenter(cfg.Token, name, rtype, user, password, c.Args()[1], c.Args()[2], c.String("vse-url"))
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
+		name := c.Args()[0]
+		var url, network, user, org, password, username string
+		var fake bool
+
+		template := c.String("template")
+		if template != "" {
+			var t DatacenterTemplate
+			if err := getDatacenterTemplate(template, &t); err != nil {
+				color.Red(err.Error())
+				return nil
+			}
+			url = t.URL
+			network = t.Network
+			user = t.User
+			org = t.Org
+			password = t.Password
+			fake = t.Fake
+		}
+		if c.String("vcloud-url") != "" {
+			url = c.String("vcloud-url")
+		}
+		if c.String("public-network") != "" {
+			network = c.String("public-network")
+		}
+		if c.String("user") != "" {
+			user = c.String("user")
+		}
+		if c.String("org") != "" {
+			org = c.String("org")
+		}
+		if c.String("password") != "" {
+			password = c.String("password")
+		}
+		if c.Bool("fake") {
+			fake = c.Bool("fake")
+		}
+		username = user + "@" + org
+
+		if url == "" {
+			errs = append(errs, "Specify a valid VCloud URL with --vcloud-url flag")
+		}
+		if network == "" {
+			errs = append(errs, "Specify a valid public network with --public-network flag")
+		}
+		if user == "" {
+			errs = append(errs, "Specify a valid user name with --user")
+		}
+		if org == "" {
+			errs = append(errs, "Specify a valid organization with --org")
+		}
+		if password == "" {
+			errs = append(errs, "Specify a valid password with --password")
+		}
+		rtype := "vcloud"
+		if fake {
+			rtype = "vcloud-fake"
+		}
+		if len(errs) > 0 {
+			color.Red("Please, fix the error shown below to continue")
+			for _, e := range errs {
+				fmt.Println("  - " + e)
+			}
+			return nil
+		}
+
+		body, err := m.CreateVcloudDatacenter(cfg.Token, name, rtype, username, password, url, network, c.String("vse-url"))
 		if err != nil {
 			color.Red(body)
+		} else {
+			color.Green("Datacenter '" + name + "' successfully created ")
 		}
 		return nil
 	},
