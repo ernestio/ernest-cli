@@ -89,10 +89,13 @@ func (m *Manager) ResetService(name string, token string) error {
 	return err
 }
 
-// Destroy ...
+// Destroy : Destroys an existing service
 func (m *Manager) Destroy(token string, name string, monit bool) error {
-	body, _, err := m.doRequest("/api/services/"+name, "DELETE", nil, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/services/"+name, "DELETE", nil, token, "application/yaml")
 	if err != nil {
+		if resp.StatusCode == 404 {
+			return errors.New("Specified service name does not exist")
+		}
 		return err
 	}
 
@@ -112,12 +115,11 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 	return nil
 }
 
-// Apply ...
+// Apply : Applies a yaml to create / update a new service
 func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	payload, err := ioutil.ReadFile(path)
 	if err != nil {
-		color.Red(err.Error())
-		return "", nil
+		return "", errors.New("You should specify a valid template path or store an ernest.yml on the current folder")
 	}
 
 	color.Green("Environment creation requested")

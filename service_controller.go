@@ -6,7 +6,6 @@ package main
 
 // CmdDatacenter subcommand
 import (
-	"errors"
 	"fmt"
 	"os"
 	"text/tabwriter"
@@ -71,6 +70,10 @@ var ApplyService = cli.Command{
 			file = c.Args()[0]
 		}
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
 		_, err := m.Apply(cfg.Token, file, true)
 		if err != nil {
 			color.Red(err.Error())
@@ -92,20 +95,24 @@ var DestroyService = cli.Command{
   `,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
-			Name:  "yes,y",
+			Name:  "force,f",
 			Usage: "Force destroy command without asking for permission.",
 		},
 	},
 	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
 		if len(c.Args()) < 1 {
-			msg := "A service name is required."
-			color.Red(msg)
-			return errors.New("A service name is required.")
+			color.Red("You should specify an existing service name")
+			return nil
 		}
 		name := c.Args()[0]
-		m, cfg := setup(c)
 
-		if c.Bool("yes") {
+		if c.Bool("force") {
 			err := m.Destroy(cfg.Token, name, true)
 			if err != nil {
 				color.Red(err.Error())
