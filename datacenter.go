@@ -124,7 +124,7 @@ var CreateAWSDatacenter = cli.Command{
 		if c.String("region") != "" {
 			region = c.String("region")
 		}
-		if c.Bool("bool") {
+		if fake == false {
 			fake = c.Bool("fake")
 		}
 
@@ -273,7 +273,7 @@ var CreateVcloudDatacenter = cli.Command{
 		if c.String("password") != "" {
 			password = c.String("password")
 		}
-		if c.Bool("fake") {
+		if fake == false {
 			fake = c.Bool("fake")
 		}
 		username = user + "@" + org
