@@ -11,15 +11,15 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func printServiceList(services []Service) {
+func printServiceHistory(services []Service) {
 	if len(services) == 0 {
-		fmt.Println("\nThere are no services created yet")
+		fmt.Println("\nThere are no registered builds for this service")
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Status", "Endpoint", "Last build"})
+		table.SetHeader([]string{"Name", "Build ID", "Status", "Last build"})
 		for _, s := range services {
-			table.Append([]string{s.Name, s.Status, s.Endpoint, s.Version})
+			table.Append([]string{s.Name, s.ID, s.Status, s.Version})
 		}
 		table.Render()
 	}

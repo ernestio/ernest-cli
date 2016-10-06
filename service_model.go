@@ -1,20 +1,16 @@
 package main
 
-import (
-	"time"
-)
-
 // Service : Model representing ernest.io service json responses
 type Service struct {
-	ID         string    `json:"id"`
-	Name       string    `json:"name"`
-	Datacenter int       `json:"datacenter_id"`
-	Version    time.Time `json:"version"`
-	Status     string    `json:"status"`
-	Definition string    `json:"definition"`
-	Result     string    `json:"result"`
-	Endpoint   string    `json:"endpoint"`
-	Vpc        string    `json:"vpc_id"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Datacenter int    `json:"datacenter_id"`
+	Version    string `json:"version"`
+	Status     string `json:"status"`
+	Definition string `json:"definition"`
+	Result     string `json:"result"`
+	Endpoint   string `json:"endpoint"`
+	Vpc        string `json:"vpc_id"`
 	Networks   []struct {
 		Name   string `json:"name"`
 		Subnet string `json:"network_aws_id"`

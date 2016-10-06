@@ -8,7 +8,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"text/tabwriter"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -26,6 +25,10 @@ var ListServices = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
 		services, err := m.ListServices(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
@@ -131,24 +134,21 @@ var HistoryService = cli.Command{
     $ ernest history myservice
 	`,
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			color.Red("You should specify the service name")
-		} else {
-			serviceName := c.Args()[0]
-
-			m, cfg := setup(c)
-			services, _ := m.ListBuilds(serviceName, cfg.Token)
-
-			w := new(tabwriter.Writer)
-			w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-
-			fmt.Fprintln(w, "NAME\tBUILD ID\tUPDATED\tSTATUS")
-			for _, service := range services {
-				str := fmt.Sprintf("%s\t%s\t%s\t%s", service.Name, service.ID, service.Version, service.Status)
-				fmt.Fprintln(w, str)
-			}
-			w.Flush()
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
 		}
+
+		if len(c.Args()) < 1 {
+			color.Red("You should specify an existing service name")
+			return nil
+		}
+
+		serviceName := c.Args()[0]
+
+		services, _ := m.ListBuilds(serviceName, cfg.Token)
+		printServiceHistory(services)
 		return nil
 	},
 }

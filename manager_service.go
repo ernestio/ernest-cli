@@ -17,6 +17,7 @@ import (
 func (m *Manager) ListServices(token string) (services []Service, err error) {
 	body, _, err := m.doRequest("/api/services/", "GET", []byte(""), token, "")
 	if err != nil {
+
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &services)
