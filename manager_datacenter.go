@@ -6,8 +6,6 @@ package main
 
 import (
 	"encoding/json"
-
-	"github.com/fatih/color"
 )
 
 // Datacenter ...
@@ -30,12 +28,11 @@ func (m *Manager) CreateVcloudDatacenter(token string, name string, rtype string
 	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		if res.StatusCode == 409 {
-			return "Datacenter name already in use", err
+			return "Datacenter '" + name + "' already exists, please specify a different name", err
 		} else {
 			return body, err
 		}
 	}
-	color.Green("SUCCESS: Datacenter " + name + " created")
 	return body, err
 }
 
@@ -45,12 +42,11 @@ func (m *Manager) CreateAWSDatacenter(token string, name string, rtype string, r
 	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		if res.StatusCode == 409 {
-			return "Datacenter name already in use", err
+			return "Datacenter '" + name + "' already exists, please specify a different name", err
 		} else {
 			return body, err
 		}
 	}
-	color.Green("SUCCESS: Datacenter " + name + " created")
 	return body, err
 }
 

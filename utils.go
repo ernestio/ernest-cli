@@ -7,7 +7,9 @@ package main
 import (
 	"crypto/rand"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/big"
 	"unicode"
@@ -109,4 +111,27 @@ func randString(n int) string {
 		bs[i] = byte(g.Int64())
 	}
 	return string(bs)
+}
+
+type DatacenterTemplate struct {
+	URL      string `yaml:"vcloud-url"`
+	Network  string `yaml:"public-network"`
+	Org      string `yaml:"org"`
+	Password string `yaml:"password"`
+	User     string `yaml:"user"`
+	Token    string `yaml:"token"`
+	Secret   string `yaml:"secret"`
+	Region   string `yaml:"region"`
+	Fake     bool   `yaml:"fake"`
+}
+
+func getDatacenterTemplate(template string, t *DatacenterTemplate) (err error) {
+	payload, err := ioutil.ReadFile(template)
+	if err != nil {
+		return errors.New("Template file '" + template + "' not found")
+	}
+	if yaml.Unmarshal(payload, &t) != nil {
+		return errors.New("Template file '" + template + "' is not valid yaml file")
+	}
+	return err
 }
