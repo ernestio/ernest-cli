@@ -86,7 +86,14 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 
 // ResetService ...
 func (m *Manager) ResetService(name string, token string) error {
-	_, _, err := m.doRequest("/api/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
+	s, err := m.ServiceStatus(token, name)
+	if err != nil {
+		return err
+	}
+	if s.Status != "in_progress" {
+		return errors.New("The service '" + name + "' can't be resetted as is on status '" + s.Status + "'")
+	}
+	_, _, err = m.doRequest("/api/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
 	return err
 }
 

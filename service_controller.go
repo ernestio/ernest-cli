@@ -164,16 +164,23 @@ var ResetService = cli.Command{
     $ ernest reset myservice
   `,
 	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
 		if len(c.Args()) < 1 {
 			color.Red("You should specify the service name")
-		} else {
-			serviceName := c.Args()[0]
-			m, cfg := setup(c)
-			err := m.ResetService(serviceName, cfg.Token)
-			if err != nil {
-				fmt.Println(err)
-			}
 		}
+		serviceName := c.Args()[0]
+		err := m.ResetService(serviceName, cfg.Token)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Red("You've successfully resetted the service '" + serviceName + "'")
+
 		return nil
 	},
 }
