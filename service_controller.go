@@ -247,23 +247,31 @@ var InfoService = cli.Command{
 	Action: func(c *cli.Context) error {
 		var err error
 		var service Service
-		if len(c.Args()) < 1 {
-			color.Red("You should specify the service name")
-		} else {
-			m, cfg := setup(c)
-			name := c.Args()[0]
-			if c.String("build") != "" {
-				build := c.String("build")
-				service, err = m.ServiceBuildStatus(cfg.Token, name, build)
-			} else {
-				service, err = m.ServiceStatus(cfg.Token, name)
-			}
-			if err != nil {
-				color.Red(err.Error())
-				os.Exit(1)
-			}
-			printServiceInfo(&service)
+
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
 		}
+
+		if len(c.Args()) == 0 {
+			color.Red("You should specify an existing service name")
+			return nil
+		}
+
+		name := c.Args()[0]
+		if c.String("build") != "" {
+			build := c.String("build")
+			service, err = m.ServiceBuildStatus(cfg.Token, name, build)
+		} else {
+			service, err = m.ServiceStatus(cfg.Token, name)
+		}
+
+		if err != nil {
+			color.Red(err.Error())
+			os.Exit(1)
+		}
+		printServiceInfo(&service)
 		return nil
 	},
 }
