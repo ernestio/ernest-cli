@@ -6,10 +6,8 @@ package main
 
 // CmdDatacenter subcommand
 import (
-	"errors"
 	"fmt"
 	"os"
-	"text/tabwriter"
 
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -27,25 +25,17 @@ var ListServices = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
 		services, err := m.ListServices(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
 			return err
 		}
 
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-
-		fmt.Fprintln(w, "NAME\tUPDATED\tSTATUS\tENDPOINT")
-		var prev []string
-		for _, service := range services {
-			if !containsString(prev, service.Name) {
-				str := fmt.Sprintf("%s\t%s\t%s\t%s", service.Name, service.Version, service.Status, service.Endpoint)
-				fmt.Fprintln(w, str)
-			}
-			prev = append(prev, service.Name)
-		}
-		w.Flush()
+		printServiceList(services)
 		return nil
 	},
 }
@@ -71,6 +61,10 @@ var ApplyService = cli.Command{
 			file = c.Args()[0]
 		}
 		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
 		_, err := m.Apply(cfg.Token, file, true)
 		if err != nil {
 			color.Red(err.Error())
@@ -92,20 +86,24 @@ var DestroyService = cli.Command{
   `,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
-			Name:  "yes,y",
+			Name:  "force,f",
 			Usage: "Force destroy command without asking for permission.",
 		},
 	},
 	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
 		if len(c.Args()) < 1 {
-			msg := "A service name is required."
-			color.Red(msg)
-			return errors.New("A service name is required.")
+			color.Red("You should specify an existing service name")
+			return nil
 		}
 		name := c.Args()[0]
-		m, cfg := setup(c)
 
-		if c.Bool("yes") {
+		if c.Bool("force") {
 			err := m.Destroy(cfg.Token, name, true)
 			if err != nil {
 				color.Red(err.Error())
@@ -136,24 +134,21 @@ var HistoryService = cli.Command{
     $ ernest history myservice
 	`,
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			color.Red("You should specify the service name")
-		} else {
-			serviceName := c.Args()[0]
-
-			m, cfg := setup(c)
-			services, _ := m.ListBuilds(serviceName, cfg.Token)
-
-			w := new(tabwriter.Writer)
-			w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-
-			fmt.Fprintln(w, "NAME\tBUILD ID\tUPDATED\tSTATUS")
-			for _, service := range services {
-				str := fmt.Sprintf("%s\t%s\t%s\t%s", service.Name, service.ID, service.Version, service.Status)
-				fmt.Fprintln(w, str)
-			}
-			w.Flush()
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
 		}
+
+		if len(c.Args()) < 1 {
+			color.Red("You should specify an existing service name")
+			return nil
+		}
+
+		serviceName := c.Args()[0]
+
+		services, _ := m.ListBuilds(serviceName, cfg.Token)
+		printServiceHistory(services)
 		return nil
 	},
 }
@@ -169,16 +164,23 @@ var ResetService = cli.Command{
     $ ernest reset myservice
   `,
 	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
 		if len(c.Args()) < 1 {
 			color.Red("You should specify the service name")
-		} else {
-			serviceName := c.Args()[0]
-			m, cfg := setup(c)
-			err := m.ResetService(serviceName, cfg.Token)
-			if err != nil {
-				fmt.Println(err)
-			}
 		}
+		serviceName := c.Args()[0]
+		err := m.ResetService(serviceName, cfg.Token)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Red("You've successfully resetted the service '" + serviceName + "'")
+
 		return nil
 	},
 }
@@ -203,27 +205,31 @@ var DefinitionService = cli.Command{
     $ ernest service definition myservice
 	`,
 	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
 		if len(c.Args()) < 1 {
 			color.Red("You should specify the service name")
-		} else {
-			m, cfg := setup(c)
-			serviceName := c.Args()[0]
-			if c.String("build") != "" {
-				service, err := m.ServiceBuildStatus(cfg.Token, serviceName, c.String("build"))
-				if err != nil {
-					color.Red(err.Error())
-					os.Exit(1)
-				}
-				fmt.Println(service.Definition)
-			} else {
-				service, err := m.ServiceStatus(cfg.Token, serviceName)
-				if err != nil {
-					color.Red(err.Error())
-					os.Exit(1)
-				}
-
-				fmt.Println(service.Definition)
+		}
+		serviceName := c.Args()[0]
+		if c.String("build") != "" {
+			service, err := m.ServiceBuildStatus(cfg.Token, serviceName, c.String("build"))
+			if err != nil {
+				color.Red(err.Error())
+				os.Exit(1)
 			}
+			fmt.Println(service.Definition)
+		} else {
+			service, err := m.ServiceStatus(cfg.Token, serviceName)
+			if err != nil {
+				color.Red(err.Error())
+				os.Exit(1)
+			}
+
+			fmt.Println(service.Definition)
 		}
 		return nil
 	},
@@ -252,23 +258,31 @@ var InfoService = cli.Command{
 	Action: func(c *cli.Context) error {
 		var err error
 		var service Service
-		if len(c.Args()) < 1 {
-			color.Red("You should specify the service name")
-		} else {
-			m, cfg := setup(c)
-			name := c.Args()[0]
-			if c.String("build") != "" {
-				build := c.String("build")
-				service, err = m.ServiceBuildStatus(cfg.Token, name, build)
-			} else {
-				service, err = m.ServiceStatus(cfg.Token, name)
-			}
-			if err != nil {
-				color.Red(err.Error())
-				os.Exit(1)
-			}
-			printServiceInfo(&service)
+
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
 		}
+
+		if len(c.Args()) == 0 {
+			color.Red("You should specify an existing service name")
+			return nil
+		}
+
+		name := c.Args()[0]
+		if c.String("build") != "" {
+			build := c.String("build")
+			service, err = m.ServiceBuildStatus(cfg.Token, name, build)
+		} else {
+			service, err = m.ServiceStatus(cfg.Token, name)
+		}
+
+		if err != nil {
+			color.Red(err.Error())
+			os.Exit(1)
+		}
+		printServiceInfo(&service)
 		return nil
 	},
 }
