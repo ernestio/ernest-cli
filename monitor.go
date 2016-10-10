@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/fatih/color"
 	"github.com/r3labs/sse"
@@ -84,17 +85,42 @@ var MonitorService = cli.Command{
 	Name:      "monitor",
 	Aliases:   []string{"m"},
 	Usage:     "Monitor a service.",
-	ArgsUsage: "<service_id>",
-	Description: `Monitors a service while it is being built by its service id.
+	ArgsUsage: "<service_name>",
+	Description: `Monitors a service while it is being built by its service name.
 
    Example:
-    $ ernest monitor F94034CE-1A57-4A66-AF49-E1E99C5010A2
+    $ ernest monitor my_service
 	`,
 	Action: func(c *cli.Context) error {
-		_, cfg := setup(c)
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
 
-		id := c.Args()[0]
-		Monitorize(cfg.URL, cfg.Token, id)
+		if len(c.Args()) == 0 {
+			color.Red("You should specify an existing service name")
+			return nil
+		}
+
+		name := c.Args()[0]
+		service, err := m.ServiceStatus(cfg.Token, name)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		parts := strings.Split(service.ID, "-")
+		if len(parts) == 0 {
+			color.Red("Invalid service specified")
+			return nil
+		}
+		if service.Status == "done" {
+			color.Yellow("Service has been successfully built")
+			color.Yellow("You can check its information running `ernest-cli service info " + name + "`")
+			return nil
+		}
+
+		Monitorize(cfg.URL, cfg.Token, parts[len(parts)-1])
 		runtime.Goexit()
 		return nil
 	},
