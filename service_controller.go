@@ -205,27 +205,31 @@ var DefinitionService = cli.Command{
     $ ernest service definition myservice
 	`,
 	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
 		if len(c.Args()) < 1 {
 			color.Red("You should specify the service name")
-		} else {
-			m, cfg := setup(c)
-			serviceName := c.Args()[0]
-			if c.String("build") != "" {
-				service, err := m.ServiceBuildStatus(cfg.Token, serviceName, c.String("build"))
-				if err != nil {
-					color.Red(err.Error())
-					os.Exit(1)
-				}
-				fmt.Println(service.Definition)
-			} else {
-				service, err := m.ServiceStatus(cfg.Token, serviceName)
-				if err != nil {
-					color.Red(err.Error())
-					os.Exit(1)
-				}
-
-				fmt.Println(service.Definition)
+		}
+		serviceName := c.Args()[0]
+		if c.String("build") != "" {
+			service, err := m.ServiceBuildStatus(cfg.Token, serviceName, c.String("build"))
+			if err != nil {
+				color.Red(err.Error())
+				os.Exit(1)
 			}
+			fmt.Println(service.Definition)
+		} else {
+			service, err := m.ServiceStatus(cfg.Token, serviceName)
+			if err != nil {
+				color.Red(err.Error())
+				os.Exit(1)
+			}
+
+			fmt.Println(service.Definition)
 		}
 		return nil
 	},
