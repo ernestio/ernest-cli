@@ -5,6 +5,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -33,9 +34,13 @@ func (NullWriter) Write([]byte) (int, error) { return 0, nil }
 // PrettyPrint unmarshals received messages and print it
 func PrettyPrint(body []byte) {
 	m := Message{}
-	err := json.Unmarshal(body, &m)
+
+	// clean msg body of any null characters
+	cleanedInput := bytes.Trim(body, "\x00")
+
+	err := json.Unmarshal(cleanedInput, &m)
 	if err != nil {
-		return
+		fmt.Println(err)
 	}
 
 	if m.Body == "error" || m.Body == "success" {
@@ -53,7 +58,7 @@ func PrintLine(m Message) {
 	} else if m.Level == "INFO" {
 		color.Yellow(m.Body)
 	} else {
-		println(m.Body)
+		fmt.Println(m.Body)
 	}
 }
 
