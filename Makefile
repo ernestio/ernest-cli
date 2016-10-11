@@ -9,7 +9,7 @@ build:
 	go build -o ernest -v ${LDFLAGS}
 
 test:
-	go test -v ./... --cover
+	gucumber
 
 cover:
 	go test -coverprofile cover.out
@@ -28,6 +28,8 @@ dev-deps:
 	go get -u github.com/gorilla/mux
 	go get -u github.com/smartystreets/goconvey/convey
 	go get -u golang.org/x/tools/cmd/cover
+	go get -u github.com/gucumber/gucumber/cmd/gucumber
+	go get -u github.com/ernestio/ernest-config-client
 
 lint:
 	golint ./...

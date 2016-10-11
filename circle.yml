@@ -1,8 +1,47 @@
-dependencies:
+machine:
   pre:
+    - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
+  services:
+    - docker
+  environment:
+    NATS_URI:  nats://127.0.0.1:4222
+    NATS_URI_TEST:  nats://127.0.0.1:4222
+    GOBIN: /home/ubuntu/.go_workspace/bin
+    CURRENT_INSTANCE: http://ernest.local:80/
+    JWT_SECRET: test
+    IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+
+  hosts:
+    ernest.local: 127.0.0.1
+
+dependencies:
+  override:
+    - mkdir -p "$GOPATH/src/$IMPORT_PATH"
+    - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
     - make deps
+    - make install
+    - ./internal/ci_install_service.sh r3labs natsc master
+    - ./internal/ci_install_service.sh r3labs composable master
+    - sudo pip install docker-compose
+    - mkdir /tmp/composable
+    - composable gen definition.yml template.yml
+    - docker-compose -f docker-compose.yml up -d
+    - docker-compose logs > /tmp/compose.log:
+          background: true
+    - ./internal/ci_setup.sh
+    - ernest-cli target http://ernest.local
+    - ernest-cli login --user ci_admin --password pwd
+    - ernest-cli user create usr pwd
+    - ernest-cli group create test
+    - ernest-cli group add-user usr test
+    - ernest-cli login --user usr --password pwd
+    - ernest-cli datacenter create vcloud fake --vcloud-url https://myvdc.me.com --fake --user usr --password pwd --org org --vse-url http://localhost --public-network NETWORK
+    - ernest-cli datacenter create aws fakeaws --region fake --token fake --secret secret --fake
+    - mkdir -p /home/ubuntu/.go_workspace/src/github.com/ernestio/
+    - rm -rf /home/ubuntu/.go_workspace/src/github.com/ernestio/ernest-cli
+    - cp -R /home/ubuntu/ernest-cli /home/ubuntu/.go_workspace/src/github.com/ernestio/ernest-cli
 
 test:
   override:
-    - make lint
-    - make test
+    - cd /home/ubuntu/.go_workspace/src/github.com/ernestio/ernest-cli && make test
+    - cd /home/ubuntu/.go_workspace/src/github.com/ernestio/ernest-cli && make lint
