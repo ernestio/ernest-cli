@@ -67,7 +67,7 @@ var RemoveDatacenter = cli.Command{
 	Description: `Removes an datacenter from a group.
 
 		Example:
-		  $ ernest group remove-datacenter <datacenter-id> <group-id>
+		  $ ernest group remove-datacenter <datacenter name> <group name>
 	`,
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
@@ -167,7 +167,7 @@ var RemoveUser = cli.Command{
 	Description: `Removes an user from a group.
 
 		Example:
-		  $ ernest group remove-user <user-id> <group-id>
+		  $ ernest group remove-user <username> <group name>
 	`,
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
