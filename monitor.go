@@ -67,6 +67,7 @@ func PrintLine(m Message) {
 func Monitorize(host, token, stream string) {
 	url := host + "/events"
 	client := sse.NewClient(url)
+	client.EncodingBase64 = true
 	client.Connection.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
