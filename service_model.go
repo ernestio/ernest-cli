@@ -29,4 +29,8 @@ type Service struct {
 		Name               string `json:"name"`
 		SecurityGroupAWSID string `json:"security_group_aws_id"`
 	} `json:"security_groups"`
+	ELBs []struct {
+		Name    string `json:"name"`
+		DNSName string `json:"dns_name"`
+	} `json:"elbs"`
 }

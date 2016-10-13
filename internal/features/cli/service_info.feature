@@ -16,6 +16,7 @@ Feature: Ernest service info
     And I run ernest with "service apply internal/definitions/destroyable.yml"
     When I run ernest with "service info destroyable"
     Then The output should contain "Name : destroyable"
+    And The output should contain "ELBs (empty)"
     And The output should contain "VPC : fakeaws"
     And The output should contain "Networks:"
     And The output should contain "| test_dc-destroyable-web | foo |"

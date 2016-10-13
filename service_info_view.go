@@ -13,6 +13,19 @@ func printServiceInfo(service *Service) {
 		fmt.Println("VPC : " + service.Vpc)
 	}
 
+	if len(service.ELBs) == 0 {
+		fmt.Println("\nELBs (empty)")
+		fmt.Println("")
+	} else {
+		fmt.Println("\nELBs:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "DNS Name"})
+		for _, v := range service.ELBs {
+			table.Append([]string{v.Name, v.DNSName})
+		}
+		table.Render()
+	}
+
 	if len(service.Networks) == 0 {
 		fmt.Println("\nNetworks (empty)")
 		fmt.Println("")
