@@ -12,8 +12,9 @@ type Service struct {
 	Endpoint   string `json:"endpoint"`
 	Vpc        string `json:"vpc_id"`
 	Networks   []struct {
-		Name   string `json:"name"`
-		Subnet string `json:"network_aws_id"`
+		Name             string `json:"name"`
+		Subnet           string `json:"network_aws_id"`
+		AvailabilityZone string `json:"availability_zone"`
 	} `json:"networks"`
 	Instances []struct {
 		Name          string `json:"name"`
