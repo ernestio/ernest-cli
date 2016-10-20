@@ -32,9 +32,9 @@ func printServiceInfo(service *Service) {
 	} else {
 		fmt.Println("\nNetworks:")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "ID"})
+		table.SetHeader([]string{"Name", "ID", "Availability Zone"})
 		for _, v := range service.Networks {
-			table.Append([]string{v.Name, v.Subnet})
+			table.Append([]string{v.Name, v.Subnet, v.AvailabilityZone})
 		}
 		table.Render()
 	}
