@@ -83,3 +83,45 @@ func (m *Manager) DeleteDatacenter(token string, name string) (err error) {
 	}
 	return nil
 }
+
+// UpdateVCloudDatacenter : updates vcloud datacenter details
+func (m *Manager) UpdateVCloudDatacenter(token, name, user, password string) (err error) {
+	g, err := m.getDatacenterByName(token, name)
+	if err != nil {
+		return errors.New("Datacenter '" + name + "' does not exist, please specify a different datacenter name")
+	}
+	id := strconv.Itoa(g.ID)
+
+	payload := []byte(`{"username":"` + user + `", "password":"` + password + `"}`)
+	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
+	if err != nil {
+		if res.StatusCode == 400 {
+			return errors.New(body)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+// UpdateAWSDatacenter : updates awsdatacenter details
+func (m *Manager) UpdateAWSDatacenter(token, name, awstoken, awssecret string) (err error) {
+	g, err := m.getDatacenterByName(token, name)
+	if err != nil {
+		return errors.New("Datacenter '" + name + "' does not exist, please specify a different datacenter name")
+	}
+	id := strconv.Itoa(g.ID)
+
+	payload := []byte(`{"token":"` + awstoken + `", "secret":"` + awssecret + `"}`)
+	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
+	if err != nil {
+		if res.StatusCode == 400 {
+			return errors.New(body)
+		}
+
+		return err
+	}
+
+	return nil
+}
