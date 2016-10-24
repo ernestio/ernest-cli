@@ -315,6 +315,40 @@ var CreateVcloudDatacenter = cli.Command{
 	},
 }
 
+// DeleteDatacenter : Datacenter deletion command definition
+var DeleteDatacenter = cli.Command{
+	Name:      "delete",
+	Usage:     "Deletes the specified datacenter.",
+	ArgsUsage: "<datacenter-name>",
+	Description: `Deletes the name specified datacenter.
+
+   Example:
+    $ ernest datacenter delete my_datacenter
+	`,
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
+		if len(c.Args()) == 0 {
+			color.Red("You should specify the datacenter name")
+			return nil
+		}
+		name := c.Args()[0]
+
+		err := m.DeleteDatacenter(cfg.Token, name)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("Datacenter " + name + " successfully removed")
+
+		return nil
+	},
+}
+
 // CreateDatacenters ...
 var CreateDatacenters = cli.Command{
 	Name:        "create",
@@ -333,5 +367,6 @@ var CmdDatacenter = cli.Command{
 	Subcommands: []cli.Command{
 		ListDatacenters,
 		CreateDatacenters,
+		DeleteDatacenter,
 	},
 }
