@@ -315,6 +315,176 @@ var CreateVcloudDatacenter = cli.Command{
 	},
 }
 
+// DeleteDatacenter : Datacenter deletion command definition
+var DeleteDatacenter = cli.Command{
+	Name:      "delete",
+	Usage:     "Deletes the specified datacenter.",
+	ArgsUsage: "<datacenter-name>",
+	Description: `Deletes the name specified datacenter.
+
+   Example:
+    $ ernest datacenter delete my_datacenter
+	`,
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
+		if len(c.Args()) == 0 {
+			color.Red("You should specify the datacenter name")
+			return nil
+		}
+		name := c.Args()[0]
+
+		err := m.DeleteDatacenter(cfg.Token, name)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("Datacenter " + name + " successfully removed")
+
+		return nil
+	},
+}
+
+// UpdateVCloudDatacenter : Updates the specified VCloud datacenter
+var UpdateVCloudDatacenter = cli.Command{
+	Name:      "vcloud",
+	Usage:     "Updates the specified VCloud datacenter.",
+	ArgsUsage: "<datacenter-name>",
+	Description: `Updates the specified VCloud datacenter.
+
+   Example:
+    $ ernest datacenter update vcloud --user <me> --org <org> --password <secret> my_datacenter
+	`,
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "user",
+			Value: "",
+			Usage: "Your VCloud valid user name",
+		},
+		cli.StringFlag{
+			Name:  "password",
+			Value: "",
+			Usage: "Your VCloud valid password",
+		},
+		cli.StringFlag{
+			Name:  "org",
+			Value: "",
+			Usage: "Your vCloud Organization",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		var user, password, org string
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+		if len(c.Args()) == 0 {
+			color.Red("You should specify the datacenter name")
+			return nil
+		}
+		name := c.Args()[0]
+		user = c.String("user")
+		password = c.String("password")
+		org = c.String("org")
+
+		if user == "" {
+			color.Red("You should specify user name with '--user' flag")
+			return nil
+		}
+		if password == "" {
+			color.Red("You should specify user password with '--password' flag")
+			return nil
+		}
+		if org == "" {
+			color.Red("You should specify user org with '--org' flag")
+			return nil
+		}
+
+		err := m.UpdateVCloudDatacenter(cfg.Token, name, user+"@"+org, password)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("Datacenter " + name + " successfully updated")
+
+		return nil
+	},
+}
+
+// UpdateAWSDatacenter : Updates the specified VCloud datacenter
+var UpdateAWSDatacenter = cli.Command{
+	Name:      "aws",
+	Usage:     "Updates the specified AWS datacenter.",
+	ArgsUsage: "<datacenter-name>",
+	Description: `Updates the specified AWS datacenter.
+
+   Example:
+    $ ernest datacenter update aws --token <my_token> --secret <mysecret> my_datacenter
+	`,
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "token",
+			Value: "",
+			Usage: "Your AWS valid token",
+		},
+		cli.StringFlag{
+			Name:  "secret",
+			Value: "",
+			Usage: "Your AWS valid secret",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		var token, secret string
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
+		if len(c.Args()) == 0 {
+			color.Red("You should specify the datacenter name")
+			return nil
+		}
+		name := c.Args()[0]
+		token = c.String("token")
+		secret = c.String("secret")
+
+		if token == "" {
+			color.Red("You should specify aws token with '--token' flag")
+			return nil
+		}
+		if secret == "" {
+			color.Red("You should specify user secret with '--secret' flag")
+			return nil
+		}
+
+		err := m.UpdateVCloudDatacenter(cfg.Token, name, token, secret)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		color.Green("Datacenter " + name + " successfully updated")
+
+		return nil
+	},
+}
+
+// UpdateDatacenters : Will update the datacenter specific fields
+var UpdateDatacenters = cli.Command{
+	Name:        "update",
+	Usage:       "Updates an existing datacenter.",
+	Description: "Update an existing datacenter on the targeted instance of Ernest.",
+	Subcommands: []cli.Command{
+		UpdateVCloudDatacenter,
+		UpdateAWSDatacenter,
+	},
+}
+
 // CreateDatacenters ...
 var CreateDatacenters = cli.Command{
 	Name:        "create",
@@ -333,5 +503,7 @@ var CmdDatacenter = cli.Command{
 	Subcommands: []cli.Command{
 		ListDatacenters,
 		CreateDatacenters,
+		UpdateDatacenters,
+		DeleteDatacenter,
 	},
 }

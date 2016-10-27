@@ -146,6 +146,7 @@ func init() {
 	And(`^I force "(.+?)" to be on status "(.+?)"$`, func(service string, status string) {
 		n.Request("service.set", []byte(`{"name":"`+service+`","status":"`+status+`"}`), time.Second*3)
 	})
+
 }
 
 func ernest(cmdArgs ...string) {
