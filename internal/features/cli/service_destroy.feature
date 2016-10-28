@@ -25,5 +25,5 @@ Feature: Service destroy
     And The service "destroyable" does not exist
     And I run ernest with "service apply internal/definitions/destroyable.yml"
     When I run ernest with "service destroy destroyable --force"
-    Then The output line number "0" should contain "Starting environment deletion"
+    Then The output should not contain "Specified service name does not exist"
 
