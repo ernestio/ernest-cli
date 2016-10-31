@@ -47,11 +47,21 @@ var SetLogger = cli.Command{
 
    Example:
     $ ernest preferences logger add basic --logfile /tmp/ernest.log
+    $ ernest preferences logger add logstash --hostname 10.50.1.1 --port 5000 --timeout 50000
+    $ ernest preferences logger add rollbar --token MY_ROLLBAR_TOKEN
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "logfile",
 			Usage: "Specify the path for the loging file",
+		},
+		cli.StringFlag{
+			Name:  "token",
+			Usage: "Rollbar token",
+		},
+		cli.StringFlag{
+			Name:  "env",
+			Usage: "Rollbar environment",
 		},
 		cli.StringFlag{
 			Name:  "hostname",
@@ -67,24 +77,32 @@ var SetLogger = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
 		if len(c.Args()) < 1 {
 			color.Red("You should specify the logger type (basic | logstash)")
 			return nil
 		}
 
 		logger := Logger{
-			Type:     c.Args()[0],
-			Logfile:  c.String("logfile"),
-			Hostname: c.String("hostname"),
-			Port:     c.Int("port"),
-			Timeout:  c.Int("timeout"),
+			Type:        c.Args()[0],
+			Logfile:     c.String("logfile"),
+			Hostname:    c.String("hostname"),
+			Port:        c.Int("port"),
+			Timeout:     c.Int("timeout"),
+			Token:       c.String("token"),
+			Environment: c.String("env"),
 		}
 		if logger.Type == "basic" {
 			if logger.Logfile == "" {
 				color.Red("You should specify a logfile with --logfile flag")
 				return nil
 			}
-		} else if logger.Type == "generic" {
+		} else if logger.Type == "logstash" {
 			if logger.Hostname == "" {
 				color.Red("You should specify a logstash hostname  with --hostname flag")
 				return nil
@@ -97,14 +115,17 @@ var SetLogger = cli.Command{
 				color.Red("You should specify a logstash timeout with --timeout flag")
 				return nil
 			}
+
+		} else if logger.Type == "rollbar" {
+			if logger.Token == "" {
+				color.Red("You should specify a rollbar token with --token flag")
+				return nil
+			}
+			if logger.Environment == "" {
+				logger.Environment = "development"
+			}
 		} else {
 			color.Red("Invalid type, valid types are basic and logstash")
-			return nil
-		}
-
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
 			return nil
 		}
 
@@ -132,7 +153,7 @@ var DelLogger = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify the logger type (basic | logstash)")
+			color.Red("You should specify the logger type (basic | logstash | rollbar)")
 			return nil
 		}
 

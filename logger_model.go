@@ -6,9 +6,11 @@ package main
 
 // Logger : Representation of a logger
 type Logger struct {
-	Type     string `json:"type"`
-	Logfile  string `json:"logfile"`
-	Hostname string `json:"hostname"`
-	Port     int    `json:"port"`
-	Timeout  int    `json:"timeout"`
+	Type        string `json:"type"`
+	Logfile     string `json:"logfile"`
+	Hostname    string `json:"hostname"`
+	Port        int    `json:"port"`
+	Timeout     int    `json:"timeout"`
+	Token       string `json:"token"`
+	Environment string `json:"environment"`
 }

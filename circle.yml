@@ -1,6 +1,7 @@
 machine:
   pre:
     - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
+    - touch /tmp/ernest.log && chmod 666 /tmp/ernest.log
   services:
     - docker
   environment:
@@ -10,12 +11,14 @@ machine:
     CURRENT_INSTANCE: http://ernest.local:80/
     JWT_SECRET: test
     IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+    ERNEST_LOG_FILE: '/tmp/ernest.log'
 
   hosts:
     ernest.local: 127.0.0.1
 
 dependencies:
   override:
+    - touch $ERNEST_LOG_FILE && chmod 777 $ERNEST_LOG_FILE
     - mkdir -p "$GOPATH/src/$IMPORT_PATH"
     - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
     - make deps

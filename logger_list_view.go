@@ -19,11 +19,11 @@ func printLoggerList(loggers []Logger) {
 	}
 
 	for _, l := range loggers {
-		if l.Type == "logger" {
+		if l.Type == "logstash" {
 			fmt.Println("")
 			fmt.Println("Logstash based loggers")
 			table := tablewriter.NewWriter(os.Stdout)
-			table.SetHeader([]string{"Hostname", "Port", "Timeout", "Region", "Url"})
+			table.SetHeader([]string{"Hostname", "Port", "Timeout"})
 
 			port := strconv.Itoa(l.Port)
 			timeout := strconv.Itoa(l.Timeout)
@@ -34,6 +34,11 @@ func printLoggerList(loggers []Logger) {
 		if l.Type == "basic" {
 			fmt.Println("")
 			fmt.Println("Basic logging file configured on : " + l.Logfile)
+		}
+
+		if l.Type == "rollbar" {
+			fmt.Println("")
+			fmt.Println("Rollbar logging is active")
 		}
 	}
 
