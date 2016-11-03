@@ -13,7 +13,7 @@ repos:
 
   - name: api-gateway
     path: git@github.com:ernestio/api-gateway.git
-    branch: develop
+    branch: logger
     links:
       - nats
     ports:
@@ -223,10 +223,12 @@ repos:
 
   - name: logger
     path: git@github.com:ernestio/logger.git
-    branch: develop
+    branch: basic 
     links:
       - nats
     environment:
       NATS_URI: 'nats://nats:4222'
       ERNEST_LOG_FILE: '/tmp/ernest.log'
+    volumes:
+       - /tmp/:/tmp/
 

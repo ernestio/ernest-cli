@@ -147,6 +147,14 @@ func init() {
 		n.Request("service.set", []byte(`{"name":"`+service+`","status":"`+status+`"}`), time.Second*3)
 	})
 
+	And(`^File "(.+?)" exists$`, func(filename string) {
+		if f, err := os.Create(filename); err != nil {
+			T.Errorf("Can't create file " + filename)
+		} else {
+			f.Close()
+		}
+	})
+
 }
 
 func ernest(cmdArgs ...string) {

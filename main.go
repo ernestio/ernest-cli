@@ -27,6 +27,7 @@ func main() {
 		CmdGroup,
 		CmdDatacenter,
 		CmdService,
+		CmdPreferences,
 	}
 	app.Run(os.Args)
 }
