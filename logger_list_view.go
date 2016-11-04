@@ -33,7 +33,8 @@ func printLoggerList(loggers []Logger) {
 
 		if l.Type == "basic" {
 			fmt.Println("")
-			fmt.Println("Basic logging file configured on : " + l.Logfile)
+			fmt.Println("Your basic logfile is configured on : " + l.Logfile)
+			fmt.Println("* In case you're running dockerized ernest the file refers to the container path, you'll find your mapped volume on docker-compose.yml file of your ernest usually ernest/logs")
 		}
 
 		if l.Type == "rollbar" {

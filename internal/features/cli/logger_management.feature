@@ -24,7 +24,7 @@ Feature: Ernest preferences management
     When I run ernest with "preferences logger add basic --logfile /tmp/ernest.log"
     Then The output should contain "Logger successfully set up"
     When I run ernest with "preferences logger list"
-    Then The output should contain "Basic logging file configured on : /tmp/ernest.log"
+    Then The output should contain "Your basic logfile is configured on : /tmp/ernest.log"
     When I run ernest with "preferences logger delete basic"
     Then The output should contain "Logger successfully deleted"
     When I run ernest with "preferences logger list"
