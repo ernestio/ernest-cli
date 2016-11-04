@@ -14,7 +14,7 @@ test:
 cover:
 	go test -coverprofile cover.out
 
-deps: dev-deps
+deps:
 	go get -u github.com/fatih/color
 	go get -u github.com/urfave/cli
 	go get -u github.com/mitchellh/go-homedir
