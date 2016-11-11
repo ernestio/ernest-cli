@@ -125,9 +125,24 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 
 // Apply : Applies a yaml to create / update a new service
 func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
+	var d Definition
+
 	payload, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", errors.New("You should specify a valid template path or store an ernest.yml on the current folder")
+	}
+
+	err = d.Load(payload)
+	if err != nil {
+		return "", errors.New("Could not process definition yaml")
+	}
+
+	// Load any imported files
+	d.LoadFileImports()
+
+	payload, err = d.Save()
+	if err != nil {
+		return "", errors.New("Could not finalize definition yaml")
 	}
 
 	color.Green("Environment creation requested")
