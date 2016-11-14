@@ -23,7 +23,7 @@ deps:
 	go get -u github.com/r3labs/sse
 	go get -u github.com/olekukonko/tablewriter
 
-dev-deps:
+dev-deps: deps
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/gorilla/mux
 	go get -u github.com/smartystreets/goconvey/convey

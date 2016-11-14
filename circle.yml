@@ -21,7 +21,7 @@ dependencies:
     - touch $ERNEST_LOG_FILE && chmod 777 $ERNEST_LOG_FILE
     - mkdir -p "$GOPATH/src/$IMPORT_PATH"
     - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
-    - make deps
+    - make dev-deps
     - make install
     - ./internal/ci_install_service.sh r3labs natsc master
     - ./internal/ci_install_service.sh r3labs composable master
