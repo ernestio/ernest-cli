@@ -5,7 +5,9 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
+	"reflect"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -28,7 +30,7 @@ func (d *Definition) Save() ([]byte, error) {
 
 // LoadFileImports : loads any referenced files and maps them to the import definition
 func (d *Definition) LoadFileImports() {
-	d.data = LoadSlice(d.data)
+	d.data = LoadMapSlice(d.data)
 }
 
 // LoadFile : determines if the encountered string is
@@ -48,14 +50,35 @@ func LoadFile(path string) string {
 	return string(payload)
 }
 
-// LoadSlice : loads all values into a slice
-func LoadSlice(s yaml.MapSlice) yaml.MapSlice {
+// LoadMapSlice : loads all values into a slice
+func LoadMapSlice(s yaml.MapSlice) yaml.MapSlice {
 	for i, item := range s {
 		switch v := item.Value.(type) {
 		case string:
 			s[i].Value = LoadFile(v)
 		case yaml.MapSlice:
+			s[i].Value = LoadMapSlice(v)
+		case []interface{}:
 			s[i].Value = LoadSlice(v)
+		default:
+			fmt.Println(reflect.TypeOf(item))
+		}
+	}
+	return s
+}
+
+// LoadSlice : loads all values into a slice
+func LoadSlice(s []interface{}) []interface{} {
+	for i, selector := range s {
+		switch v := selector.(type) {
+		case string:
+			s[i] = LoadFile(v)
+		case []interface{}:
+			s[i] = LoadSlice(v)
+		case yaml.MapSlice:
+			s[i] = LoadMapSlice(v)
+		default:
+			fmt.Println(reflect.TypeOf(selector))
 		}
 	}
 	return s

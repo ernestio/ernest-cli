@@ -7,7 +7,9 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"os"
 	"runtime"
 
 	"github.com/fatih/color"
@@ -141,6 +143,11 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	d.LoadFileImports()
 
 	payload, err = d.Save()
+	fmt.Println(string(payload))
+
+	if true {
+		os.Exit(1)
+	}
 
 	if err != nil {
 		return "", errors.New("Could not finalize definition yaml")

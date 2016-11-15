@@ -10,6 +10,7 @@ build:
 
 test:
 	gucumber
+	make test
 
 cover:
 	go test -coverprofile cover.out
