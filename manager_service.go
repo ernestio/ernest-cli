@@ -141,6 +141,7 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	d.LoadFileImports()
 
 	payload, err = d.Save()
+
 	if err != nil {
 		return "", errors.New("Could not finalize definition yaml")
 	}

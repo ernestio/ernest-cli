@@ -12,7 +12,8 @@ import (
 
 // Definition ...
 type Definition struct {
-	data map[interface{}]interface{}
+	// data map[interface{}]interface{}
+	data yaml.MapSlice
 }
 
 // Load the yaml
@@ -27,7 +28,7 @@ func (d *Definition) Save() ([]byte, error) {
 
 // LoadFileImports : loads any referenced files and maps them to the import definition
 func (d *Definition) LoadFileImports() {
-	d.data = LoadMap(d.data)
+	d.data = LoadSlice(d.data)
 }
 
 // LoadFile : determines if the encountered string is
@@ -48,32 +49,14 @@ func LoadFile(path string) string {
 }
 
 // LoadSlice : loads all values into a slice
-func LoadSlice(s []interface{}) []interface{} {
-	for i, selector := range s {
-		switch v := selector.(type) {
+func LoadSlice(s yaml.MapSlice) yaml.MapSlice {
+	for i, item := range s {
+		switch v := item.Value.(type) {
 		case string:
-			s[i] = LoadFile(v)
-		case []interface{}:
-			s[i] = LoadSlice(v)
-		case map[interface{}]interface{}:
-			s[i] = LoadMap(v)
+			s[i].Value = LoadFile(v)
+		case yaml.MapSlice:
+			s[i].Value = LoadSlice(v)
 		}
 	}
 	return s
-}
-
-// LoadMap : loads all values into a map
-func LoadMap(m map[interface{}]interface{}) map[interface{}]interface{} {
-	for field, selector := range m {
-		switch v := selector.(type) {
-		case string:
-			m[field] = LoadFile(v)
-		case []interface{}:
-			m[field] = LoadSlice(v)
-		case map[interface{}]interface{}:
-			m[field] = LoadMap(v)
-		}
-	}
-
-	return m
 }
