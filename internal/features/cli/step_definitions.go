@@ -106,6 +106,10 @@ func init() {
 		n.Request("datacenter.set", msg, time.Second*3)
 	})
 
+	And(`^I wait for "(.+?)" seconds$`, func(n int) {
+		time.Sleep(time.Duration(n) * time.Millisecond)
+	})
+
 	Then(`^The output users table should contain "(.+?)" assigned to "(.+?)" group$`, func(user string, group string) {
 		lines := strings.Split(lastOutput, "\n")
 		for _, l := range lines {
