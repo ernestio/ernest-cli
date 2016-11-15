@@ -17,7 +17,6 @@ Feature: Ernest service definition
     When I run ernest with "service definition destroyable"
     Then The output should contain "name: destroyable"
     And The output should contain "datacenter: test_dc"
-    And The output should contain "# Basic aws example"
 
   Scenario: Logged user definition for a specific build
     Given I setup ernest with target "https://ernest.local"
@@ -29,5 +28,4 @@ Feature: Ernest service definition
     When I run ernest with "service definition destroyable"
     Then The output should contain "name: destroyable"
     And The output should contain "datacenter: test_dc"
-    And The output should contain "# Basic aws example"
 

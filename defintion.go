@@ -5,9 +5,7 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
-	"reflect"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -60,8 +58,6 @@ func LoadMapSlice(s yaml.MapSlice) yaml.MapSlice {
 			s[i].Value = LoadMapSlice(v)
 		case []interface{}:
 			s[i].Value = LoadSlice(v)
-		default:
-			fmt.Println(reflect.TypeOf(item))
 		}
 	}
 	return s
@@ -77,8 +73,6 @@ func LoadSlice(s []interface{}) []interface{} {
 			s[i] = LoadSlice(v)
 		case yaml.MapSlice:
 			s[i] = LoadMapSlice(v)
-		default:
-			fmt.Println(reflect.TypeOf(selector))
 		}
 	}
 	return s
