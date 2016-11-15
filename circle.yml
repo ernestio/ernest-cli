@@ -12,12 +12,13 @@ machine:
     JWT_SECRET: test
     IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
     ERNEST_LOG_FILE: '/tmp/ernest.log'
+    ROOTPATH: /home/ubuntu/.go_workspace/src/github.com/ernestio/
 
   hosts:
     ernest.local: 127.0.0.1
 
 dependencies:
-  override:
+  pre:
     - touch $ERNEST_LOG_FILE && chmod 777 $ERNEST_LOG_FILE
     - mkdir -p "$GOPATH/src/$IMPORT_PATH"
     - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
@@ -27,11 +28,14 @@ dependencies:
     - ./internal/ci_install_service.sh r3labs composable master
     - sudo pip install docker-compose
     - mkdir /tmp/composable
-    - composable gen definition.yml template.yml
+    - git clone git@github.com:ernestio/ernest.git /tmp/ernest 
+    - composable gen -G develop -exclude='*-aws-connector,*-vcloud-connector' /tmp/ernest/definition.yml ./template.yml 
     - docker-compose -f docker-compose.yml up -d
     - docker-compose logs > /tmp/compose.log:
           background: true
     - ./internal/ci_setup.sh
+
+  override:
     - ernest-cli target http://ernest.local
     - ernest-cli login --user ci_admin --password pwd
     - ernest-cli user create usr pwd
@@ -40,11 +44,11 @@ dependencies:
     - ernest-cli login --user usr --password pwd
     - ernest-cli datacenter create vcloud fake --vcloud-url https://myvdc.me.com --fake --user usr --password pwd --org org --vse-url http://localhost --public-network NETWORK
     - ernest-cli datacenter create aws fakeaws --region fake --token fake --secret secret --fake
-    - mkdir -p /home/ubuntu/.go_workspace/src/github.com/ernestio/
-    - rm -rf /home/ubuntu/.go_workspace/src/github.com/ernestio/ernest-cli
-    - cp -R /home/ubuntu/ernest-cli /home/ubuntu/.go_workspace/src/github.com/ernestio/ernest-cli
+    - mkdir -p $ROOTPATH
+    - rm -rf $ROOTPATH/ernest-cli
+    - cp -R /home/ubuntu/ernest-cli $ROOTPATH/ernest-cli
 
 test:
   override:
-    - cd /home/ubuntu/.go_workspace/src/github.com/ernestio/ernest-cli && make test
-    - cd /home/ubuntu/.go_workspace/src/github.com/ernestio/ernest-cli && make lint
+    - cd $ROOTPATH/ernest-cli && make test
+    - cd $ROOTPATH/ernest-cli && make lint
