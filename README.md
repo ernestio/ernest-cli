@@ -15,7 +15,7 @@ In order to install it and have it running, you just need to run the following c
 
 ```
 $ git clone git@github.com:ernestio/ernest-cli.git
-$ cd ernest
+$ cd ernest-cli
 $ make
 $ make install
 ```
