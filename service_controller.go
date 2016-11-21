@@ -213,7 +213,6 @@ var DefinitionService = cli.Command{
 
 		if len(c.Args()) < 1 {
 			color.Red("You should specify the service name")
-			return nil
 		}
 		serviceName := c.Args()[0]
 		if c.String("build") != "" {
