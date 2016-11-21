@@ -24,7 +24,8 @@ func TestEvent(t *testing.T) {
 		So(err, ShouldEqual, nil)
 
 		Convey("And I load file imports", func() {
-			So(d.LoadFileImports, ShouldNotPanic)
+			errimports := d.LoadFileImports()
+			So(errimports, ShouldBeNil)
 
 			Convey("It should have loaded the supporting file", func() {
 				output, err := d.Save()

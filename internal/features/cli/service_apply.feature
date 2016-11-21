@@ -29,3 +29,12 @@ Feature: Service apply
     And The output line number "6" should contain "Subnet    : 1.1.1.1/24"
     And The output line number "7" should contain "Status    : completed"
     And The output line number "8" should contain "Vpc created"
+
+  Scenario: Logged service apply with internal file references
+    Given I setup ernest with target "https://ernest.local"
+    And I'm logged in as "usr" / "pwd"
+    And the datacenter "test_dc" does not exist
+    And I run ernest with "datacenter create aws --token tmp_token --secret tmp_secret --region tmp_region --fake test_dc"
+    And The service "aws_test_service" does not exist
+    When I run ernest with "service apply internal/definitions/aws-template1-unexisting.yml"
+    Then The output should contain "Can't access referenced file"
