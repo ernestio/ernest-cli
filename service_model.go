@@ -6,6 +6,7 @@ type Service struct {
 	Name       string `json:"name"`
 	Datacenter int    `json:"datacenter_id"`
 	Version    string `json:"version"`
+	UserName   string `json:"user_name"`
 	Status     string `json:"status"`
 	Definition string `json:"definition"`
 	Result     string `json:"result"`

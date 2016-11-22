@@ -17,9 +17,9 @@ func printServiceHistory(services []Service) {
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Build ID", "Status", "Last build"})
+		table.SetHeader([]string{"Name", "Build ID", "Status", "Last build", "User"})
 		for _, s := range services {
-			table.Append([]string{s.Name, s.ID, s.Status, s.Version})
+			table.Append([]string{s.Name, s.ID, s.Status, s.Version, s.UserName})
 		}
 		table.Render()
 	}

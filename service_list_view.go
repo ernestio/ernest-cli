@@ -17,9 +17,9 @@ func printServiceList(services []Service) {
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Status", "Endpoint", "Last build"})
+		table.SetHeader([]string{"Name", "Status", "Endpoint", "Last build", "User"})
 		for _, s := range services {
-			table.Append([]string{s.Name, s.Status, s.Endpoint, s.Version})
+			table.Append([]string{s.Name, s.Status, s.Endpoint, s.Version, s.UserName})
 		}
 		table.Render()
 	}
