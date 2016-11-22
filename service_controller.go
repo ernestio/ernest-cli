@@ -287,6 +287,55 @@ var InfoService = cli.Command{
 	},
 }
 
+// DiffService : Shows detailed information of a service by its name
+var DiffService = cli.Command{
+	Name:      "diff",
+	Aliases:   []string{"i"},
+	ArgsUsage: "<service_name> <build_a> <build_b>",
+	Usage:     "$ ernest service diff <service_name> <build_a> <build_b>",
+	Description: `Will display the diff between two different builds
+
+   Examples:
+    $ ernest service diff 1283018731 9182yuhds12
+	`,
+	Action: func(c *cli.Context) error {
+		var err error
+
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
+		if len(c.Args()) < 2 {
+			color.Red("You should specify the service name and two build ids to compare them")
+			return nil
+		}
+
+		serviceName := c.Args()[0]
+		b1 := c.Args()[1]
+		b2 := c.Args()[2]
+
+		build1, err := m.ServiceBuildStatus(cfg.Token, serviceName, b1)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		build2, err := m.ServiceBuildStatus(cfg.Token, serviceName, b2)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+
+		if err != nil {
+			color.Red(err.Error())
+			os.Exit(1)
+		}
+		printServiceDiff(build1, build2)
+		return nil
+	},
+}
+
 // CmdService ...
 var CmdService = cli.Command{
 	Name:  "service",
@@ -300,5 +349,6 @@ var CmdService = cli.Command{
 		DefinitionService,
 		InfoService,
 		MonitorService,
+		DiffService,
 	},
 }

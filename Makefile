@@ -23,6 +23,7 @@ deps:
 	go get -u github.com/howeyc/gopass
 	go get -u github.com/r3labs/sse
 	go get -u github.com/olekukonko/tablewriter
+	go get github.com/pmezard/go-difflib/difflib
 
 dev-deps: deps
 	go get -u github.com/golang/lint/golint
