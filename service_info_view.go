@@ -12,6 +12,14 @@ func printServiceInfo(service *Service) {
 	if service.Vpc != "" {
 		fmt.Println("VPC : " + service.Vpc)
 	}
+	fmt.Println("Status : " + service.Status)
+	if service.Status == "errored" {
+		if service.LastError == "" {
+			fmt.Println("Last known error : unknown")
+		} else {
+			fmt.Println("Last known error : " + service.LastError)
+		}
+	}
 
 	if len(service.ELBs) == 0 {
 		fmt.Println("\nELBs (empty)")

@@ -9,6 +9,7 @@ type Service struct {
 	Status     string `json:"status"`
 	Definition string `json:"definition"`
 	Result     string `json:"result"`
+	LastError  string `json:"last_known_error"`
 	Endpoint   string `json:"endpoint"`
 	Vpc        string `json:"vpc_id"`
 	Networks   []struct {
