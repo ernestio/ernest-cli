@@ -17,4 +17,5 @@ Feature: Ernest service list
     When I run ernest with "service list"
     Then The output should contain "destroyable"
     And The output should not contain "errored"
+    And The output should contain "usr"
 

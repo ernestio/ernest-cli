@@ -28,7 +28,8 @@ Feature: Service history
     And I run ernest with "service apply internal/definitions/destroyable2.yml"
     When I run ernest with "service history destroyable"
     Then The output line number "3" should contain "destroyable"
-    Then The output line number "3" should contain "done"
-    Then The output line number "5" should contain "destroyable"
-    Then The output line number "5" should contain "done"
+    And The output line number "3" should contain "done"
+    And The output line number "3" should contain "usr"
+    And The output line number "5" should contain "destroyable"
+    And The output line number "5" should contain "usr"
 
