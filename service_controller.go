@@ -172,6 +172,7 @@ var ResetService = cli.Command{
 
 		if len(c.Args()) < 1 {
 			color.Red("You should specify the service name")
+			return nil
 		}
 		serviceName := c.Args()[0]
 		err := m.ResetService(serviceName, cfg.Token)
