@@ -47,15 +47,15 @@ var CreateAWSDatacenter = cli.Command{
 	Description: `Create a new AWS datacenter on the targeted instance of Ernest.
 
 	Example:
-	 $ ernest datacenter create aws --region region --secret_access_key <token> --access_key_id <secret> my_datacenter
+	 $ ernest datacenter create aws --region region --secret_access_key <secret_access_key> --access_key_id <access_key_id> my_datacenter
 
    Template example:
     $ ernest datacenter create aws --template mydatacenter.yml mydatacenter
     Where mydatacenter.yaml will look like:
       ---
       fake: true
-      secret_access_key: token
-      access_key_id : secret
+      secret_access_key: secret_access_key
+      access_key_id : access_key_id
       region: region
 	 `,
 	ArgsUsage: "<datacenter-name>",
