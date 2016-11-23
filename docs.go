@@ -6,9 +6,12 @@ package main
 
 // CmdDocs subcommand
 import (
+	"fmt"
 	"github.com/urfave/cli"
 	"github.com/skratchdot/open-golang/open"
 )
+
+const docURL = "http://ernest.io/documentation/"
 
 // CmdDocs: Open docs in the default browser
 var CmdDocs = cli.Command{
@@ -21,7 +24,10 @@ var CmdDocs = cli.Command{
     $ ernest docs
 	`,
 	Action: func(c *cli.Context) error {
-		open.Run("http://ernest.io/documentation/")
+	    	err := open.Run(docURL)
+    		if err != nil {
+			fmt.Println("Visit ernest.io documentation site : " + docURL)
+    		}
 		return nil
 	},
 }
