@@ -424,16 +424,16 @@ var UpdateAWSDatacenter = cli.Command{
 	Description: `Updates the specified AWS datacenter.
 
    Example:
-    $ ernest datacenter update aws --token <my_token> --secret <mysecret> my_datacenter
+    $ ernest datacenter update aws --aws_secret_access_key <my_token> --aws_access_key_id <mysecret> my_datacenter
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "token",
+			Name:  "aws_secret_access_key",
 			Value: "",
 			Usage: "Your AWS valid token",
 		},
 		cli.StringFlag{
-			Name:  "secret",
+			Name:  "aws_access_key_id",
 			Value: "",
 			Usage: "Your AWS valid secret",
 		},
@@ -451,8 +451,8 @@ var UpdateAWSDatacenter = cli.Command{
 			return nil
 		}
 		name := c.Args()[0]
-		token = c.String("token")
-		secret = c.String("secret")
+		token = c.String("aws_secret_access_key")
+		secret = c.String("aws_access_key_id")
 
 		if token == "" {
 			color.Red("You should specify aws token with '--token' flag")
@@ -463,7 +463,7 @@ var UpdateAWSDatacenter = cli.Command{
 			return nil
 		}
 
-		err := m.UpdateVCloudDatacenter(cfg.Token, name, token, secret)
+		err := m.UpdateAWSDatacenter(cfg.Token, name, token, secret)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
