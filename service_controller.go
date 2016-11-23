@@ -297,7 +297,7 @@ var DiffService = cli.Command{
 	Description: `Will display the diff between two different builds
 
    Examples:
-    $ ernest service diff 1283018731 9182yuhds12
+    $ ernest service diff my_service 1 2
 	`,
 	Action: func(c *cli.Context) error {
 		var err error
