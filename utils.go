@@ -119,8 +119,8 @@ type DatacenterTemplate struct {
 	Org      string `yaml:"org"`
 	Password string `yaml:"password"`
 	User     string `yaml:"user"`
-	Token    string `yaml:"aws_secret_access_key"`
-	Secret   string `yaml:"aws_access_key_id "`
+	Token    string `yaml:"secret_access_key"`
+	Secret   string `yaml:"access_key_id "`
 	Region   string `yaml:"region"`
 	Fake     bool   `yaml:"fake"`
 }
