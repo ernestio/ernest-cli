@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"os"
 	"os/exec"
 	"strconv"
@@ -104,6 +105,22 @@ func init() {
 		n.Request("datacenter.del", msg, time.Second*3)
 		msg = []byte(`{"name":"` + d + `"}`)
 		n.Request("datacenter.set", msg, time.Second*3)
+	})
+
+	And(`^The aws datacenter "(.+?)" credentials should be "(.+?)" and "(.+?)"$`, func(name, token, secret string) {
+		msg := []byte(`{"name":"` + name + `", "type":"aws"}`)
+		res, _ := n.Request("datacenter.get", msg, time.Second*3)
+		var d struct {
+			Token  string `json:"token"`
+			Secret string `json:"secret"`
+		}
+		json.Unmarshal(res.Data, &d)
+		if d.Token != token {
+			T.Errorf(`Expected token is "` + token + `" but found ` + d.Token)
+		}
+		if d.Secret != secret {
+			T.Errorf(`Expected secret is "` + secret + `" but found ` + d.Secret)
+		}
 	})
 
 	And(`^I wait for "(.+?)" seconds$`, func(n int) {

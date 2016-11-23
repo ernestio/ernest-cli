@@ -47,15 +47,15 @@ var CreateAWSDatacenter = cli.Command{
 	Description: `Create a new AWS datacenter on the targeted instance of Ernest.
 
 	Example:
-	 $ ernest datacenter create aws --region region --token token --secret secret my_datacenter
+	 $ ernest datacenter create aws --region region --secret_access_key <token> --access_key_id <secret> my_datacenter
 
    Template example:
     $ ernest datacenter create aws --template mydatacenter.yml mydatacenter
     Where mydatacenter.yaml will look like:
       ---
       fake: true
-      token: token
-      secret: secret
+      secret_access_key: token
+      access_key_id : secret
       region: region
 	 `,
 	ArgsUsage: "<datacenter-name>",
@@ -66,14 +66,14 @@ var CreateAWSDatacenter = cli.Command{
 			Usage: "Datacenter region",
 		},
 		cli.StringFlag{
-			Name:  "token",
+			Name:  "secret_access_key",
 			Value: "",
-			Usage: "AWS Token",
+			Usage: "AWS Secret access key",
 		},
 		cli.StringFlag{
-			Name:  "secret",
+			Name:  "access_key_id",
 			Value: "",
-			Usage: "AWS Secret",
+			Usage: "AWS access key id",
 		},
 		cli.StringFlag{
 			Name:  "template",
@@ -115,11 +115,11 @@ var CreateAWSDatacenter = cli.Command{
 			region = t.Region
 			fake = t.Fake
 		}
-		if c.String("token") != "" {
-			token = c.String("token")
+		if c.String("secret_access_key") != "" {
+			token = c.String("secret_access_key")
 		}
-		if c.String("secret") != "" {
-			secret = c.String("secret")
+		if c.String("access_key_id") != "" {
+			secret = c.String("access_key_id")
 		}
 		if c.String("region") != "" {
 			region = c.String("region")
@@ -129,11 +129,15 @@ var CreateAWSDatacenter = cli.Command{
 		}
 
 		if token == "" {
-			errs = append(errs, "Specify a valid token with --token flag")
+			errs = append(errs, "Specify a valid secret access key with --secret_access_key flag")
 		}
 
 		if secret == "" {
-			errs = append(errs, "Specify a valid secret with --secret flag")
+			errs = append(errs, "Specify a valid access key id with --access_key_id flag")
+		}
+
+		if len(secret) < 16 || len(secret) > 32 {
+			errs = append(errs, "access_key_id should have a length between 16 and 32 chars")
 		}
 
 		if region == "" {
@@ -424,16 +428,16 @@ var UpdateAWSDatacenter = cli.Command{
 	Description: `Updates the specified AWS datacenter.
 
    Example:
-    $ ernest datacenter update aws --token <my_token> --secret <mysecret> my_datacenter
+    $ ernest datacenter update aws --secret_access_key <my_token> --access_key_id <mysecret> my_datacenter
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "token",
+			Name:  "secret_access_key",
 			Value: "",
 			Usage: "Your AWS valid token",
 		},
 		cli.StringFlag{
-			Name:  "secret",
+			Name:  "access_key_id",
 			Value: "",
 			Usage: "Your AWS valid secret",
 		},
@@ -451,8 +455,8 @@ var UpdateAWSDatacenter = cli.Command{
 			return nil
 		}
 		name := c.Args()[0]
-		token = c.String("token")
-		secret = c.String("secret")
+		token = c.String("secret_access_key")
+		secret = c.String("access_key_id")
 
 		if token == "" {
 			color.Red("You should specify aws token with '--token' flag")
@@ -463,7 +467,7 @@ var UpdateAWSDatacenter = cli.Command{
 			return nil
 		}
 
-		err := m.UpdateVCloudDatacenter(cfg.Token, name, token, secret)
+		err := m.UpdateAWSDatacenter(cfg.Token, name, token, secret)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
