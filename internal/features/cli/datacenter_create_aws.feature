@@ -17,10 +17,11 @@ Feature: Ernest datacenter create
     Then The output should contain "You should specify the datacenter name"
     When I run ernest with "datacenter create aws tmp_datacenter"
     Then The output should contain "Please, fix the error shown below to continue"
-    And The output should contain "- Specify a valid token with --token flag"
-    And The output should contain "- Specify a valid secret with --secret flag"
+    And The output should contain "- Specify a valid secret access key with --aws_secret_access_key flag"
+    And The output should contain "- Specify a valid access key id with --access_key_id flag"
+    And The output should contain "- access_key_id should have a length between 16 and 32 chars"
     And The output should contain "- Specify a valid region with --region flag"
-    When I run ernest with "datacenter create aws --token tmp_token --secret tmp_secret --region tmp_region tmp_datacenter"
+    When I run ernest with "datacenter create aws --aws_secret_access_key tmp_aws_secret_access_key --access_key_id tmp_secret_up_to_16_chars_up_to_16_chars --region tmp_region tmp_datacenter"
     Then The output should contain "Datacenter 'tmp_datacenter' successfully created"
     When I run ernest with "datacenter list"
     Then The output should contain "tmp_datacenter"
@@ -31,8 +32,8 @@ Feature: Ernest datacenter create
     Given I setup ernest with target "https://ernest.local"
     And the datacenter "tmp_datacenter" does not exist
     And I'm logged in as "usr" / "pwd"
-    When I run ernest with "datacenter create aws --token tmp_token --secret tmp_secret --region tmp_region tmp_datacenter"
-    And I run ernest with "datacenter create aws --token tmp_token --secret tmp_secret --region tmp_region tmp_datacenter"
+    When I run ernest with "datacenter create aws --aws_secret_access_key tmp_aws_secret_access_key --access_key_id tmp_secret_up_to_16_chars_up_to_16_characters --region tmp_region tmp_datacenter"
+    And I run ernest with "datacenter create aws --aws_secret_access_key tmp_aws_secret_access_key --access_key_id tmp_secret_up_to_16_chars_up_to_16_characters --region tmp_region tmp_datacenter"
     Then The output should contain "Datacenter 'tmp_datacenter' already exists, please specify a different name"
 
 
