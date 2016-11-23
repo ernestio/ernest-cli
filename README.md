@@ -34,7 +34,7 @@ You can get help by running:
 $ ernest
 ```
 
-And read our documentation about [how to use the CLI](http://ernest.io/documentation/cli-cmd/)
+And read our documentation about [how to use the CLI](http://ernest.io/documentation/cli-guide/)
 
 ## Running Tests
 
