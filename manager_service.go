@@ -9,6 +9,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"runtime"
+	"strconv"
 
 	"github.com/fatih/color"
 )
@@ -64,6 +65,14 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service Servi
 
 // ServiceBuildStatus ...
 func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID string) (service Service, err error) {
+	builds, _ := m.ListBuilds(serviceName, token)
+	num, _ := strconv.Atoi(serviceID)
+	if num < 1 || num > len(builds) {
+		return service, errors.New("Invalid build id")
+	}
+	num = len(builds) - num
+	serviceID = builds[num].ID
+
 	body, resp, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp.StatusCode == 403 {

@@ -13,6 +13,7 @@ func printServiceInfo(service *Service) {
 		fmt.Println("VPC : " + service.Vpc)
 	}
 	fmt.Println("Status : " + service.Status)
+	fmt.Println("Date : " + service.Version)
 	if service.Status == "errored" {
 		if service.LastError == "" {
 			fmt.Println("Last known error : unknown")

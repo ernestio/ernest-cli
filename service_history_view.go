@@ -7,6 +7,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/olekukonko/tablewriter"
 )
@@ -17,9 +18,12 @@ func printServiceHistory(services []Service) {
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Build ID", "Status", "Last build", "User"})
+		table.SetHeader([]string{"ID", "Name", "Build ID", "Status", "User"})
+		num := len(services) + 1
 		for _, s := range services {
-			table.Append([]string{s.Name, s.ID, s.Status, s.Version, s.UserName})
+			num = num - 1
+			id := strconv.Itoa(num)
+			table.Append([]string{id, s.Name, s.Status, s.Version, s.UserName})
 		}
 		table.Render()
 	}
