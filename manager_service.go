@@ -147,7 +147,9 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	}
 
 	// Load any imported files
-	d.LoadFileImports()
+	if err := d.LoadFileImports(); err != nil {
+		return "", err
+	}
 
 	payload, err = d.Save()
 

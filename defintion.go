@@ -5,7 +5,9 @@
 package main
 
 import (
+	"errors"
 	"io/ioutil"
+	"os"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -27,53 +29,73 @@ func (d *Definition) Save() ([]byte, error) {
 }
 
 // LoadFileImports : loads any referenced files and maps them to the import definition
-func (d *Definition) LoadFileImports() {
-	d.data = LoadMapSlice(d.data)
+func (d *Definition) LoadFileImports() error {
+	var err error
+	d.data, err = LoadMapSlice(d.data)
+	return err
 }
 
 // LoadFile : determines if the encountered string is
-func LoadFile(path string) string {
+func LoadFile(path string) (string, error) {
 	if len(path) < 3 || path[:2] != "@{" {
-		return path
+		return path, nil
 	}
 
 	trimmedPath := path[2:]
 	trimmedPath = trimmedPath[:len(trimmedPath)-1]
 
-	payload, err := ioutil.ReadFile(trimmedPath)
-	if err != nil {
-		panic(err)
+	if _, err := os.Stat(trimmedPath); os.IsNotExist(err) {
+		return "", errors.New("Can't access referenced file " + trimmedPath)
 	}
 
-	return string(payload)
+	payload, err := ioutil.ReadFile(trimmedPath)
+	if err != nil {
+		return "", errors.New("Can't access referenced file " + trimmedPath)
+	}
+
+	return string(payload), nil
 }
 
 // LoadMapSlice : loads all values into a slice
-func LoadMapSlice(s yaml.MapSlice) yaml.MapSlice {
+func LoadMapSlice(s yaml.MapSlice) (yaml.MapSlice, error) {
+	var err error
 	for i, item := range s {
 		switch v := item.Value.(type) {
 		case string:
-			s[i].Value = LoadFile(v)
+			if s[i].Value, err = LoadFile(v); err != nil {
+				return s, err
+			}
 		case yaml.MapSlice:
-			s[i].Value = LoadMapSlice(v)
+			if s[i].Value, err = LoadMapSlice(v); err != nil {
+				return s, err
+			}
 		case []interface{}:
-			s[i].Value = LoadSlice(v)
+			if s[i].Value, err = LoadSlice(v); err != nil {
+				return s, err
+			}
 		}
 	}
-	return s
+	return s, err
 }
 
 // LoadSlice : loads all values into a slice
-func LoadSlice(s []interface{}) []interface{} {
+func LoadSlice(s []interface{}) ([]interface{}, error) {
+	var err error
 	for i, selector := range s {
 		switch v := selector.(type) {
 		case string:
-			s[i] = LoadFile(v)
+			if s[i], err = LoadFile(v); err != nil {
+				return s, err
+			}
 		case []interface{}:
-			s[i] = LoadSlice(v)
+			if s[i], err = LoadSlice(v); err != nil {
+				return s, err
+			}
 		case yaml.MapSlice:
-			s[i] = LoadMapSlice(v)
+			if s[i], err = LoadMapSlice(v); err != nil {
+				return s, err
+			}
 		}
 	}
-	return s
+	return s, err
 }
