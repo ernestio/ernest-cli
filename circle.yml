@@ -22,23 +22,21 @@ dependencies:
     - touch $ERNEST_LOG_FILE && chmod 777 $ERNEST_LOG_FILE
     - mkdir -p "$GOPATH/src/$IMPORT_PATH"
     - rsync -azC --delete ./ "$GOPATH/src/$IMPORT_PATH/"
-    - make dev-deps
-    - make install
-    - ./internal/ci_install_service.sh r3labs natsc master
-    - ./internal/ci_install_service.sh r3labs composable master
-    - sudo pip install docker-compose
-    - mkdir /tmp/composable
-    - git clone git@github.com:ernestio/ernest.git /tmp/ernest 
-    - composable gen -G develop -exclude='*-aws-connector,*-vcloud-connector' /tmp/ernest/definition.yml ./template.yml 
-    - docker-compose -f docker-compose.yml up -d
-    - docker-compose logs > /tmp/compose.log:
-          background: true
-    - ./internal/ci_setup.sh
-
-  override:
     - mkdir -p $ROOTPATH
     - rm -rf $ROOTPATH/ernest-cli
     - cp -R /home/ubuntu/ernest-cli $ROOTPATH/ernest-cli
+    - make dev-deps
+    - make install
+    - $ROOTPATH/ernest-cli/internal/ci_install_service.sh r3labs natsc master
+    - $ROOTPATH/ernest-cli/internal/ci_install_service.sh r3labs composable master
+    - sudo pip install docker-compose
+    - mkdir /tmp/composable
+    - git clone git@github.com:ernestio/ernest.git /tmp/ernest 
+    - composable gen -G develop -exclude='*-aws-connector,*-vcloud-connector' /tmp/ernest/definition.yml ./internal/template.yml 
+    - docker-compose -f docker-compose.yml up -d
+    - docker-compose logs > /tmp/compose.log:
+          background: true
+    - $ROOTPATH/ernest-cli/internal/ci_setup.sh
 
 test:
   override:

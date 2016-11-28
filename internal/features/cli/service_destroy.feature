@@ -14,7 +14,7 @@ Feature: Service destroy
     And I'm logged in as "usr" / "pwd"
     When I run ernest with "service destroy"
     Then The output should contain "You should specify an existing service name"
-    When I run ernest with "service destroy unexisting --force"
+    When I run ernest with "service destroy unexisting --yes"
     Then The output should contain "Specified service name does not exist"
 
   Scenario: Logged service destroy
@@ -24,6 +24,8 @@ Feature: Service destroy
     And I run ernest with "datacenter create aws --secret_access_key tmp_secret_access_key --access_key_id tmp_secret_up_to_16_chars --region tmp_region --fake test_dc"
     And The service "destroyable" does not exist
     And I run ernest with "service apply internal/definitions/destroyable.yml"
-    When I run ernest with "service destroy destroyable --force"
+    When I run ernest with "service destroy destroyable --yes"
     Then The output should not contain "Specified service name does not exist"
+    When I run ernest with "service destroy destroyable --force"
+    Then The output should contain "Specified service name does not exist"
 
