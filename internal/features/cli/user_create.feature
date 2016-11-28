@@ -15,7 +15,7 @@ Feature: Ernest user list
     Given I setup ernest with target "https://ernest.local"
     When I'm logged in as "usr" / "pwd"
     And I run ernest with "user create test_creation pwd"
-    Then The output should contain "You're not allowed to perform this action, please contact your admin."
+    Then The output should contain "You're not allowed to perform this action, please contact your admin"
 
   Scenario: Admin user creation
     Given I setup ernest with target "https://ernest.local"
@@ -29,6 +29,6 @@ Feature: Ernest user list
     When I'm logged in as "ci_admin" / "pwd"
     And I run ernest with "user create duplicated pwd"
     And I run ernest with "user create duplicated pwd"
-    Then The output should contain "Specified username already existis please choose a different one."
+    Then The output should contain "Specified username already existis please choose a different one"
 
 

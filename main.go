@@ -7,6 +7,7 @@ package main
 import (
 	"os"
 
+	"github.com/ernestio/ernest-cli/command"
 	"github.com/urfave/cli"
 )
 
@@ -19,16 +20,16 @@ func main() {
 	app.Version = Version
 	app.Usage = "Command line interface for Ernest"
 	app.Commands = []cli.Command{
-		Target,
-		Info,
-		Login,
-		Logout,
-		CmdUser,
-		CmdGroup,
-		CmdDatacenter,
-		CmdService,
-		CmdPreferences,
-		CmdDocs,
+		command.Target,
+		command.Info,
+		command.Login,
+		command.Logout,
+		command.CmdUser,
+		command.CmdGroup,
+		command.CmdDatacenter,
+		command.CmdService,
+		command.CmdPreferences,
+		command.CmdDocs,
 	}
 	app.Run(os.Args)
 }
