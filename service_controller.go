@@ -87,7 +87,11 @@ var DestroyService = cli.Command{
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "force,f",
-			Usage: "Force destroy command without asking for permission.",
+			Usage: "Hard ernest service removal.",
+		},
+		cli.BoolFlag{
+			Name:  "yes,y",
+			Usage: "Destroy a service without prompting confirmation.",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -104,20 +108,30 @@ var DestroyService = cli.Command{
 		name := c.Args()[0]
 
 		if c.Bool("force") {
-			err := m.Destroy(cfg.Token, name, true)
+			err := m.ForceDestroy(cfg.Token, name)
 			if err != nil {
 				color.Red(err.Error())
+				return nil
 			}
 		} else {
-			fmt.Print("Are you sure? Please type yes or no and then press enter: ")
-			if askForConfirmation() {
+			if c.Bool("yes") {
 				err := m.Destroy(cfg.Token, name, true)
 				if err != nil {
 					color.Red(err.Error())
-					return err
+					return nil
+				}
+			} else {
+				fmt.Print("Are you sure? Please type yes or no and then press enter: ")
+				if askForConfirmation() {
+					err := m.Destroy(cfg.Token, name, true)
+					if err != nil {
+						color.Red(err.Error())
+						return nil
+					}
 				}
 			}
 		}
+		color.Green("Service successfully removed")
 		return nil
 	},
 }

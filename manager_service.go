@@ -132,6 +132,19 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 	return nil
 }
 
+// ForceDestroy : Destroys an existing service by forcing it
+func (m *Manager) ForceDestroy(token, name string) error {
+	_, resp, err := m.doRequest("/api/services/"+name+"/force/", "DELETE", nil, token, "application/yaml")
+	if err != nil {
+		if resp.StatusCode == 404 {
+			return errors.New("Specified service name does not exist")
+		}
+		return err
+	}
+
+	return nil
+}
+
 // Apply : Applies a yaml to create / update a new service
 func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	var d Definition
