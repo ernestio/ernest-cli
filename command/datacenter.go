@@ -66,27 +66,27 @@ var CreateAWSDatacenter = cli.Command{
 	ArgsUsage: "<datacenter-name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "region",
+			Name:  "region, r",
 			Value: "",
 			Usage: "Datacenter region",
 		},
 		cli.StringFlag{
-			Name:  "secret_access_key",
+			Name:  "secret_access_key, s",
 			Value: "",
 			Usage: "AWS Secret access key",
 		},
 		cli.StringFlag{
-			Name:  "access_key_id",
+			Name:  "access_key_id, k",
 			Value: "",
 			Usage: "AWS access key id",
 		},
 		cli.StringFlag{
-			Name:  "template",
+			Name:  "template, t",
 			Value: "",
 			Usage: "Datacenter template",
 		},
 		cli.BoolFlag{
-			Name:  "fake",
+			Name:  "fake, f",
 			Usage: "Fake datacenter",
 		},
 	},
