@@ -125,13 +125,14 @@ var DestroyService = cli.Command{
 					return nil
 				}
 			} else {
-				fmt.Print("Are you sure? Please type yes or no and then press enter: ")
-				if askForConfirmation() {
-					err := m.Destroy(cfg.Token, name, true)
-					if err != nil {
-						color.Red(err.Error())
-						return nil
-					}
+				fmt.Print("Do you really want to destroy this service? (Y/n)")
+				if askForConfirmation() == false {
+					return nil
+				}
+				err := m.Destroy(cfg.Token, name, true)
+				if err != nil {
+					color.Red(err.Error())
+					return nil
 				}
 			}
 		}
