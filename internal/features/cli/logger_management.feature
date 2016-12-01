@@ -17,6 +17,7 @@ Feature: Ernest preferences management
     Given I setup ernest with target "https://ernest.local"
     And I'm logged in as "ci_admin" / "pwd"
     And File "/tmp/ernest.log" exists
+    And File "/tmp/unexisting.log" does not exist
     When I run ernest with "preferences logger add basic"
     Then The output should contain "You should specify a logfile with --logfile flag"
     When I run ernest with "preferences logger add basic --logfile /tmp/unexisting.log"
