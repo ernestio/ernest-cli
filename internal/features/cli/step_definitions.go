@@ -176,6 +176,10 @@ func init() {
 		}
 	})
 
+	And(`^File "(.+?)" does not exist$`, func(filename string) {
+		_ = os.Remove(filename)
+	})
+
 }
 
 func ernest(cmdArgs ...string) {

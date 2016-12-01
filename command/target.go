@@ -30,21 +30,28 @@ var Target = cli.Command{
 		} else {
 			_, cfg := setup(c)
 			cfg.URL = c.Args()[0]
-			u, _ := url.Parse(cfg.URL)
-			if u.Scheme == "http" {
-				color.Yellow("Warning! Your are using an insecure target for Ernest")
-			}
-			if u.Scheme != "https" && u.Scheme != "http" {
-				color.Red("You should specify a valid url for the target")
+			if err := persistTarget(cfg); err != nil {
 				return nil
 			}
-			err := model.SaveConfig(cfg)
-			if err != nil {
-				color.Red(err.Error())
-				return err
-			}
-			color.Green("Target set")
 		}
+		color.Green("Target set")
 		return nil
 	},
+}
+
+func persistTarget(cfg *model.Config) error {
+	u, _ := url.Parse(cfg.URL)
+	if u.Scheme == "http" {
+		color.Yellow("Warning! Your are using an insecure target for Ernest")
+	}
+	if u.Scheme != "https" && u.Scheme != "http" {
+		color.Red("You should specify a valid url for the target")
+		return nil
+	}
+	err := model.SaveConfig(cfg)
+	if err != nil {
+		color.Red(err.Error())
+		return err
+	}
+	return nil
 }
