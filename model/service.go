@@ -40,4 +40,12 @@ type Service struct {
 		Name    string `json:"name"`
 		DNSName string `json:"dns_name"`
 	} `json:"elbs"`
+	RDSClusters []struct {
+		Name     string `json:"name"`
+		Endpoint string `json:"endpoint"`
+	} `json:"rds_clusters"`
+	RDSInstances []struct {
+		Name     string `json:"name"`
+		Endpoint string `json:"endpoint"`
+	} `json:"rds_instances"`
 }

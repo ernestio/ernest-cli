@@ -92,4 +92,30 @@ func PrintServiceInfo(service *model.Service) {
 		}
 		table.Render()
 	}
+
+	if len(service.RDSClusters) == 0 {
+		fmt.Println("\nRDS Clusters (empty)")
+		fmt.Println("")
+	} else {
+		fmt.Println("\nRDS Clusters:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "Endpoint"})
+		for _, v := range service.RDSClusters {
+			table.Append([]string{v.Name, v.Endpoint})
+		}
+		table.Render()
+	}
+
+	if len(service.RDSInstances) == 0 {
+		fmt.Println("\nRDS Instances (empty)")
+		fmt.Println("")
+	} else {
+		fmt.Println("\nRDS Instances:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "Endpoint"})
+		for _, v := range service.RDSInstances {
+			table.Append([]string{v.Name, v.Endpoint})
+		}
+		table.Render()
+	}
 }
