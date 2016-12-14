@@ -33,6 +33,7 @@ dev-deps: deps
 	go get -u golang.org/x/tools/cmd/cover
 	go get -u github.com/gucumber/gucumber/cmd/gucumber
 	go get -u github.com/ernestio/ernest-config-client
+	go get -u github.com/ernestio/crypto
 
 lint:
 	golint ./...

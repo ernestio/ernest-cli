@@ -37,9 +37,9 @@ Feature: Ernest datacenter create
     And I run ernest with "datacenter create aws --secret_access_key tmp_secret_access_key_up_to_16_chars --access_key_id tmp_secret_up_to_16_chars --region tmp_region tmp_datacenter"
     And I run ernest with "datacenter list"
     And The output should contain "tmp_datacenter"
-    When I run ernest with "datacenter update aws tmp_datacenter --secret_access_key me --access_key_id secret"
+    When I run ernest with "datacenter update aws tmp_datacenter --secret_access_key tmp_secret_access_key_up_to_16_chars --access_key_id tmp_secret_up_to_16_chars"
     Then The output should contain "Datacenter tmp_datacenter successfully updated"
-    And The aws datacenter "tmp_datacenter" credentials should be "me" and "secret"
+    And The aws datacenter "tmp_datacenter" credentials should be "tmp_secret_up_to_16_chars" and "tmp_secret_access_key_up_to_16_chars"
 
   Scenario: Updating an unexisting aws datacenter
     Given I setup ernest with target "https://ernest.local"

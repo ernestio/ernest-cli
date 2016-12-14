@@ -26,8 +26,8 @@ func (m *Manager) CreateVcloudDatacenter(token string, name string, rtype string
 }
 
 // CreateAWSDatacenter : Creates an AWS datacenter
-func (m *Manager) CreateAWSDatacenter(token string, name string, rtype string, region string, awstoken string, awssecret string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region":"` + region + `", "username":"` + name + `", "token":"` + awstoken + `", "secret":"` + awssecret + `"}`)
+func (m *Manager) CreateAWSDatacenter(token string, name string, rtype string, region string, awsAccessKeyID string, awsSecretAccessKey string) (string, error) {
+	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region":"` + region + `", "username":"` + name + `", "aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}`)
 	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		if res.StatusCode == 409 {
@@ -92,14 +92,14 @@ func (m *Manager) UpdateVCloudDatacenter(token, name, user, password string) (er
 }
 
 // UpdateAWSDatacenter : updates awsdatacenter details
-func (m *Manager) UpdateAWSDatacenter(token, name, awstoken, awssecret string) (err error) {
+func (m *Manager) UpdateAWSDatacenter(token, name, awsAccessKeyID, awsSecretAccessKey string) (err error) {
 	g, err := m.getDatacenterByName(token, name)
 	if err != nil {
 		return errors.New("Datacenter '" + name + "' does not exist, please specify a different datacenter name")
 	}
 	id := strconv.Itoa(g.ID)
 
-	payload := []byte(`{"token":"` + awstoken + `", "secret":"` + awssecret + `"}`)
+	payload := []byte(`{"aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}`)
 	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res.StatusCode == 400 {
