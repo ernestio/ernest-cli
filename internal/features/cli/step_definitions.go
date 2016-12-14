@@ -2,12 +2,14 @@ package cli
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
 	"time"
 
+	ernestAes "github.com/ernestio/crypto/aes"
 	ecc "github.com/ernestio/ernest-config-client"
 	. "github.com/gucumber/gucumber"
 	"github.com/nats-io/nats"
@@ -111,15 +113,25 @@ func init() {
 		msg := []byte(`{"name":"` + name + `", "type":"aws"}`)
 		res, _ := n.Request("datacenter.get", msg, time.Second*3)
 		var d struct {
-			Token  string `json:"token"`
-			Secret string `json:"secret"`
+			Token  string `json:"aws_access_key_id"`
+			Secret string `json:"aws_secret_access_key"`
 		}
+		key := os.Getenv("ERNEST_CRYPTO_KEY")
 		json.Unmarshal(res.Data, &d)
-		if d.Token != token {
-			T.Errorf(`Expected token is "` + token + `" but found ` + d.Token)
+		crypto := ernestAes.New()
+		tk, err := crypto.Decrypt(d.Token, key)
+		if err != nil {
+			log.Println(err)
 		}
-		if d.Secret != secret {
-			T.Errorf(`Expected secret is "` + secret + `" but found ` + d.Secret)
+		se, err := crypto.Decrypt(d.Secret, key)
+		if err != nil {
+			log.Println(err)
+		}
+		if tk != token {
+			T.Errorf(`Expected token is "` + token + `" but found ` + tk)
+		}
+		if se != secret {
+			T.Errorf(`Expected secret is "` + secret + `" but found ` + se)
 		}
 	})
 

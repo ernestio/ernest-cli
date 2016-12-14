@@ -52,16 +52,16 @@ var CreateAWSDatacenter = cli.Command{
 	Description: `Create a new AWS datacenter on the targeted instance of Ernest.
 
 	Example:
-	 $ ernest datacenter create aws --region region --secret_access_key <secret_access_key> --access_key_id <access_key_id> my_datacenter
+	 $ ernest datacenter create aws --region us-west-2 --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_datacenter
 
    Template example:
     $ ernest datacenter create aws --template mydatacenter.yml mydatacenter
     Where mydatacenter.yaml will look like:
       ---
       fake: true
-      secret_access_key: secret_access_key
-      access_key_id : access_key_id
-      region: region
+      access_key_id : AKIAIOSFODNN7EXAMPLE
+      secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+      region: us-west-2
 	 `,
 	ArgsUsage: "<datacenter-name>",
 	Flags: []cli.Flag{
@@ -71,14 +71,14 @@ var CreateAWSDatacenter = cli.Command{
 			Usage: "Datacenter region",
 		},
 		cli.StringFlag{
-			Name:  "secret_access_key, s",
-			Value: "",
-			Usage: "AWS Secret access key",
-		},
-		cli.StringFlag{
 			Name:  "access_key_id, k",
 			Value: "",
 			Usage: "AWS access key id",
+		},
+		cli.StringFlag{
+			Name:  "secret_access_key, s",
+			Value: "",
+			Usage: "AWS Secret access key",
 		},
 		cli.StringFlag{
 			Name:  "template, t",
@@ -92,7 +92,7 @@ var CreateAWSDatacenter = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 		var errs []string
-		var token, secret, region string
+		var accessKeyID, secretAccessKey, region string
 		var fake bool
 		m, cfg := setup(c)
 
@@ -115,16 +115,16 @@ var CreateAWSDatacenter = cli.Command{
 				color.Red(err.Error())
 				return nil
 			}
-			token = t.Token
-			secret = t.Secret
+			accessKeyID = t.Token
+			secretAccessKey = t.Secret
 			region = t.Region
 			fake = t.Fake
 		}
 		if c.String("secret_access_key") != "" {
-			token = c.String("secret_access_key")
+			secretAccessKey = c.String("secret_access_key")
 		}
 		if c.String("access_key_id") != "" {
-			secret = c.String("access_key_id")
+			accessKeyID = c.String("access_key_id")
 		}
 		if c.String("region") != "" {
 			region = c.String("region")
@@ -133,16 +133,12 @@ var CreateAWSDatacenter = cli.Command{
 			fake = c.Bool("fake")
 		}
 
-		if token == "" {
+		if secretAccessKey == "" {
 			errs = append(errs, "Specify a valid secret access key with --secret_access_key flag")
 		}
 
-		if secret == "" {
+		if accessKeyID == "" {
 			errs = append(errs, "Specify a valid access key id with --access_key_id flag")
-		}
-
-		if len(secret) < 16 || len(secret) > 32 {
-			errs = append(errs, "access_key_id should have a length between 16 and 32 chars")
 		}
 
 		if region == "" {
@@ -162,7 +158,7 @@ var CreateAWSDatacenter = cli.Command{
 		if fake {
 			rtype = "aws-fake"
 		}
-		body, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, region, token, secret)
+		body, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, region, accessKeyID, secretAccessKey)
 		if err != nil {
 			color.Red(body)
 		} else {
@@ -433,22 +429,22 @@ var UpdateAWSDatacenter = cli.Command{
 	Description: `Updates the specified AWS datacenter.
 
    Example:
-    $ ernest datacenter update aws --secret_access_key <my_token> --access_key_id <mysecret> my_datacenter
+		$ ernest datacenter update aws --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_datacenter
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "secret_access_key",
-			Value: "",
-			Usage: "Your AWS valid token",
-		},
-		cli.StringFlag{
 			Name:  "access_key_id",
 			Value: "",
-			Usage: "Your AWS valid secret",
+			Usage: "Your AWS access key id",
+		},
+		cli.StringFlag{
+			Name:  "secret_access_key",
+			Value: "",
+			Usage: "Your AWS secret access key",
 		},
 	},
 	Action: func(c *cli.Context) error {
-		var token, secret string
+		var accessKeyID, secretAccessKey string
 		m, cfg := setup(c)
 		if cfg.Token == "" {
 			color.Red("You're not allowed to perform this action, please log in")
@@ -460,19 +456,19 @@ var UpdateAWSDatacenter = cli.Command{
 			return nil
 		}
 		name := c.Args()[0]
-		token = c.String("secret_access_key")
-		secret = c.String("access_key_id")
+		accessKeyID = c.String("access_key_id")
+		secretAccessKey = c.String("secret_access_key")
 
-		if token == "" {
-			color.Red("You should specify aws token with '--token' flag")
+		if accessKeyID == "" {
+			color.Red("You should specify your aws access key id with '--access_key_id' flag")
 			return nil
 		}
-		if secret == "" {
-			color.Red("You should specify user secret with '--secret' flag")
+		if secretAccessKey == "" {
+			color.Red("You should specify your aws secret access key with '--secret_access_key' flag")
 			return nil
 		}
 
-		err := m.UpdateAWSDatacenter(cfg.Token, name, token, secret)
+		err := m.UpdateAWSDatacenter(cfg.Token, name, accessKeyID, secretAccessKey)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
