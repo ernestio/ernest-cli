@@ -13,6 +13,7 @@ machine:
     IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
     ERNEST_LOG_FILE: '/tmp/ernest.log'
     ROOTPATH: /home/ubuntu/.go_workspace/src/github.com/ernestio/
+    ERNEST_CRYPTO_KEY: mMYlPIvI11z20H1BnBmB223355667788
 
   hosts:
     ernest.local: 127.0.0.1
@@ -32,7 +33,7 @@ dependencies:
     - sudo pip install docker-compose
     - mkdir /tmp/composable
     - git clone git@github.com:ernestio/ernest.git /tmp/ernest 
-    - composable gen -G develop -exclude='*-aws-connector,*-vcloud-connector' /tmp/ernest/definition.yml ./internal/template.yml 
+    - composable gen -E ERNEST_CRYPTO_KEY=$ERNEST_CRYPTO_KEY -G develop -exclude='*-aws-connector,*-vcloud-connector' /tmp/ernest/definition.yml ./internal/template.yml 
     - docker-compose -f docker-compose.yml up -d
     - docker-compose logs > /tmp/compose.log:
           background: true

@@ -26,6 +26,6 @@ Feature: Service destroy
     And I run ernest with "service apply internal/definitions/destroyable.yml"
     When I run ernest with "service destroy destroyable --yes"
     Then The output should not contain "Specified service name does not exist"
-    When I run ernest with "service destroy destroyable --force"
+    When I run ernest with "service destroy destroyable --yes"
     Then The output should contain "Specified service name does not exist"
 
