@@ -48,4 +48,8 @@ type Service struct {
 		Name     string `json:"name"`
 		Endpoint string `json:"endpoint"`
 	} `json:"rds_instances"`
+	EBSVolumes []struct {
+		Name        string `json:"name"`
+		VolumeAWSID string `json:"volume_aws_id"`
+	} `json:"ebs_volumes"`
 }

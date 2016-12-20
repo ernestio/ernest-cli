@@ -118,4 +118,18 @@ func PrintServiceInfo(service *model.Service) {
 		}
 		table.Render()
 	}
+
+	if len(service.EBSVolumes) == 0 {
+		fmt.Println("\nEBS Volumes (empty)")
+		fmt.Println("")
+	} else {
+		fmt.Println("\nEBS Volumes:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "Volume ID"})
+		for _, v := range service.EBSVolumes {
+			table.Append([]string{v.Name, v.VolumeAWSID})
+		}
+		table.Render()
+	}
+
 }
