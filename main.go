@@ -30,7 +30,6 @@ func main() {
 		command.CmdService,
 		command.CmdPreferences,
 		command.CmdDocs,
-		command.CmdSetup,
 	}
 	app.Run(os.Args)
 }
