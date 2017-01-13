@@ -196,3 +196,36 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	}
 	return streamID, nil
 }
+
+// Import : Imports an existing service
+func (m *Manager) Import(token string, name string, datacenter string) (streamID string, err error) {
+	var s struct {
+		Name       string `json:"name"`
+		Datacenter string `json:"datacenter"`
+	}
+	s.Name = name
+	s.Datacenter = datacenter
+	payload, err := json.Marshal(s)
+	if err != nil {
+		return "", errors.New("Invalid name or datacenter")
+	}
+
+	color.Green("Environment import requested")
+	println("Ernest will show you all output from your requested service creation")
+	println("You can cancel at any moment with Ctrl+C, even the service is still being imported, you won't have any output")
+
+	streamID = m.GetUUID(token, payload)
+	if streamID == "" {
+		color.Red("Please log in")
+		return "", nil
+	}
+
+	go helper.Monitorize(m.URL, token, streamID)
+
+	if body, _, err := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml"); err != nil {
+		return "", errors.New(body)
+	}
+	runtime.Goexit()
+
+	return streamID, nil
+}
