@@ -356,6 +356,54 @@ var DiffService = cli.Command{
 	},
 }
 
+// ImportService : Shows detailed information of a service by its name
+var ImportService = cli.Command{
+	Name:      "import",
+	Aliases:   []string{"i"},
+	ArgsUsage: "<service_name>",
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "datacenter",
+			Value: "",
+			Usage: "Datacenter name",
+		},
+	},
+	Usage: "$ ernest service import <my_datacenter> <my_service>",
+	Description: `Will import te service <my_service> from datacenter <datacenter_name>
+
+   Examples:
+    $ ernest service import my_datacenter my_service
+	`,
+	Action: func(c *cli.Context) error {
+		var err error
+
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
+		if len(c.Args()) == 0 {
+			color.Red("You should specify an existing datacenter name")
+			return nil
+		}
+		if len(c.Args()) == 1 {
+			color.Red("You should specify a valid service name")
+			return nil
+		}
+
+		datacenter := c.Args()[0]
+		name := c.Args()[1]
+		_, err = m.Import(cfg.Token, name, datacenter)
+
+		if err != nil {
+			color.Red(err.Error())
+			os.Exit(1)
+		}
+		return nil
+	},
+}
+
 func getServiceUUID(output []byte) (string, error) {
 	var service struct {
 		ID string `json:"id"`
@@ -397,5 +445,6 @@ var CmdService = cli.Command{
 		InfoService,
 		MonitorService,
 		DiffService,
+		ImportService,
 	},
 }
