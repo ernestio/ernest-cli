@@ -2,6 +2,8 @@ machine:
   pre:
     - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
     - touch /tmp/ernest.log && chmod 666 /tmp/ernest.log
+    - curl -L https://github.com/docker/compose/releases/download/1.10.0/docker-compose-`uname -s`-`uname -m` > /home/ubuntu/bin/docker-compose
+    - chmod +x /home/ubuntu/bin/docker-compose
   services:
     - docker
   environment:
@@ -30,7 +32,6 @@ dependencies:
     - make install
     - $ROOTPATH/ernest-cli/internal/ci_install_service.sh r3labs natsc master
     - $ROOTPATH/ernest-cli/internal/ci_install_service.sh r3labs composable master
-    - sudo pip install docker-compose
     - mkdir /tmp/composable
     - git clone git@github.com:ernestio/ernest.git /tmp/ernest 
     - composable gen -E ERNEST_CRYPTO_KEY=$ERNEST_CRYPTO_KEY -G develop -exclude='*-aws-connector,*-vcloud-connector' /tmp/ernest/definition.yml ./internal/template.yml 
