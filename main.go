@@ -31,6 +31,7 @@ func main() {
 		command.CmdPreferences,
 		command.CmdDocs,
 		command.CmdSetup,
+		command.CmdComponents,
 	}
 	app.Run(os.Args)
 }
