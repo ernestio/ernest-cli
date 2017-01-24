@@ -24,14 +24,14 @@ $ make install
 
 You need to set up your remote ernest instance
 ```
-$ ernest target "http://my.ernest.io"
+$ ernest-cli target "http://my.ernest.io"
 ```
 
 ## Run it
 
 You can get help by running:
 ```
-$ ernest
+$ ernest-cli
 ```
 
 And read our documentation about [how to use the CLI](http://ernest.io/documentation/cli-guide/)
