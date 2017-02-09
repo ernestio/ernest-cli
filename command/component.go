@@ -19,7 +19,7 @@ var FindComponents = cli.Command{
 	Description: `List all components on your datacenter.
 
    Example:
-    $ ernest component list ebs my_datacenter --service=my_service
+    $ ernest component list my_datacenter ebs --service=my_service
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
