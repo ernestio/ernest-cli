@@ -11,7 +11,13 @@ Ernest helps you deploy your vcloud infrastructure with a few shell commands.
 
 ## Installation
 
-In order to install it and have it running, you just need to run the following commands:
+### Master Branch
+
+Follow the instructions [here](http://docs.ernest.io/downloads/) to install the master branch of the cli.
+
+### Develop Branch
+
+In order to install the develop branch and have it running, you just need to run the following commands:
 
 ```
 $ git clone git@github.com:ernestio/ernest-cli.git
