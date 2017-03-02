@@ -40,7 +40,7 @@ You can get help by running:
 $ ernest-cli
 ```
 
-And read our documentation about [how to use the CLI](http://ernest.io/documentation/cli-guide/)
+And read our documentation about [how to use the CLI](http://docs.ernest.io/getting-started/)
 
 ## Running Tests
 
