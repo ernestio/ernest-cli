@@ -13,7 +13,7 @@ Ernest helps you deploy your vcloud infrastructure with a few shell commands.
 
 ### Master Branch
 
-Follow the instructions [here](http://docs.ernest.io/downloads/) to install the master branch of the cli.
+Follow the instructions [here](http://docs.ernest.io/downloads/) to install the appropriate master branch binary of the cli.
 
 ### Develop Branch
 
