@@ -61,7 +61,7 @@ var MonitorService = cli.Command{
 			return nil
 		}
 
-		helper.Monitorize(cfg.URL, cfg.Token, parts[len(parts)-1])
+		helper.Monitorize(cfg.URL, "/events", cfg.Token, parts[len(parts)-1])
 		runtime.Goexit()
 		return nil
 	},

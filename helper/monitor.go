@@ -15,12 +15,72 @@ import (
 
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
+	"github.com/hokaccha/go-prettyjson"
 	"github.com/r3labs/sse"
 )
 
+type print func([]byte)
+
 // Monitorize opens a websocket connection to get input messages
-func Monitorize(host, token, stream string) {
-	url := host + "/events"
+func Monitorize(host, endpoint, token, stream string) {
+	sseSubscribe(host, endpoint, token, stream, func(body []byte) {
+		m := model.Message{}
+
+		// clean msg body of any null characters
+		cleanedInput := bytes.Trim(body, "\x00")
+
+		err := json.Unmarshal(cleanedInput, &m)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		if m.Body == "error" || m.Body == "success" {
+			os.Exit(0)
+		}
+		PrintLine(m)
+	})
+}
+
+// PrintLogs : prints logs inline
+func PrintLogs(host, endpoint, token, stream string) {
+	sseSubscribe(host, endpoint, token, stream, func(body []byte) {
+		m := model.Message{}
+
+		// clean msg body of any null characters
+		cleanedInput := bytes.Trim(body, "\x00")
+
+		if err := json.Unmarshal(cleanedInput, &m); err != nil {
+			fmt.Println(err)
+		}
+
+		color.Yellow(m.Subject)
+		if len(m.Body) > 0 {
+			message, _ := prettyjson.Format([]byte(m.Body))
+			fmt.Println(string(message))
+		} else {
+			fmt.Println("-- Empty string --")
+		}
+	})
+}
+
+// PrintRawLogs : prints logs inline
+func PrintRawLogs(host, endpoint, token, stream string) {
+	sseSubscribe(host, endpoint, token, stream, func(body []byte) {
+		m := model.Message{}
+
+		// clean msg body of any null characters
+		cleanedInput := bytes.Trim(body, "\x00")
+
+		if err := json.Unmarshal(cleanedInput, &m); err != nil {
+			fmt.Println(err)
+		}
+
+		fmt.Println("[" + m.Subject + "] : " + m.Body)
+	})
+}
+
+func sseSubscribe(host, endpoint, token, stream string, fn print) {
+	url := host + endpoint
 	client := sse.NewClient(url)
 	client.EncodingBase64 = true
 	client.Connection.Transport = &http.Transport{
@@ -31,31 +91,13 @@ func Monitorize(host, token, stream string) {
 
 	err := client.Subscribe(stream, func(msg *sse.Event) {
 		if msg.Data != nil {
-			PrettyPrint(msg.Data)
+			fn(msg.Data)
 		}
 	})
 	if err != nil {
 		log.Println("Failed with: " + err.Error())
 		os.Exit(1)
 	}
-}
-
-// PrettyPrint unmarshals received messages and print it
-func PrettyPrint(body []byte) {
-	m := model.Message{}
-
-	// clean msg body of any null characters
-	cleanedInput := bytes.Trim(body, "\x00")
-
-	err := json.Unmarshal(cleanedInput, &m)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if m.Body == "error" || m.Body == "success" {
-		os.Exit(0)
-	}
-	PrintLine(m)
 }
 
 // PrintLine prints each received message on a line with its color

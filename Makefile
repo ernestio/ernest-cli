@@ -25,6 +25,8 @@ deps:
 	go get -u github.com/olekukonko/tablewriter
 	go get github.com/pmezard/go-difflib/difflib
 	go get github.com/skratchdot/open-golang/open
+	go get github.com/hokaccha/go-prettyjson
+	go get github.com/nu7hatch/gouuid
 
 dev-deps: deps
 	go get -u github.com/golang/lint/golint

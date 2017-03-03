@@ -6,6 +6,7 @@ package model
 
 // Message represents an incomming websocket message
 type Message struct {
-	Body  string `json:"body"`
-	Level string `json:"level"`
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
+	Level   string `json:"level"`
 }
