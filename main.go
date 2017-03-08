@@ -5,6 +5,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/ernestio/ernest-cli/command"
@@ -32,6 +33,9 @@ func main() {
 		command.CmdDocs,
 		command.CmdSetup,
 		command.CmdComponents,
+		command.CmdLog,
 	}
-	app.Run(os.Args)
+	if err := app.Run(os.Args); err != nil {
+		log.Println("Oops, something is broken")
+	}
 }

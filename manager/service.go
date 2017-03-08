@@ -126,7 +126,7 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 
 	if monit == true {
 		if str, ok := res["stream_id"].(string); ok {
-			helper.Monitorize(m.URL, token, str)
+			helper.Monitorize(m.URL, "/events", token, str)
 			runtime.Goexit()
 		}
 	}
@@ -183,7 +183,7 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	}
 
 	if monit == true {
-		go helper.Monitorize(m.URL, token, streamID)
+		go helper.Monitorize(m.URL, "/events", token, streamID)
 	} else {
 		println("Additionally you can trace your service on ernest monitor tool with id: " + streamID)
 	}
@@ -220,7 +220,7 @@ func (m *Manager) Import(token string, name string, datacenter string) (streamID
 		return "", nil
 	}
 
-	go helper.Monitorize(m.URL, token, streamID)
+	go helper.Monitorize(m.URL, "/events", token, streamID)
 
 	if body, _, err := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml"); err != nil {
 		return "", errors.New(body)

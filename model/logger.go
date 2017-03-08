@@ -13,4 +13,5 @@ type Logger struct {
 	Timeout     int    `json:"timeout"`
 	Token       string `json:"token"`
 	Environment string `json:"environment"`
+	UUID        string `json:"uuid"`
 }
