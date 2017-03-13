@@ -34,6 +34,7 @@ func main() {
 		command.CmdSetup,
 		command.CmdComponents,
 		command.CmdLog,
+		command.CmdUsage,
 	}
 	if err := app.Run(os.Args); err != nil {
 		log.Println("Oops, something is broken")
