@@ -102,7 +102,7 @@ func (m *Manager) ResetService(name string, token string) error {
 		return err
 	}
 	if s.Status != "in_progress" {
-		return errors.New("The service '" + name + "' can't be resetted as is on status '" + s.Status + "'")
+		return errors.New("The service '" + name + "' cannot be reset as its status is '" + s.Status + "'")
 	}
 	_, _, err = m.doRequest("/api/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
 	return err
