@@ -11,7 +11,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-const docURL = "http://ernest.io/documentation/"
+const docURL = "http://docs.ernest.io/documentation/"
 
 // CmdDocs : Open docs in the default browser
 var CmdDocs = cli.Command{
