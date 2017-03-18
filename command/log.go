@@ -45,7 +45,7 @@ var CmdLog = cli.Command{
 		}
 
 		if err := m.SetLogger(cfg.Token, logger); err != nil {
-			color.Red("Ernest wasn't able to setup sse logger")
+			color.Red(err.Error())
 			return nil
 		}
 
