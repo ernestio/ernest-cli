@@ -4,7 +4,10 @@
 
 package command
 
-import "github.com/urfave/cli"
+import (
+	"fmt"
+	"github.com/urfave/cli"
+)
 
 // Info command
 // Shows the current ernest target instance information
@@ -20,8 +23,8 @@ var Info = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		_, cfg := setup(c)
-		println("Current target : " + cfg.URL)
-		println("Current user : " + cfg.User)
+		fmt.Println("Current target : " + cfg.URL)
+		fmt.Println("Current user : " + cfg.User)
 		return nil
 	},
 }

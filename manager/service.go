@@ -7,6 +7,7 @@ package manager
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"runtime"
 	"strconv"
@@ -173,8 +174,8 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	}
 
 	color.Green("Environment creation requested")
-	println("Ernest will show you all output from your requested service creation")
-	println("You can cancel at any moment with Ctrl+C, even the service is still being created, you won't have any output")
+	fmt.Println("Ernest will show you all output from your requested service creation")
+	fmt.Println("You can cancel at any moment with Ctrl+C, even the service is still being created, you won't have any output")
 
 	streamID := m.GetUUID(token, payload)
 	if streamID == "" {
@@ -185,7 +186,7 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	if monit == true {
 		go helper.Monitorize(m.URL, "/events", token, streamID)
 	} else {
-		println("Additionally you can trace your service on ernest monitor tool with id: " + streamID)
+		fmt.Println("Additionally you can trace your service on ernest monitor tool with id: " + streamID)
 	}
 
 	if body, _, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
@@ -211,8 +212,8 @@ func (m *Manager) Import(token string, name string, datacenter string) (streamID
 	}
 
 	color.Green("Environment import requested")
-	println("Ernest will show you all output from your requested service creation")
-	println("You can cancel at any moment with Ctrl+C, even the service is still being imported, you won't have any output")
+	fmt.Println("Ernest will show you all output from your requested service creation")
+	fmt.Println("You can cancel at any moment with Ctrl+C, even the service is still being imported, you won't have any output")
 
 	streamID = m.GetUUID(token, payload)
 	if streamID == "" {
