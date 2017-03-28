@@ -9,4 +9,5 @@ type Message struct {
 	Subject string `json:"subject"`
 	Body    string `json:"body"`
 	Level   string `json:"level"`
+	User    string `json:"user"`
 }
