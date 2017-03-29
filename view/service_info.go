@@ -15,9 +15,6 @@ import (
 // PrintServiceInfo : Pretty print for service info
 func PrintServiceInfo(service *model.Service) {
 	fmt.Println("Name : " + service.Name)
-	if service.Vpc != "" {
-		fmt.Println("VPC : " + service.Vpc)
-	}
 	fmt.Println("Status : " + service.Status)
 	fmt.Println("Date : " + service.Version)
 	if service.Status == "errored" {
@@ -26,6 +23,19 @@ func PrintServiceInfo(service *model.Service) {
 		} else {
 			fmt.Println("Last known error : " + service.LastError)
 		}
+	}
+
+	if len(service.VPCs) == 0 {
+		fmt.Println("\nVPCs (empty)")
+		fmt.Println("")
+	} else {
+		fmt.Println("\nVPCs:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "ID", "Subnet"})
+		for _, v := range service.VPCs {
+			table.Append([]string{v.Name, v.ID, v.Subnet})
+		}
+		table.Render()
 	}
 
 	if len(service.ELBs) == 0 {
