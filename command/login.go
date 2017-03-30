@@ -7,6 +7,7 @@ package command
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
@@ -64,8 +65,15 @@ var Login = cli.Command{
 
 		if c.String("password") == "" {
 			fmt.Printf("Password: ")
-			pass, _ := gopass.GetPasswdMasked()
-			password = string(pass)
+			if runtime.GOOS == "windows" {
+				_, err := fmt.Scanf("%s", &password)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
+				}
+			} else {
+				pass, _ := gopass.GetPasswdMasked()
+				password = string(pass)
+			}
 		} else {
 			password = c.String("password")
 		}
