@@ -30,17 +30,11 @@ dependencies:
     - cp -R /home/ubuntu/ernest-cli $ROOTPATH/ernest-cli
     - make dev-deps
     - make install
-    - $ROOTPATH/ernest-cli/internal/ci_install_service.sh r3labs natsc master
-    - $ROOTPATH/ernest-cli/internal/ci_install_service.sh r3labs composable master
-    - mkdir /tmp/composable
-    - git clone git@github.com:ernestio/ernest.git /tmp/ernest 
-    - composable gen -E ERNEST_CRYPTO_KEY=$ERNEST_CRYPTO_KEY -G develop -exclude='*-aws-connector,*-vcloud-connector' /tmp/ernest/definition.yml ./internal/template.yml 
-    - docker-compose -f docker-compose.yml up -d
-    - docker-compose logs > /tmp/compose.log:
-          background: true
-    - $ROOTPATH/ernest-cli/internal/ci_setup.sh
+    - rm -rf $ROOTPATH/toolset/ && git clone git@github.com:ernestio/toolset.git $ROOTPATH/toolset/
+    - cd $ROOTPATH/toolset/ernestci/ && bundle install
 
 test:
   override:
     - cd $ROOTPATH/ernest-cli && make test
     - cd $ROOTPATH/ernest-cli && make lint
+    - ruby $ROOTPATH/toolset/ernestci/run.rb .ernest-ci
