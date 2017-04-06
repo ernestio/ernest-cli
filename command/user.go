@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"regexp"
 	"strconv"
 	"text/tabwriter"
 	"unicode"
@@ -81,12 +82,20 @@ var CreateUser = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
+
 		if len(c.Args()) < 1 {
 			color.Red("You should specify an user username and a password")
 			return nil
 		}
 		if len(c.Args()) < 2 {
 			color.Red("You should specify the user password")
+			return nil
+		}
+
+		// validate input for credentials
+		valid, msg := validCredentials(c.Args()[0], c.Args()[1])
+		if !valid {
+			color.Red(msg)
 			return nil
 		}
 
@@ -157,6 +166,14 @@ var PasswordUser = cli.Command{
 				color.Red("Please provide a valid password for the user with `--password`")
 				return nil
 			}
+
+			// validate input for credentials
+			valid, msg := validCredentials("", password)
+			if !valid {
+				color.Red(msg)
+				return nil
+			}
+
 			// Just change the password with the given values for the given user
 			usr, err := m.GetUserByUsername(cfg.Token, username)
 			if err = m.ChangePasswordByAdmin(cfg.Token, usr.ID, usr.Username, usr.GroupID, password); err != nil {
@@ -201,6 +218,13 @@ var PasswordUser = cli.Command{
 				fmt.Printf("Confirm new password: ")
 				rnpass, _ := gopass.GetPasswdMasked()
 				rnewpassword = string(rnpass)
+			}
+
+			// validate input for credentials
+			valid, msg := validCredentials("", newpassword)
+			if !valid {
+				color.Red(msg)
+				return nil
 			}
 
 			if newpassword != rnewpassword {
@@ -282,6 +306,24 @@ func randString(n int) string {
 		bs[i] = byte(g.Int64())
 	}
 	return string(bs)
+}
+
+func validCredentials(usr, pwd string) (bool, string) {
+	if usr != "" {
+		if m, _ := regexp.MatchString("^[a-zA-Z0-9@._-]*$", usr); !m {
+			return false, "Username can only contain the following characters: a-z, 0-9, @._-"
+		}
+	}
+	if pwd != "" {
+		if len(pwd) < 8 {
+			return false, "Minimum password length is 8 characters"
+		}
+		if m, _ := regexp.MatchString("^[a-zA-Z0-9@._-]*$", pwd); !m {
+			return false, "Password can only contain the following characters: a-z, 0-9, @._-"
+		}
+	}
+
+	return true, ""
 }
 
 // CmdUser ...
