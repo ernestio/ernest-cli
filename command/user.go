@@ -7,6 +7,7 @@ package command
 // CmdUser subcommand
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"math/big"
 	"os"
@@ -82,7 +83,6 @@ var CreateUser = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-
 		if len(c.Args()) < 1 {
 			color.Red("You should specify an user username and a password")
 			return nil
@@ -92,10 +92,13 @@ var CreateUser = cli.Command{
 			return nil
 		}
 
-		// validate input for credentials
-		valid, msg := validCredentials(c.Args()[0], c.Args()[1])
-		if !valid {
-			color.Red(msg)
+		// validate credentials
+		if err := validateUsername(c.Args()[0]); err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		if err := validatePassword(c.Args()[1]); err != nil {
+			color.Red(err.Error())
 			return nil
 		}
 
@@ -167,10 +170,9 @@ var PasswordUser = cli.Command{
 				return nil
 			}
 
-			// validate input for credentials
-			valid, msg := validCredentials("", password)
-			if !valid {
-				color.Red(msg)
+			// validate password
+			if err := validatePassword(password); err != nil {
+				color.Red(err.Error())
 				return nil
 			}
 
@@ -220,10 +222,9 @@ var PasswordUser = cli.Command{
 				rnewpassword = string(rnpass)
 			}
 
-			// validate input for credentials
-			valid, msg := validCredentials("", newpassword)
-			if !valid {
-				color.Red(msg)
+			// validate password
+			if err := validatePassword(newpassword); err != nil {
+				color.Red(err.Error())
 				return nil
 			}
 
@@ -308,22 +309,35 @@ func randString(n int) string {
 	return string(bs)
 }
 
-func validCredentials(usr, pwd string) (bool, string) {
-	if usr != "" {
-		if m, _ := regexp.MatchString("^[a-zA-Z0-9@._-]*$", usr); !m {
-			return false, "Username can only contain the following characters: a-z, 0-9, @._-"
-		}
+func validateUsername(username string) error {
+	if username == "" {
+		return errors.New("Username can't be empty")
 	}
-	if pwd != "" {
-		if len(pwd) < 8 {
-			return false, "Minimum password length is 8 characters"
-		}
-		if m, _ := regexp.MatchString("^[a-zA-Z0-9@._-]*$", pwd); !m {
-			return false, "Password can only contain the following characters: a-z, 0-9, @._-"
-		}
+	if m, err := regexp.MatchString("^[a-zA-Z0-9@._-]*$", username); err != nil {
+		return errors.New(err)
+	}
+	if !m {
+		return errors.New("Username can only contain the following characters: a-z, 0-9, @._-")
 	}
 
-	return true, ""
+	return nil
+}
+
+func validatePassword(password string) error {
+	if password == "" {
+		return errors.New("Password can't be empty")
+	}
+	if len(password) < 8 {
+		return errors.New("Minimum password length is 8 characters")
+	}
+	if m, err := regexp.MatchString("^[a-zA-Z0-9@._-]*$", password); err != nil {
+		return errors.New(err)
+	}
+	if !m {
+		return errors.New("Password can only contain the following characters: a-z, 0-9, @._-")
+	}
+
+	return nil
 }
 
 // CmdUser ...
