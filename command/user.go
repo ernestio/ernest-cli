@@ -92,7 +92,6 @@ var CreateUser = cli.Command{
 			return nil
 		}
 
-		// validate credentials
 		if err := validateUsername(c.Args()[0]); err != nil {
 			color.Red(err.Error())
 			return nil
@@ -170,7 +169,6 @@ var PasswordUser = cli.Command{
 				return nil
 			}
 
-			// validate password
 			if err := validatePassword(password); err != nil {
 				color.Red(err.Error())
 				return nil
@@ -222,7 +220,6 @@ var PasswordUser = cli.Command{
 				rnewpassword = string(rnpass)
 			}
 
-			// validate password
 			if err := validatePassword(newpassword); err != nil {
 				color.Red(err.Error())
 				return nil
@@ -313,8 +310,9 @@ func validateUsername(username string) error {
 	if username == "" {
 		return errors.New("Username can't be empty")
 	}
-	if m, err := regexp.MatchString("^[a-zA-Z0-9@._-]*$", username); err != nil {
-		return errors.New(err)
+	m, err := regexp.MatchString("^[a-zA-Z0-9@._-]*$", username)
+	if err != nil {
+		return err
 	}
 	if !m {
 		return errors.New("Username can only contain the following characters: a-z, 0-9, @._-")
@@ -330,8 +328,9 @@ func validatePassword(password string) error {
 	if len(password) < 8 {
 		return errors.New("Minimum password length is 8 characters")
 	}
-	if m, err := regexp.MatchString("^[a-zA-Z0-9@._-]*$", password); err != nil {
-		return errors.New(err)
+	m, err := regexp.MatchString("^[a-zA-Z0-9@._-]*$", password)
+	if err != nil {
+		return err
 	}
 	if !m {
 		return errors.New("Password can only contain the following characters: a-z, 0-9, @._-")
