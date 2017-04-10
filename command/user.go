@@ -308,14 +308,14 @@ func randString(n int) string {
 
 func validateUsername(username string) error {
 	if username == "" {
-		return errors.New("Username can't be empty")
+		return errors.New("Username cannot be empty")
 	}
 	m, err := regexp.MatchString("^[a-zA-Z0-9@._-]*$", username)
 	if err != nil {
 		return err
 	}
 	if !m {
-		return errors.New("Username can only contain the following characters: a-z, 0-9, @._-")
+		return errors.New("Username can only contain the following characters: a-z 0-9 @._-")
 	}
 
 	return nil
@@ -323,7 +323,7 @@ func validateUsername(username string) error {
 
 func validatePassword(password string) error {
 	if password == "" {
-		return errors.New("Password can't be empty")
+		return errors.New("Password cannot be empty")
 	}
 	if len(password) < 8 {
 		return errors.New("Minimum password length is 8 characters")
@@ -333,7 +333,7 @@ func validatePassword(password string) error {
 		return err
 	}
 	if !m {
-		return errors.New("Password can only contain the following characters: a-z, 0-9, @._-")
+		return errors.New("Password can only contain the following characters: a-z 0-9 @._-")
 	}
 
 	return nil
