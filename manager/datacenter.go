@@ -38,6 +38,19 @@ func (m *Manager) CreateAWSDatacenter(token string, name string, rtype string, r
 	return body, err
 }
 
+// CreateAzureDatacenter : Creates an Azure datacenter
+func (m *Manager) CreateAzureDatacenter(token, name, rtype, region, subscriptionID, clientID, clientSecret, tenantID, environment string) (string, error) {
+	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region":"` + region + `", "username":"` + name + `", "azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}`)
+	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
+	if err != nil {
+		if res.StatusCode == 409 {
+			return "Datacenter '" + name + "' already exists, please specify a different name", err
+		}
+		return body, err
+	}
+	return body, err
+}
+
 // ListDatacenters : Lists all datacenters on your account
 func (m *Manager) ListDatacenters(token string) (datacenters []model.Datacenter, err error) {
 	body, _, err := m.doRequest("/api/datacenters/", "GET", []byte(""), token, "")
@@ -100,6 +113,27 @@ func (m *Manager) UpdateAWSDatacenter(token, name, awsAccessKeyID, awsSecretAcce
 	id := strconv.Itoa(g.ID)
 
 	payload := []byte(`{"aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}`)
+	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
+	if err != nil {
+		if res.StatusCode == 400 {
+			return errors.New(body)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+// UpdateAzureDatacenter : updates awsdatacenter details
+func (m *Manager) UpdateAzureDatacenter(token, name, subscriptionID, clientID, clientSecret, tenantID, environment string) (err error) {
+	g, err := m.getDatacenterByName(token, name)
+	if err != nil {
+		return errors.New("Datacenter '" + name + "' does not exist, please specify a different datacenter name")
+	}
+	id := strconv.Itoa(g.ID)
+
+	payload := []byte(`{"azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}`)
 	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res.StatusCode == 400 {

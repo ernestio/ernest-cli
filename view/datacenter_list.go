@@ -23,6 +23,7 @@ func PrintDatacenterList(datacenters []model.Datacenter) {
 
 	var aws []model.Datacenter
 	var vcloud []model.Datacenter
+	var azure []model.Datacenter
 
 	for _, d := range datacenters {
 		switch d.Type {
@@ -30,6 +31,8 @@ func PrintDatacenterList(datacenters []model.Datacenter) {
 			aws = append(aws, d)
 		case "vcloud", "vcloud-fake":
 			vcloud = append(vcloud, d)
+		case "azure", "azure-fake":
+			azure = append(azure, d)
 		}
 	}
 
@@ -58,6 +61,18 @@ func PrintDatacenterList(datacenters []model.Datacenter) {
 				org = parts[1]
 			}
 			table.Append([]string{id, d.Name, d.GroupName, d.Type, d.VCloudURL, d.ExternalNetwork, org})
+		}
+		table.Render()
+	}
+
+	if len(azure) > 0 {
+		fmt.Println("")
+		fmt.Println("Azure Datacenters")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"ID", "Name", "Group", "Type", "Region"})
+		for _, d := range azure {
+			id := strconv.Itoa(d.ID)
+			table.Append([]string{id, d.Name, d.GroupName, d.Type, d.Region})
 		}
 		table.Render()
 	}
