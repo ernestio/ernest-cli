@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
@@ -53,7 +54,8 @@ func PrintLogs(host, endpoint, token, stream string) {
 			fmt.Println(err)
 		}
 
-		color.Yellow(m.Subject)
+		yellow := color.New(color.FgYellow).PrintfFunc()
+		yellow("%s level=%s user=%s : %s\n", time.Now().Format("02/01/2006 15:04:05"), m.Level, m.User, m.Subject)
 		if len(m.Body) > 0 {
 			message, _ := prettyjson.Format([]byte(m.Body))
 			fmt.Println(string(message))
@@ -75,7 +77,7 @@ func PrintRawLogs(host, endpoint, token, stream string) {
 			fmt.Println(err)
 		}
 
-		fmt.Println("[" + m.Subject + "] : " + m.Body)
+		fmt.Println(time.Now().Format("02/01/2006 15:04:05"), "level="+m.Level, "user="+m.User, ":", m.Subject+" ", m.Body)
 	})
 }
 
