@@ -7,9 +7,11 @@ package command
 // CmdUser subcommand
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"math/big"
 	"os"
+	"regexp"
 	"strconv"
 	"text/tabwriter"
 	"unicode"
@@ -90,6 +92,15 @@ var CreateUser = cli.Command{
 			return nil
 		}
 
+		if err := validateUsername(c.Args()[0]); err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		if err := validatePassword(c.Args()[1]); err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+
 		usr := c.Args()[0]
 		email := c.String("email")
 		pwd := c.Args()[1]
@@ -157,6 +168,12 @@ var PasswordUser = cli.Command{
 				color.Red("Please provide a valid password for the user with `--password`")
 				return nil
 			}
+
+			if err := validatePassword(password); err != nil {
+				color.Red(err.Error())
+				return nil
+			}
+
 			// Just change the password with the given values for the given user
 			usr, err := m.GetUserByUsername(cfg.Token, username)
 			if err = m.ChangePasswordByAdmin(cfg.Token, usr.ID, usr.Username, usr.GroupID, password); err != nil {
@@ -201,6 +218,11 @@ var PasswordUser = cli.Command{
 				fmt.Printf("Confirm new password: ")
 				rnpass, _ := gopass.GetPasswdMasked()
 				rnewpassword = string(rnpass)
+			}
+
+			if err := validatePassword(newpassword); err != nil {
+				color.Red(err.Error())
+				return nil
 			}
 
 			if newpassword != rnewpassword {
@@ -282,6 +304,39 @@ func randString(n int) string {
 		bs[i] = byte(g.Int64())
 	}
 	return string(bs)
+}
+
+func validateUsername(username string) error {
+	if username == "" {
+		return errors.New("Username cannot be empty")
+	}
+	m, err := regexp.MatchString("^[a-zA-Z0-9@._-]*$", username)
+	if err != nil {
+		return err
+	}
+	if !m {
+		return errors.New("Username can only contain the following characters: a-z 0-9 @._-")
+	}
+
+	return nil
+}
+
+func validatePassword(password string) error {
+	if password == "" {
+		return errors.New("Password cannot be empty")
+	}
+	if len(password) < 8 {
+		return errors.New("Minimum password length is 8 characters")
+	}
+	m, err := regexp.MatchString("^[a-zA-Z0-9@._-]*$", password)
+	if err != nil {
+		return err
+	}
+	if !m {
+		return errors.New("Password can only contain the following characters: a-z 0-9 @._-")
+	}
+
+	return nil
 }
 
 // CmdUser ...
