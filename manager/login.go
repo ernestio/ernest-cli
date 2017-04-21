@@ -12,6 +12,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/ernestio/ernest-cli/helper"
 	"github.com/fatih/color"
 )
 
@@ -35,18 +36,19 @@ func (m *Manager) Login(username string, password string) (token string, err err
 	if err != nil {
 		return "", err
 	}
-
-	if resp.StatusCode != 200 {
-		return "", errors.New("The keypair user / password does not match any user on the database, please try again")
-	}
 	defer resp.Body.Close()
 
-	responseBody, err := ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		color.Red(err.Error())
 	}
 
-	err = json.Unmarshal(responseBody, &t)
+	if resp.StatusCode != 200 {
+		e := helper.ResponseMessage(body)
+		return "", errors.New(e.Message)
+	}
+
+	err = json.Unmarshal(body, &t)
 	if err != nil {
 		color.Red(err.Error())
 	}

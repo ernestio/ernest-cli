@@ -9,6 +9,7 @@ import (
 	"errors"
 	"strconv"
 
+	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 )
 
@@ -58,16 +59,11 @@ func (m *Manager) GetUser(token string, userid string) (user model.User, err err
 // CreateUser ...
 func (m *Manager) CreateUser(token string, name string, email string, user string, password string) error {
 	payload := []byte(`{"group_id": 0, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
-	_, resp, err := m.doRequest("/api/users/", "POST", payload, token, "")
+	body, resp, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
-		if resp.StatusCode == 409 {
-			return errors.New("Specified username already existis please choose a different one")
-		}
-		if resp.StatusCode == 400 {
-			return errors.New("You're not allowed to perform this action, please log in")
-		}
-		if resp.StatusCode == 403 {
-			return errors.New("You're not allowed to perform this action, please contact your admin")
+		if resp.StatusCode != 200 {
+			e := helper.ResponseMessage([]byte(body))
+			return errors.New(e.Message)
 		}
 		return err
 	}
@@ -77,8 +73,12 @@ func (m *Manager) CreateUser(token string, name string, email string, user strin
 // ChangePassword ...
 func (m *Manager) ChangePassword(token string, userid int, username string, usergroup int, oldpassword string, newpassword string) error {
 	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "group_id": ` + strconv.Itoa(usergroup) + `, "password": "` + newpassword + `", "oldpassword": "` + oldpassword + `"}`)
-	_, _, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
+		if resp.StatusCode != 200 {
+			e := helper.ResponseMessage([]byte(body))
+			return errors.New(e.Message)
+		}
 		return err
 	}
 	return nil
@@ -87,8 +87,12 @@ func (m *Manager) ChangePassword(token string, userid int, username string, user
 // ChangePasswordByAdmin ...
 func (m *Manager) ChangePasswordByAdmin(token string, userid int, username string, usergroup int, newpassword string) error {
 	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "group_id": ` + strconv.Itoa(usergroup) + `, "password": "` + newpassword + `"}`)
-	_, _, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
+		if resp.StatusCode != 200 {
+			e := helper.ResponseMessage([]byte(body))
+			return errors.New(e.Message)
+		}
 		return err
 	}
 	return nil
