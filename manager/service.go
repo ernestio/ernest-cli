@@ -199,13 +199,15 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 }
 
 // Import : Imports an existing service
-func (m *Manager) Import(token string, name string, datacenter string) (streamID string, err error) {
+func (m *Manager) Import(token string, name string, datacenter string, filters []string) (streamID string, err error) {
 	var s struct {
-		Name       string `json:"name"`
-		Datacenter string `json:"datacenter"`
+		Name          string   `json:"name"`
+		Datacenter    string   `json:"datacenter"`
+		ImportFilters []string `json:"import_filers,omitempty"`
 	}
 	s.Name = name
 	s.Datacenter = datacenter
+	s.ImportFilters = filters
 	payload, err := json.Marshal(s)
 	if err != nil {
 		return "", errors.New("Invalid name or datacenter")

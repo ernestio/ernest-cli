@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
@@ -367,6 +368,11 @@ var ImportService = cli.Command{
 			Value: "",
 			Usage: "Datacenter name",
 		},
+		cli.StringFlag{
+			Name:  "filters",
+			Value: "",
+			Usage: "Import filters comma delimited list",
+		},
 	},
 	Usage: "$ ernest service import <my_datacenter> <my_service>",
 	Description: `Will import te service <my_service> from datacenter <datacenter_name>
@@ -376,6 +382,7 @@ var ImportService = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		var err error
+		var filters []string
 
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -392,9 +399,13 @@ var ImportService = cli.Command{
 			return nil
 		}
 
+		if c.String("filters") != "" {
+			filters = strings.Split(c.String("filters"), ",")
+		}
+
 		datacenter := c.Args()[0]
 		name := c.Args()[1]
-		_, err = m.Import(cfg.Token, name, datacenter)
+		_, err = m.Import(cfg.Token, name, datacenter, filters)
 
 		if err != nil {
 			color.Red(err.Error())
