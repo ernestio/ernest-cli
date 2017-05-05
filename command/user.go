@@ -157,6 +157,7 @@ var PasswordUser = cli.Command{
 				color.Red("Please provide a valid password for the user with `--password`")
 				return nil
 			}
+
 			// Just change the password with the given values for the given user
 			usr, err := m.GetUserByUsername(cfg.Token, username)
 			if err = m.ChangePasswordByAdmin(cfg.Token, usr.ID, usr.Username, usr.GroupID, password); err != nil {
