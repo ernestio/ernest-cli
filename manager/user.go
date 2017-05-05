@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"strings"
 
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
@@ -63,6 +64,9 @@ func (m *Manager) CreateUser(token string, name string, email string, user strin
 	if err != nil {
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
+			if strings.Contains(e.Message, "invalid jwt") {
+				return errors.New("You're not allowed to perform this action, please log in")
+			}
 			return errors.New(e.Message)
 		}
 		return err
