@@ -203,7 +203,7 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 	var s struct {
 		Name          string   `json:"name"`
 		Datacenter    string   `json:"datacenter"`
-		ImportFilters []string `json:"import_filers,omitempty"`
+		ImportFilters []string `json:"import_filters,omitempty"`
 	}
 	s.Name = name
 	s.Datacenter = datacenter
