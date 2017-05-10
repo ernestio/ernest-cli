@@ -17,6 +17,9 @@ func (m *Manager) CreateVcloudDatacenter(token string, name string, rtype string
 	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region": "", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
 	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
+		if res == nil {
+			return "", errors.New("Connection refused")
+		}
 		if res.StatusCode == 409 {
 			return "Datacenter '" + name + "' already exists, please specify a different name", err
 		}
@@ -30,6 +33,9 @@ func (m *Manager) CreateAWSDatacenter(token string, name string, rtype string, r
 	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region":"` + region + `", "username":"` + name + `", "aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}`)
 	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
+		if res == nil {
+			return "", errors.New("Connection refused")
+		}
 		if res.StatusCode == 409 {
 			return "Datacenter '" + name + "' already exists, please specify a different name", err
 		}
@@ -43,6 +49,9 @@ func (m *Manager) CreateAzureDatacenter(token, name, rtype, region, subscription
 	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region":"` + region + `", "username":"` + name + `", "azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}`)
 	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
+		if res == nil {
+			return "", errors.New("Connection refused")
+		}
 		if res.StatusCode == 409 {
 			return "Datacenter '" + name + "' already exists, please specify a different name", err
 		}
@@ -53,8 +62,11 @@ func (m *Manager) CreateAzureDatacenter(token, name, rtype, region, subscription
 
 // ListDatacenters : Lists all datacenters on your account
 func (m *Manager) ListDatacenters(token string) (datacenters []model.Datacenter, err error) {
-	body, _, err := m.doRequest("/api/datacenters/", "GET", []byte(""), token, "")
+	body, res, err := m.doRequest("/api/datacenters/", "GET", []byte(""), token, "")
 	if err != nil {
+		if res == nil {
+			return nil, errors.New("Connection refused")
+		}
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &datacenters)
@@ -74,6 +86,9 @@ func (m *Manager) DeleteDatacenter(token string, name string) (err error) {
 
 	body, res, err := m.doRequest("/api/datacenters/"+id, "DELETE", []byte(""), token, "")
 	if err != nil {
+		if res == nil {
+			return errors.New("Connection refused")
+		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
 		}
@@ -94,6 +109,9 @@ func (m *Manager) UpdateVCloudDatacenter(token, name, user, password string) (er
 	payload := []byte(`{"username":"` + user + `", "password":"` + password + `"}`)
 	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
 	if err != nil {
+		if res == nil {
+			return errors.New("Connection refused")
+		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
 		}
@@ -115,6 +133,9 @@ func (m *Manager) UpdateAWSDatacenter(token, name, awsAccessKeyID, awsSecretAcce
 	payload := []byte(`{"aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}`)
 	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
 	if err != nil {
+		if res == nil {
+			return errors.New("Connection refused")
+		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
 		}
@@ -136,6 +157,9 @@ func (m *Manager) UpdateAzureDatacenter(token, name, subscriptionID, clientID, c
 	payload := []byte(`{"azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}`)
 	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
 	if err != nil {
+		if res == nil {
+			return errors.New("Connection refused")
+		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
 		}
