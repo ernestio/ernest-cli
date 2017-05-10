@@ -18,6 +18,9 @@ import (
 func (m *Manager) ListUsers(token string) (users []model.User, err error) {
 	body, resp, err := m.doRequest("/api/users/", "GET", []byte(""), token, "")
 	if err != nil {
+		if resp == nil {
+			return nil, errors.New("Connection refused")
+		}
 		if resp.StatusCode == 400 {
 			return users, errors.New("You're not allowed to perform this action, please log in")
 		}
@@ -46,11 +49,14 @@ func (m *Manager) GetUserByUsername(token string, name string) (user model.User,
 
 // GetUser ...
 func (m *Manager) GetUser(token string, userid string) (user model.User, err error) {
-	res, _, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
 	if err != nil {
+		if resp == nil {
+			return user, errors.New("Connection refused")
+		}
 		return user, err
 	}
-	err = json.Unmarshal([]byte(res), &user)
+	err = json.Unmarshal([]byte(body), &user)
 	if err != nil {
 		return user, err
 	}
@@ -62,6 +68,9 @@ func (m *Manager) CreateUser(token string, name string, email string, user strin
 	payload := []byte(`{"group_id": 0, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
 	body, resp, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
+		if resp == nil {
+			return errors.New("Connection refused")
+		}
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
 			if strings.Contains(e.Message, "invalid jwt") {

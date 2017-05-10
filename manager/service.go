@@ -19,9 +19,11 @@ import (
 
 // ListServices ...
 func (m *Manager) ListServices(token string) (services []model.Service, err error) {
-	body, _, err := m.doRequest("/api/services/", "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/services/", "GET", []byte(""), token, "")
 	if err != nil {
-
+		if resp == nil {
+			return nil, errors.New("Connection refused")
+		}
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &services)
@@ -33,8 +35,11 @@ func (m *Manager) ListServices(token string) (services []model.Service, err erro
 
 // ListBuilds ...
 func (m *Manager) ListBuilds(name string, token string) (builds []model.Service, err error) {
-	body, _, err := m.doRequest("/api/services/"+name+"/builds/", "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/services/"+name+"/builds/", "GET", []byte(""), token, "")
 	if err != nil {
+		if resp == nil {
+			return nil, errors.New("Connection refused")
+		}
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &builds)
@@ -48,6 +53,9 @@ func (m *Manager) ListBuilds(name string, token string) (builds []model.Service,
 func (m *Manager) ServiceStatus(token string, serviceName string) (service model.Service, err error) {
 	body, resp, err := m.doRequest("/api/services/"+serviceName, "GET", []byte(""), token, "")
 	if err != nil {
+		if resp == nil {
+			return service, errors.New("Connection refused")
+		}
 		if resp.StatusCode == 403 {
 			return service, errors.New("You don't have permissions to perform this action")
 		}
@@ -78,6 +86,9 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 
 	body, resp, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
 	if err != nil {
+		if resp == nil {
+			return service, errors.New("Connection refused")
+		}
 		if resp.StatusCode == 403 {
 			return service, errors.New("You don't have permissions to perform this action")
 		}
@@ -105,7 +116,12 @@ func (m *Manager) ResetService(name string, token string) error {
 	if s.Status != "in_progress" {
 		return errors.New("The service '" + name + "' cannot be reset as its status is '" + s.Status + "'")
 	}
-	_, _, err = m.doRequest("/api/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
+	_, resp, err := m.doRequest("/api/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
+	if err != nil {
+		if resp == nil {
+			return errors.New("Connection refused")
+		}
+	}
 	return err
 }
 
@@ -121,6 +137,9 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 
 	body, resp, err := m.doRequest("/api/services/"+name, "DELETE", nil, token, "application/yaml")
 	if err != nil {
+		if resp == nil {
+			return errors.New("Connection refused")
+		}
 		if resp.StatusCode == 404 {
 			return errors.New("Specified service name does not exist")
 		}
@@ -147,6 +166,9 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 func (m *Manager) ForceDestroy(token, name string) error {
 	_, resp, err := m.doRequest("/api/services/"+name+"/force/", "DELETE", nil, token, "application/yaml")
 	if err != nil {
+		if resp == nil {
+			return errors.New("Connection refused")
+		}
 		if resp.StatusCode == 404 {
 			return errors.New("Specified service name does not exist")
 		}
@@ -197,7 +219,10 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 		fmt.Println("Additionally you can trace your service on ernest monitor tool with id: " + streamID)
 	}
 
-	if body, _, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
+	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
+		if resp == nil {
+			return "", errors.New("Connection refused")
+		}
 		var internalError struct {
 			Message string `json:"message"`
 		}
@@ -206,6 +231,7 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 		}
 		return "", errors.New(internalError.Message)
 	}
+
 	if monit == true {
 		runtime.Goexit()
 	}
@@ -239,7 +265,10 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 
 	go helper.Monitorize(m.URL, "/events", token, streamID)
 
-	if body, _, err := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml"); err != nil {
+	if body, resp, err := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml"); err != nil {
+		if resp == nil {
+			return "", errors.New("Connection refused")
+		}
 		return "", errors.New(body)
 	}
 	runtime.Goexit()
