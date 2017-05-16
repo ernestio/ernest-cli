@@ -190,7 +190,13 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 	}
 
 	if body, _, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
-		return "", errors.New(body)
+		var internalError struct {
+			Message string `json:"message"`
+		}
+		if err := json.Unmarshal([]byte(body), &internalError); err != nil {
+			return "", errors.New(body)
+		}
+		return "", errors.New(internalError.Message)
 	}
 	if monit == true {
 		runtime.Goexit()
