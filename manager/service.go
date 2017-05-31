@@ -52,7 +52,7 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service model
 			return service, errors.New("You don't have permissions to perform this action")
 		}
 		if resp.StatusCode == 404 {
-			return service, errors.New("Specified service not found")
+			return service, errors.New("Specified service name does not exist")
 		}
 		return service, err
 	}
