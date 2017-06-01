@@ -52,7 +52,7 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service model
 			return service, errors.New("You don't have permissions to perform this action")
 		}
 		if resp.StatusCode == 404 {
-			return service, errors.New("Specified service not found")
+			return service, errors.New("Specified service name does not exist")
 		}
 		return service, err
 	}
@@ -111,6 +111,14 @@ func (m *Manager) ResetService(name string, token string) error {
 
 // Destroy : Destroys an existing service
 func (m *Manager) Destroy(token string, name string, monit bool) error {
+	s, err := m.ServiceStatus(token, name)
+	if err != nil {
+		return err
+	}
+	if s.Status == "in_progress" {
+		return errors.New("The service " + name + " cannot be destroyed as it is currently '" + s.Status + "'")
+	}
+
 	body, resp, err := m.doRequest("/api/services/"+name, "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp.StatusCode == 404 {
