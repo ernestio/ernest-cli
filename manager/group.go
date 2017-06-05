@@ -49,6 +49,9 @@ func (m *Manager) DeleteGroup(token string, group string) error {
 	id := strconv.Itoa(g.ID)
 
 	_, resp, err := m.doRequest("/api/groups/"+id, "DELETE", []byte(""), token, "")
+	if resp == nil {
+		return CONNECTIONREFUSED
+	}
 	if resp.StatusCode == 403 {
 		return errors.New("You're not allowed to perform this action, please log in")
 	}
@@ -63,6 +66,9 @@ func (m *Manager) DeleteGroup(token string, group string) error {
 func (m *Manager) CreateGroup(token string, group string) error {
 	payload := []byte(`{"name": "` + group + `"}`)
 	_, resp, err := m.doRequest("/api/groups/", "POST", payload, token, "")
+	if resp == nil {
+		return CONNECTIONREFUSED
+	}
 	if resp.StatusCode == 403 {
 		return errors.New("You're not allowed to perform this action, please log in")
 	}
@@ -78,8 +84,11 @@ func (m *Manager) CreateGroup(token string, group string) error {
 
 // ListGroups ...
 func (m *Manager) ListGroups(token string) (groups []model.Group, err error) {
-	body, _, err := m.doRequest("/api/groups/", "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/groups/", "GET", []byte(""), token, "")
 	if err != nil {
+		if resp == nil {
+			return nil, CONNECTIONREFUSED
+		}
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &groups)
@@ -107,6 +116,9 @@ func (m *Manager) GroupAddUser(token string, user string, group string) (err err
 
 	payload := []byte(`{"username": "` + user + `", "group": "` + group + `"}`)
 	_, resp, err := m.doRequest("/api/groups/"+group+"/users/", "POST", payload, token, "")
+	if resp == nil {
+		return CONNECTIONREFUSED
+	}
 	if resp.StatusCode == 403 {
 		return errors.New("You're not allowed to perform this action, please log in")
 	}
@@ -133,6 +145,9 @@ func (m *Manager) GroupRemoveUser(token string, user string, group string) (err 
 	groupid := strconv.Itoa(g.ID)
 
 	_, resp, err := m.doRequest("/api/groups/"+groupid+"/users/"+userid, "DELETE", []byte(""), token, "")
+	if resp == nil {
+		return CONNECTIONREFUSED
+	}
 	if resp.StatusCode == 403 {
 		return errors.New("You're not allowed to perform this action, please log in")
 	}
@@ -160,6 +175,9 @@ func (m *Manager) GroupAddDatacenter(token string, datacenter string, group stri
 	groupid := strconv.Itoa(g.ID)
 	payload := []byte(`{"datacenterid": "` + datacenterid + `", "groupid": "` + groupid + `"}`)
 	_, resp, err := m.doRequest("/api/groups/"+groupid+"/datacenters/", "POST", payload, token, "")
+	if resp == nil {
+		return CONNECTIONREFUSED
+	}
 	if resp.StatusCode == 403 {
 		return errors.New("You're not allowed to perform this action, please log in")
 	}
@@ -186,6 +204,9 @@ func (m *Manager) GroupRemoveDatacenter(token string, datacenter string, group s
 	groupid := strconv.Itoa(g.ID)
 
 	_, resp, err := m.doRequest("/api/groups/"+groupid+"/datacenters/"+datacenterid, "DELETE", []byte(""), token, "")
+	if resp == nil {
+		return CONNECTIONREFUSED
+	}
 	if resp.StatusCode == 403 {
 		return errors.New("You're not allowed to perform this action, please log in")
 	}

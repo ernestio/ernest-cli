@@ -39,6 +39,8 @@ type Session struct {
 	IsAdmin bool   `json:"admin"`
 }
 
+var CONNECTIONREFUSED = errors.New("Connection refused")
+
 func (m *Manager) client() *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -77,8 +79,11 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 
 func (m *Manager) createClient(token string, name string) (string, error) {
 	payload := []byte(`{"name":"` + name + `"}`)
-	body, _, err := m.doRequest("/api/groups/", "POST", payload, token, "")
+	body, resp, err := m.doRequest("/api/groups/", "POST", payload, token, "")
 	if err != nil {
+		if resp == nil {
+			return "", CONNECTIONREFUSED
+		}
 		return body, err
 	}
 
@@ -96,11 +101,14 @@ func (m *Manager) createClient(token string, name string) (string, error) {
 
 // GetSession ..
 func (m *Manager) GetSession(token string) (session Session, err error) {
-	res, _, err := m.doRequest("/api/session/", "GET", nil, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/session/", "GET", nil, token, "application/yaml")
 	if err != nil {
+		if resp == nil {
+			return session, CONNECTIONREFUSED
+		}
 		return session, err
 	}
-	err = json.Unmarshal([]byte(res), &session)
+	err = json.Unmarshal([]byte(body), &session)
 	if err != nil {
 		return session, err
 	}

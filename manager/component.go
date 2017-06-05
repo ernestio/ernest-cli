@@ -10,9 +10,11 @@ import (
 
 // FindComponents ...
 func (m *Manager) FindComponents(token, datacenter, component, service string) (components []interface{}, err error) {
-	body, _, err := m.doRequest("/api/components/"+component+"/?datacenter="+datacenter+"&service="+service, "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/components/"+component+"/?datacenter="+datacenter+"&service="+service, "GET", []byte(""), token, "")
 	if err != nil {
-
+		if resp == nil {
+			return nil, CONNECTIONREFUSED
+		}
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &components)
