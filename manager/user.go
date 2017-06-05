@@ -19,7 +19,7 @@ func (m *Manager) ListUsers(token string) (users []model.User, err error) {
 	body, resp, err := m.doRequest("/api/users/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return nil, errors.New("Connection refused")
+			return nil, CONNECTIONREFUSED
 		}
 		if resp.StatusCode == 400 {
 			return users, errors.New("You're not allowed to perform this action, please log in")
@@ -52,7 +52,7 @@ func (m *Manager) GetUser(token string, userid string) (user model.User, err err
 	body, resp, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return user, errors.New("Connection refused")
+			return user, CONNECTIONREFUSED
 		}
 		return user, err
 	}
@@ -69,7 +69,7 @@ func (m *Manager) CreateUser(token string, name string, email string, user strin
 	body, resp, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
 		if resp == nil {
-			return errors.New("Connection refused")
+			return CONNECTIONREFUSED
 		}
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))

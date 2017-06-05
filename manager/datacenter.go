@@ -18,7 +18,7 @@ func (m *Manager) CreateVcloudDatacenter(token string, name string, rtype string
 	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		if res == nil {
-			return "", errors.New("Connection refused")
+			return "", CONNECTIONREFUSED
 		}
 		if res.StatusCode == 409 {
 			return "Datacenter '" + name + "' already exists, please specify a different name", err
@@ -34,7 +34,7 @@ func (m *Manager) CreateAWSDatacenter(token string, name string, rtype string, r
 	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		if res == nil {
-			return "", errors.New("Connection refused")
+			return "", CONNECTIONREFUSED
 		}
 		if res.StatusCode == 409 {
 			return "Datacenter '" + name + "' already exists, please specify a different name", err
@@ -50,7 +50,7 @@ func (m *Manager) CreateAzureDatacenter(token, name, rtype, region, subscription
 	body, res, err := m.doRequest("/api/datacenters/", "POST", payload, token, "")
 	if err != nil {
 		if res == nil {
-			return "", errors.New("Connection refused")
+			return "", CONNECTIONREFUSED
 		}
 		if res.StatusCode == 409 {
 			return "Datacenter '" + name + "' already exists, please specify a different name", err
@@ -65,7 +65,7 @@ func (m *Manager) ListDatacenters(token string) (datacenters []model.Datacenter,
 	body, res, err := m.doRequest("/api/datacenters/", "GET", []byte(""), token, "")
 	if err != nil {
 		if res == nil {
-			return nil, errors.New("Connection refused")
+			return nil, CONNECTIONREFUSED
 		}
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (m *Manager) DeleteDatacenter(token string, name string) (err error) {
 	body, res, err := m.doRequest("/api/datacenters/"+id, "DELETE", []byte(""), token, "")
 	if err != nil {
 		if res == nil {
-			return errors.New("Connection refused")
+			return CONNECTIONREFUSED
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -110,7 +110,7 @@ func (m *Manager) UpdateVCloudDatacenter(token, name, user, password string) (er
 	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
-			return errors.New("Connection refused")
+			return CONNECTIONREFUSED
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -134,7 +134,7 @@ func (m *Manager) UpdateAWSDatacenter(token, name, awsAccessKeyID, awsSecretAcce
 	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
-			return errors.New("Connection refused")
+			return CONNECTIONREFUSED
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -158,7 +158,7 @@ func (m *Manager) UpdateAzureDatacenter(token, name, subscriptionID, clientID, c
 	body, res, err := m.doRequest("/api/datacenters/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
-			return errors.New("Connection refused")
+			return CONNECTIONREFUSED
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)

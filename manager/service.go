@@ -22,7 +22,7 @@ func (m *Manager) ListServices(token string) (services []model.Service, err erro
 	body, resp, err := m.doRequest("/api/services/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return nil, errors.New("Connection refused")
+			return nil, CONNECTIONREFUSED
 		}
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func (m *Manager) ListBuilds(name string, token string) (builds []model.Service,
 	body, resp, err := m.doRequest("/api/services/"+name+"/builds/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return nil, errors.New("Connection refused")
+			return nil, CONNECTIONREFUSED
 		}
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service model
 	body, resp, err := m.doRequest("/api/services/"+serviceName, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return service, errors.New("Connection refused")
+			return service, CONNECTIONREFUSED
 		}
 		if resp.StatusCode == 403 {
 			return service, errors.New("You don't have permissions to perform this action")
@@ -87,7 +87,7 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 	body, resp, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return service, errors.New("Connection refused")
+			return service, CONNECTIONREFUSED
 		}
 		if resp.StatusCode == 403 {
 			return service, errors.New("You don't have permissions to perform this action")
@@ -119,7 +119,7 @@ func (m *Manager) ResetService(name string, token string) error {
 	_, resp, err := m.doRequest("/api/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return errors.New("Connection refused")
+			return CONNECTIONREFUSED
 		}
 	}
 	return err
@@ -138,7 +138,7 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 	body, resp, err := m.doRequest("/api/services/"+name, "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return errors.New("Connection refused")
+			return CONNECTIONREFUSED
 		}
 		if resp.StatusCode == 404 {
 			return errors.New("Specified service name does not exist")
@@ -167,7 +167,7 @@ func (m *Manager) ForceDestroy(token, name string) error {
 	_, resp, err := m.doRequest("/api/services/"+name+"/force/", "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return errors.New("Connection refused")
+			return CONNECTIONREFUSED
 		}
 		if resp.StatusCode == 404 {
 			return errors.New("Specified service name does not exist")
@@ -221,7 +221,7 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 
 	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
-			return "", errors.New("Connection refused")
+			return "", CONNECTIONREFUSED
 		}
 		var internalError struct {
 			Message string `json:"message"`
@@ -267,7 +267,7 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 
 	if body, resp, err := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
-			return "", errors.New("Connection refused")
+			return "", CONNECTIONREFUSED
 		}
 		return "", errors.New(body)
 	}

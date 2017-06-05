@@ -39,6 +39,8 @@ type Session struct {
 	IsAdmin bool   `json:"admin"`
 }
 
+var CONNECTIONREFUSED = errors.New("Connection refused")
+
 func (m *Manager) client() *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -80,7 +82,7 @@ func (m *Manager) createClient(token string, name string) (string, error) {
 	body, resp, err := m.doRequest("/api/groups/", "POST", payload, token, "")
 	if err != nil {
 		if resp == nil {
-			return "", errors.New("Connection refused")
+			return "", CONNECTIONREFUSED
 		}
 		return body, err
 	}
@@ -102,7 +104,7 @@ func (m *Manager) GetSession(token string) (session Session, err error) {
 	body, resp, err := m.doRequest("/api/session/", "GET", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return session, errors.New("Connection refused")
+			return session, CONNECTIONREFUSED
 		}
 		return session, err
 	}
