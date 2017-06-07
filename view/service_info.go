@@ -25,10 +25,7 @@ func PrintServiceInfo(service *model.Service) {
 		}
 	}
 
-	if len(service.VPCs) == 0 {
-		fmt.Println("\nVPCs (empty)")
-		fmt.Println("")
-	} else {
+	if len(service.VPCs) > 0 {
 		fmt.Println("\nVPCs:")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "ID", "Subnet"})
@@ -38,10 +35,7 @@ func PrintServiceInfo(service *model.Service) {
 		table.Render()
 	}
 
-	if len(service.ELBs) == 0 {
-		fmt.Println("\nELBs (empty)")
-		fmt.Println("")
-	} else {
+	if len(service.ELBs) > 0 {
 		fmt.Println("\nELBs:")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "DNS Name"})
@@ -51,10 +45,7 @@ func PrintServiceInfo(service *model.Service) {
 		table.Render()
 	}
 
-	if len(service.Networks) == 0 {
-		fmt.Println("\nNetworks (empty)")
-		fmt.Println("")
-	} else {
+	if len(service.Networks) > 0 {
 		fmt.Println("\nNetworks:")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "ID", "Availability Zone"})
@@ -64,10 +55,7 @@ func PrintServiceInfo(service *model.Service) {
 		table.Render()
 	}
 
-	if len(service.Instances) == 0 {
-		fmt.Println("\nInstances (empty)")
-		fmt.Println("")
-	} else {
+	if len(service.Instances) > 0 {
 		fmt.Println("\nInstances:")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "ID", "Public IP", "Private IP"})
@@ -77,10 +65,7 @@ func PrintServiceInfo(service *model.Service) {
 		table.Render()
 	}
 
-	if len(service.Nats) == 0 {
-		fmt.Println("\nNAT gateways (empty)")
-		fmt.Println("")
-	} else {
+	if len(service.Nats) > 0 {
 		fmt.Println("\nNAT gateways:")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Group ID"})
@@ -90,10 +75,7 @@ func PrintServiceInfo(service *model.Service) {
 		table.Render()
 	}
 
-	if len(service.SecurityGroups) == 0 {
-		fmt.Println("\nSecurity groups (empty)")
-		fmt.Println("")
-	} else {
+	if len(service.SecurityGroups) > 0 {
 		fmt.Println("\nSecurity groups:")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Group ID"})
@@ -103,10 +85,7 @@ func PrintServiceInfo(service *model.Service) {
 		table.Render()
 	}
 
-	if len(service.RDSClusters) == 0 {
-		fmt.Println("\nRDS Clusters (empty)")
-		fmt.Println("")
-	} else {
+	if len(service.RDSClusters) > 0 {
 		fmt.Println("\nRDS Clusters:")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Endpoint"})
@@ -116,10 +95,7 @@ func PrintServiceInfo(service *model.Service) {
 		table.Render()
 	}
 
-	if len(service.RDSInstances) == 0 {
-		fmt.Println("\nRDS Instances (empty)")
-		fmt.Println("")
-	} else {
+	if len(service.RDSInstances) > 0 {
 		fmt.Println("\nRDS Instances:")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Endpoint"})
@@ -129,15 +105,42 @@ func PrintServiceInfo(service *model.Service) {
 		table.Render()
 	}
 
-	if len(service.EBSVolumes) == 0 {
-		fmt.Println("\nEBS Volumes (empty)")
-		fmt.Println("")
-	} else {
+	if len(service.EBSVolumes) > 0 {
 		fmt.Println("\nEBS Volumes:")
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Volume ID"})
 		for _, v := range service.EBSVolumes {
 			table.Append([]string{v.Name, v.VolumeAWSID})
+		}
+		table.Render()
+	}
+
+	if len(service.LoadBalancers) > 0 {
+		fmt.Println("\nLoad Balancers:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "IP"})
+		for _, v := range service.LoadBalancers {
+			table.Append([]string{v.Name, v.PublicIP})
+		}
+		table.Render()
+	}
+
+	if len(service.VirtualMachines) > 0 {
+		fmt.Println("\nVirtual Machines:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "Public IP", "Private IP"})
+		for _, v := range service.VirtualMachines {
+			table.Append([]string{v.Name, v.PublicIP, v.PrivateIP})
+		}
+		table.Render()
+	}
+
+	if len(service.SQLDatabases) > 0 {
+		fmt.Println("\nSQL Databases:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "Server Name"})
+		for _, v := range service.SQLDatabases {
+			table.Append([]string{v.Name, v.ServerName})
 		}
 		table.Render()
 	}

@@ -56,4 +56,20 @@ type Service struct {
 		Name        string `json:"name"`
 		VolumeAWSID string `json:"volume_aws_id"`
 	} `json:"ebs_volumes"`
+	LoadBalancers []struct {
+		ID       string `json:"id"`
+		Name     string `json:"name"`
+		PublicIP string `json:"public_ip"`
+	} `json:"load_balancers"`
+	VirtualMachines []struct {
+		ID        string `json:"id"`
+		Name      string `json:"name"`
+		PublicIP  string `json:"public_ip"`
+		PrivateIP string `json:"private_ip"`
+	} `json:"virtual_machines"`
+	SQLDatabases []struct {
+		ID         string `json:"id"`
+		Name       string `json:"name"`
+		ServerName string `json:"servername"`
+	} `json:"sql_databases"`
 }
