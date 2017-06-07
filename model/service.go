@@ -35,6 +35,7 @@ type Service struct {
 	Nats []struct {
 		Name            string `json:"name"`
 		NatGatewayAWSID string `json:"nat_gateway_aws_id"`
+		IP              string `json:"public_ip"`
 	} `json:"nats"`
 	SecurityGroups []struct {
 		Name               string `json:"name"`
