@@ -20,7 +20,7 @@ func PrintServiceHistory(services []model.Service) {
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Build ID", "Status", "User"})
+		table.SetHeader([]string{"ID", "Name", "Status", "Version", "User"})
 		num := len(services) + 1
 		for _, s := range services {
 			num = num - 1
