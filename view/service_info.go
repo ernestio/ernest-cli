@@ -68,9 +68,9 @@ func PrintServiceInfo(service *model.Service) {
 	if len(service.Nats) > 0 {
 		fmt.Println("\nNAT gateways:")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Group ID"})
+		table.SetHeader([]string{"Name", "ID", "IP"})
 		for _, v := range service.Nats {
-			table.Append([]string{v.Name, v.NatGatewayAWSID})
+			table.Append([]string{v.Name, v.NatGatewayAWSID, v.IP})
 		}
 		table.Render()
 	}
