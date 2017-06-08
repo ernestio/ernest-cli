@@ -71,6 +71,6 @@ type Service struct {
 	SQLDatabases []struct {
 		ID         string `json:"id"`
 		Name       string `json:"name"`
-		ServerName string `json:"servername"`
+		ServerName string `json:"server_name"`
 	} `json:"sql_databases"`
 }
