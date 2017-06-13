@@ -137,7 +137,7 @@ var CreateAzureDatacenter = cli.Command{
 			errs = append(errs, "Specify a valid tenant id with --tenant_id flag")
 		}
 		if environment == "" {
-			errs = append(errs, "Specify a valid environment with --environment flag")
+			environment = "public"
 		}
 
 		if len(errs) > 0 {
