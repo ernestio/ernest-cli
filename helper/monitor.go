@@ -13,9 +13,11 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"time"
 
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
+	"github.com/gosuri/uilive"
 	"github.com/hokaccha/go-prettyjson"
 	"github.com/mitchellh/mapstructure"
 	"github.com/r3labs/sse"
@@ -25,11 +27,16 @@ type print func([]byte)
 
 // Monitorize opens a websocket connection to get input messages
 func Monitorize(host, endpoint, token, stream string) {
-	sseSubscribe(host, endpoint, token, stream, func(event []byte) {
-		//		m := model.ServiceNew{}
+	var s model.ServiceEvent
+	var c model.ComponentEvent
+
+	//	writer.Stop()
+
+	//	renderOutput()
+
+	go sseSubscribe(host, endpoint, token, stream, func(event []byte) {
 
 		// clean msg body of any null characters
-
 		cleanedInput := bytes.Trim(event, "\x00")
 
 		in := make(map[string]interface{})
@@ -39,36 +46,163 @@ func Monitorize(host, endpoint, token, stream string) {
 			fmt.Println(err)
 		}
 
-		fmt.Printf("origin = %#v\n\n", in)
-
 		r := regexp.MustCompile(`^service\.`)
 		if r.MatchString(in["_subject"].(string)) {
-			m := model.ServiceNew{}
-
-			err := mapstructure.Decode(in, &m)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Printf("%#v\n", m)
-
+			s = processServiceEvent(in)
 		} else {
-			m := model.ComponentNew{}
-
-			err := mapstructure.Decode(in, &m)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Printf("%#v\n", m)
-
+			c = processComponentEvent(in)
 		}
-
-		//		if m.Body == "error" || m.Body == "success" {
-		//			os.Exit(0)
-		//		}
-		//		PrintLine(m)
 	})
+
+	writer := uilive.New()
+
+	writer.Start()
+	//	defer writer.Stop()
+
+	for {
+		time.Sleep(time.Second * 1)
+
+		f, a := parseService(s)
+
+		//		f = f + fs
+
+		//		for _, v := range s.Changes {
+		//			f = f + "%s\n"
+		//fmt.Printf("this: %#v\n", v.Type)
+		//		}
+
+		//		fmt.Printf("f == %#v\n", f)
+
+		//		fmt.Fprintf(writer, f, s.ID, s.Subject, list)
+		fmt.Fprintf(writer, f, a...)
+
+		//		fmt.Printf("%#v", s)
+		//		if finished {
+		//			break
+		//		}
+		if s.Subject == "service.create.done" {
+			writer.Stop()
+			break
+		}
+	}
+	//			s.Subject == "service.create.error" ||
+	//			s.Subject == "service.delete.done" ||
+	//			s.Subject == "service.delete.error" ||
+	//			s.Subject == "service.import.done" ||
+	//			s.Subject == "service.import.error" {
+	//			break
+	//		}
+
+	//}
+	os.Exit(0)
+
+}
+
+func parseService(s model.ServiceEvent) (string, []interface{}) {
+
+	//	var f string
+	f := "ID: %s\n"
+	a := []interface{}{s.ID}
+
+	f = f + "Subject: %s\n"
+	a = append(a, s.Subject)
+
+	for _, c := range s.Changes {
+		f = f + "%s  %s\n"
+		a = append(a, c.Type)
+		a = append(a, c.State)
+
+		//fmt.Printf("this: %#v\n", v.Type)
+	}
+
+	//	vals := make([]interface{}, len(s))
+	//	for i, v := range s {
+	//		vals[i] = v.Name
+	//	}
+
+	//	fmt.Printf("f = %#v\n", f)
+	//	fmt.Printf("vals = %#v\n", vals)
+
+	return f, a
+
+}
+
+func processServiceEvent(s map[string]interface{}) model.ServiceEvent {
+	m := model.ServiceEvent{}
+
+	config := &mapstructure.DecoderConfig{
+		Metadata: nil,
+		Result:   &m,
+		TagName:  "json",
+	}
+
+	decoder, err := mapstructure.NewDecoder(config)
+	if err != nil {
+		panic(err)
+	}
+
+	err = decoder.Decode(s)
+	if err != nil {
+		panic(err)
+	}
+
+	//	fmt.Printf("%#v\n", m)
+	return m
+
+	// // release CLI
+	// if m.Subject == "service.create.done" ||
+	// 	m.Subject == "service.create.error" ||
+	// 	m.Subject == "service.delete.done" ||
+	// 	m.Subject == "service.delete.error" ||
+	// 	m.Subject == "service.import.done" ||
+	// 	m.Subject == "service.import.error" {
+	// 	os.Exit(0)
+	// }
+
+}
+
+func processComponentEvent(c map[string]interface{}) model.ComponentEvent {
+
+	m := model.ComponentEvent{}
+	config := &mapstructure.DecoderConfig{
+		Metadata: nil,
+		Result:   &m,
+		TagName:  "json",
+	}
+
+	decoder, err := mapstructure.NewDecoder(config)
+	if err != nil {
+		panic(err)
+	}
+
+	err = decoder.Decode(c)
+	if err != nil {
+		panic(err)
+	}
+
+	//	fmt.Printf("%#v\n", m)
+	return m
+
+}
+
+func renderOutput() {
+
+	fmt.Println("RENDER OUTPUT")
+
+	//	writer := uilive.New()
+
+	//	writer.Start()
+
+	//	for i := 0; i <= 60; i++ {
+	//		fmt.Fprintf(writer, "Datacenter: %s\n", x)
+	//		if finished {
+	//			break
+	//		}
+	//		time.Sleep(time.Second)
+	//	}
+
+	//	writer.Stop()
+
 }
 
 // PrintLogs : prints logs inline

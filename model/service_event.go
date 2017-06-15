@@ -4,9 +4,8 @@
 
 package model
 
-// Message represents an incomming websocket message
-type Message struct {
-	Subject string `json:"subject"`
-	Body    string `json:"body"`
-	Level   string `json:"level"`
+type ServiceEvent struct {
+	ID      string           `json:"id"`
+	Subject string           `json:"_subject"`
+	Changes []ComponentEvent `json:"changes"`
 }
