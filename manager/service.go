@@ -203,9 +203,9 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 		return "", errors.New("Could not finalize definition yaml")
 	}
 
-	color.Green("Environment creation requested")
-	fmt.Println("Ernest will show you all output from your requested service creation")
-	fmt.Println("You can cancel at any moment with Ctrl+C, even the service is still being created, you won't have any output")
+	//	color.Green("Environment creation requested")
+	//	fmt.Println("Ernest will show you all output from your requested service creation")
+	//	fmt.Println("You can cancel at any moment with Ctrl+C, even the service is still being created, you won't have any output")
 
 	streamID := m.GetUUID(token, payload)
 	if streamID == "" {
