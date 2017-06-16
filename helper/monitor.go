@@ -12,7 +12,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"time"
 
 	"github.com/ernestio/ernest-cli/model"
@@ -29,13 +28,10 @@ type print func([]byte)
 func Monitorize(host, endpoint, token, stream string) {
 	var s model.ServiceEvent
 	var c model.ComponentEvent
-
-	//	writer.Stop()
-
-	//	renderOutput()
+	var f string
+	var a []interface{}
 
 	go sseSubscribe(host, endpoint, token, stream, func(event []byte) {
-
 		// clean msg body of any null characters
 		cleanedInput := bytes.Trim(event, "\x00")
 
@@ -46,85 +42,99 @@ func Monitorize(host, endpoint, token, stream string) {
 			fmt.Println(err)
 		}
 
-		r := regexp.MustCompile(`^service\.`)
-		if r.MatchString(in["_subject"].(string)) {
+		subject := in["_subject"].(string)
+
+		switch {
+		case subject == "service.create":
 			s = processServiceEvent(in)
-		} else {
+			f, a = renderOutput(s)
+		case subject == "service.create.done":
+			s = processServiceEvent(in)
+			a = renderUpdate(s, c, a)
+		default:
 			c = processComponentEvent(in)
+			a = renderUpdate(s, c, a)
 		}
 	})
 
 	writer := uilive.New()
-
 	writer.Start()
-	//	defer writer.Stop()
 
 	for {
+		// Revisit this
 		time.Sleep(time.Second * 1)
-
-		f, a := parseService(s)
-
-		//		f = f + fs
-
-		//		for _, v := range s.Changes {
-		//			f = f + "%s\n"
-		//fmt.Printf("this: %#v\n", v.Type)
-		//		}
-
-		//		fmt.Printf("f == %#v\n", f)
-
-		//		fmt.Fprintf(writer, f, s.ID, s.Subject, list)
 		fmt.Fprintf(writer, f, a...)
 
-		//		fmt.Printf("%#v", s)
-		//		if finished {
-		//			break
-		//		}
 		if s.Subject == "service.create.done" {
 			writer.Stop()
 			break
 		}
+
+		// why doesn't this work?
+		//		switch s.Subject {
+		//		case "service.create.done", "service.delete.done", "service.import.done", "service.create.error", "service.delete.error", "service.import.error":
+		//			writer.Stop()
+		//			break
+		//		}
 	}
-	//			s.Subject == "service.create.error" ||
-	//			s.Subject == "service.delete.done" ||
-	//			s.Subject == "service.delete.error" ||
-	//			s.Subject == "service.import.done" ||
-	//			s.Subject == "service.import.error" {
-	//			break
-	//		}
-
-	//}
 	os.Exit(0)
-
 }
 
-func parseService(s model.ServiceEvent) (string, []interface{}) {
+func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{}) []interface{} {
+	var green = color.New(color.FgGreen).SprintFunc()
+	var yellow = color.New(color.FgYellow).SprintFunc()
+	var red = color.New(color.FgRed).SprintFunc()
 
-	//	var f string
-	f := "ID: %s\n"
-	a := []interface{}{s.ID}
-
-	f = f + "Subject: %s\n"
-	a = append(a, s.Subject)
-
-	for _, c := range s.Changes {
-		f = f + "%s  %s\n"
-		a = append(a, c.Type)
-		a = append(a, c.State)
-
-		//fmt.Printf("this: %#v\n", v.Type)
+	if len(s.Changes) > 0 {
+		// component status
+		for i, v := range a {
+			if v == c.Type {
+				switch c.State {
+				case "completed":
+					a[i+1] = green(c.State)
+				case "errored":
+					a[i+1] = red(c.State)
+					//			errMsg = c.Error
+				default:
+					a[i+1] = yellow(c.State)
+				}
+			}
+		}
 	}
 
-	//	vals := make([]interface{}, len(s))
-	//	for i, v := range s {
-	//		vals[i] = v.Name
-	//	}
+	// overall status
+	switch s.Subject {
+	case "service.create.done", "service.delete.done", "service.import.done":
+		a[len(a)-1] = green("Applied")
+	case "service.create.error", "service.delete.error", "service.import.error":
+		a[len(a)-1] = red("Error")
+		//		f = f + "Message: %s\n\n"
+		//		a = append(a, red(errMsg))
+	default:
+		a[len(a)-1] = yellow("Applying")
+	}
 
-	//	fmt.Printf("f = %#v\n", f)
-	//	fmt.Printf("vals = %#v\n", vals)
+	return a
+}
+
+func renderOutput(s model.ServiceEvent) (string, []interface{}) {
+	var blue = color.New(color.FgBlue).SprintFunc()
+
+	f := "Service ID: %s\n\n"
+	a := []interface{}{blue(s.ID)}
+
+	if len(s.Changes) > 0 {
+		for _, sc := range s.Changes {
+			f = f + "%s...  %s\n"
+			a = append(a, sc.Type)
+			a = append(a, "")
+		}
+	}
+
+	f = f + "\nStatus: %s\n"
+	a = append(a, "")
 
 	return f, a
-
 }
 
 func processServiceEvent(s map[string]interface{}) model.ServiceEvent {
@@ -146,23 +156,10 @@ func processServiceEvent(s map[string]interface{}) model.ServiceEvent {
 		panic(err)
 	}
 
-	//	fmt.Printf("%#v\n", m)
 	return m
-
-	// // release CLI
-	// if m.Subject == "service.create.done" ||
-	// 	m.Subject == "service.create.error" ||
-	// 	m.Subject == "service.delete.done" ||
-	// 	m.Subject == "service.delete.error" ||
-	// 	m.Subject == "service.import.done" ||
-	// 	m.Subject == "service.import.error" {
-	// 	os.Exit(0)
-	// }
-
 }
 
 func processComponentEvent(c map[string]interface{}) model.ComponentEvent {
-
 	m := model.ComponentEvent{}
 	config := &mapstructure.DecoderConfig{
 		Metadata: nil,
@@ -180,29 +177,7 @@ func processComponentEvent(c map[string]interface{}) model.ComponentEvent {
 		panic(err)
 	}
 
-	//	fmt.Printf("%#v\n", m)
 	return m
-
-}
-
-func renderOutput() {
-
-	fmt.Println("RENDER OUTPUT")
-
-	//	writer := uilive.New()
-
-	//	writer.Start()
-
-	//	for i := 0; i <= 60; i++ {
-	//		fmt.Fprintf(writer, "Datacenter: %s\n", x)
-	//		if finished {
-	//			break
-	//		}
-	//		time.Sleep(time.Second)
-	//	}
-
-	//	writer.Stop()
-
 }
 
 // PrintLogs : prints logs inline
@@ -262,19 +237,4 @@ func sseSubscribe(host, endpoint, token, stream string, fn print) {
 		log.Println("Failed with: " + err.Error())
 		os.Exit(1)
 	}
-}
-
-// PrintLine prints each received message on a line with its color
-func PrintLine(m interface{}) {
-	//func PrintLine(m model.ServiceNew) {
-	fmt.Printf("m = %+v\n", m)
-	//	if m.Level == "ERROR" {
-	//		color.Red(m.Body)
-	//	} else if m.Level == "SUCCESS" {
-	//		color.Green(m.Body)
-	//	} else if m.Level == "INFO" {
-	//		color.Yellow(m.Body)
-	//	} else {
-	//		fmt.Println(m.Body)
-	//	}
 }
