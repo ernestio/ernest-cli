@@ -12,9 +12,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
@@ -30,10 +28,13 @@ type print func([]byte)
 func Monitorize(host, endpoint, token, stream string) {
 	var s model.ServiceEvent
 	var c model.ComponentEvent
-	var f string
-	var a []interface{}
+	var format string
+	var args []interface{}
 
-	go sseSubscribe(host, endpoint, token, stream, func(event []byte) {
+	writer := uilive.New()
+	writer.Start()
+
+	sseSubscribe(host, endpoint, token, stream, func(event []byte) {
 		// clean msg body of any null characters
 		cleanedInput := bytes.Trim(event, "\x00")
 
@@ -49,47 +50,22 @@ func Monitorize(host, endpoint, token, stream string) {
 		switch {
 		case subject == "service.create":
 			s = processServiceEvent(in)
-			f, a = renderOutput(s)
+			format, args = renderOutput(s)
 		case subject == "service.create.done":
 			s = processServiceEvent(in)
-			a = renderUpdate(s, c, a)
+			renderUpdate(s, c, args)
+			writer.Stop()
+			os.Exit(0)
 		default:
 			c = processComponentEvent(in)
-			a = renderUpdate(s, c, a)
+			renderUpdate(s, c, args)
 		}
+
+		fmt.Fprintf(writer, format, args...)
 	})
-
-	writer := uilive.New()
-	writer.Start()
-
-	for {
-		// Revisit this
-		time.Sleep(time.Second * 1)
-		fmt.Fprintf(writer, f, a...)
-
-		if s.Subject == "service.create.done" {
-			writer.Stop()
-
-			// build details
-			out, err := exec.Command("ernest service info").Output()
-			if err != nil {
-				panic(err)
-			}
-			fmt.Printf("%s", out)
-			break
-		}
-
-		// why doesn't this work?
-		//		switch s.Subject {
-		//		case "service.create.done", "service.delete.done", "service.import.done", "service.create.error", "service.delete.error", "service.import.error":
-		//			writer.Stop()
-		//			break
-		//		}
-	}
-	os.Exit(0)
 }
 
-func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{}) []interface{} {
+func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{}) {
 	var green = color.New(color.FgGreen).SprintFunc()
 	var yellow = color.New(color.FgYellow).SprintFunc()
 	var red = color.New(color.FgRed).SprintFunc()
@@ -123,8 +99,6 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 	default:
 		a[len(a)-1] = yellow("Applying")
 	}
-
-	return a
 }
 
 func renderOutput(s model.ServiceEvent) (string, []interface{}) {
