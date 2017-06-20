@@ -12,6 +12,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/ernestio/ernest-cli/model"
@@ -67,6 +69,13 @@ func Monitorize(host, endpoint, token, stream string) {
 
 		if s.Subject == "service.create.done" {
 			writer.Stop()
+
+			// build details
+			out, err := exec.Command("ernest service info").Output()
+			if err != nil {
+				panic(err)
+			}
+			fmt.Printf("%s", out)
 			break
 		}
 
@@ -88,7 +97,8 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 	if len(s.Changes) > 0 {
 		// component status
 		for i, v := range a {
-			if v == c.Type {
+			t := formatType(c.Type)
+			if v == t {
 				switch c.State {
 				case "completed":
 					a[i+1] = green(c.State)
@@ -120,21 +130,28 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 	var blue = color.New(color.FgBlue).SprintFunc()
 
-	f := "Service ID: %s\n\n"
+	f := "\nService ID: %s\n\n"
 	a := []interface{}{blue(s.ID)}
 
 	if len(s.Changes) > 0 {
 		for _, sc := range s.Changes {
 			f = f + "%s...  %s\n"
-			a = append(a, sc.Type)
+			t := formatType(sc.Type)
+			a = append(a, t)
 			a = append(a, "")
 		}
 	}
 
-	f = f + "\nStatus: %s\n"
+	f = f + "\nStatus: %s\n\n"
 	a = append(a, "")
 
 	return f, a
+}
+
+func formatType(t string) string {
+	s := strings.Replace(t, "_", " ", -1)
+	s = strings.Title(s + "s")
+	return s
 }
 
 func processServiceEvent(s map[string]interface{}) model.ServiceEvent {
