@@ -14,6 +14,7 @@ import (
 
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
+	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 )
 
@@ -229,7 +230,7 @@ func (m *Manager) ForceDestroy(token, name string) error {
 }
 
 // Apply : Applies a yaml to create / update a new service
-func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
+func (m *Manager) Apply(token string, path string, monit, dry bool) (string, error) {
 	var d model.Definition
 
 	payload, err := ioutil.ReadFile(path)
@@ -251,6 +252,25 @@ func (m *Manager) Apply(token string, path string, monit bool) (string, error) {
 
 	if err != nil {
 		return "", errors.New("Could not finalize definition yaml")
+	}
+
+	if dry {
+		var body string
+		body, resp, err := m.doRequest("/api/services/?dry=true", "POST", payload, token, "application/yaml")
+		if err != nil {
+			if resp == nil {
+				return "", CONNECTIONREFUSED
+			}
+			var internalError struct {
+				Message string `json:"message"`
+			}
+			if err := json.Unmarshal([]byte(body), &internalError); err != nil {
+				return "", errors.New(body)
+			}
+			return "", errors.New(internalError.Message)
+		}
+		view.ServiceDry(body)
+		return "", nil
 	}
 
 	color.Green("Environment creation requested")

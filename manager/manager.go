@@ -64,6 +64,7 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 	if err != nil {
 		return err.Error(), resp, err
 	}
+
 	defer resp.Body.Close()
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {

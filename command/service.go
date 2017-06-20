@@ -51,13 +51,25 @@ var ApplyService = cli.Command{
 	Aliases:   []string{"a"},
 	ArgsUsage: "<file.yml>",
 	Usage:     "Builds or changes infrastructure.",
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "build_id",
+			Value: "",
+			Usage: "Build id you want to be applied",
+		},
+		cli.BoolFlag{
+			Name:  "dry",
+			Usage: "print the changes to be applied on a service intead of applying them",
+		},
+	},
 	Description: `Sends a service YAML description file to Ernest to be executed.
    You must be logged in to execute this command.
 
    If the file is not provided, ernest.yml will be used by default.
 
-   Example:
+   Examples:
     $ ernest apply myservice.yml
+    $ ernest apply --dry myservice.yml
 	`,
 	Action: func(c *cli.Context) error {
 		file := "ernest.yml"
@@ -69,9 +81,14 @@ var ApplyService = cli.Command{
 			color.Red("You're not allowed to perform this action, please log in")
 			return nil
 		}
-		_, err := m.Apply(cfg.Token, file, true)
+
+		var err error
+		response, err := m.Apply(cfg.Token, file, false, c.Bool("dry"))
 		if err != nil {
 			color.Red(err.Error())
+		}
+		if c.Bool("dry") == true {
+			fmt.Println(string(response))
 		}
 		return nil
 	},
