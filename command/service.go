@@ -180,7 +180,7 @@ var ResetService = cli.Command{
 	Description: `Reseting a service creation may cause problems, please make sure you know what are you doing.
 
    Example:
-    $ ernest reset myservice
+    $ ernest service reset myservice
   `,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -200,6 +200,39 @@ var ResetService = cli.Command{
 			return nil
 		}
 		color.Red("You've successfully resetted the service '" + serviceName + "'")
+
+		return nil
+	},
+}
+
+// RevertService command
+var RevertService = cli.Command{
+	Name:      "revert",
+	ArgsUsage: "<service_name> <build_id>",
+	Usage:     "Reverts a service to a previous state",
+	Description: `Reverts a service to a previous known state using a build ID from 'ernest service history'.
+
+   Example:
+    $ ernest service revert <service_name> <build_id>
+  `,
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
+		if len(c.Args()) < 2 {
+			color.Red("Please specify a service name and build ID")
+			return nil
+		}
+		serviceName := c.Args()[0]
+		buildID := c.Args()[1]
+		_, err := m.RevertService(serviceName, buildID, cfg.Token)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
 
 		return nil
 	},
@@ -452,6 +485,7 @@ var CmdService = cli.Command{
 		DestroyService,
 		HistoryService,
 		ResetService,
+		RevertService,
 		DefinitionService,
 		InfoService,
 		MonitorService,

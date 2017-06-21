@@ -79,7 +79,7 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 	builds, _ := m.ListBuilds(serviceName, token)
 	num, _ := strconv.Atoi(serviceID)
 	if num < 1 || num > len(builds) {
-		return service, errors.New("Invalid build id")
+		return service, errors.New("Invalid build ID")
 	}
 	num = len(builds) - num
 	serviceID = builds[num].ID
@@ -123,6 +123,56 @@ func (m *Manager) ResetService(name string, token string) error {
 		}
 	}
 	return err
+}
+
+// RevertService reverts a service to a previous known state using a build ID
+func (m *Manager) RevertService(name string, buildID string, token string) (string, error) {
+	// get requested manifest
+	s, err := m.ServiceBuildStatus(token, name, buildID)
+	if err != nil {
+		return "", err
+	}
+	payload := []byte(s.Definition)
+
+	// apply requested manifest
+	var d model.Definition
+
+	err = d.Load(payload)
+	if err != nil {
+		return "", errors.New("Could not process definition yaml")
+	}
+
+	payload, err = d.Save()
+	if err != nil {
+		return "", errors.New("Could not finalize definition yaml")
+	}
+
+	color.Green("Reverting service...")
+
+	streamID := m.GetUUID(token, payload)
+	if streamID == "" {
+		color.Red("Please log in")
+		return "", nil
+	}
+
+	go helper.Monitorize(m.URL, "/events", token, streamID)
+
+	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
+		if resp == nil {
+			return "", CONNECTIONREFUSED
+		}
+		var internalError struct {
+			Message string `json:"message"`
+		}
+		if err := json.Unmarshal([]byte(body), &internalError); err != nil {
+			return "", errors.New(body)
+		}
+		return "", errors.New(internalError.Message)
+	}
+
+	runtime.Goexit()
+
+	return streamID, nil
 }
 
 // Destroy : Destroys an existing service
