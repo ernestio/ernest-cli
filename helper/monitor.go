@@ -8,11 +8,11 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -26,73 +26,61 @@ import (
 
 type print func([]byte)
 
+var green = color.New(color.FgGreen).SprintFunc()
+var yellow = color.New(color.FgYellow).SprintFunc()
+var red = color.New(color.FgRed).SprintFunc()
+
 // Monitorize opens a websocket connection to get input messages
 func Monitorize(host, endpoint, token, stream string) {
 	var s model.ServiceEvent
 	var c model.ComponentEvent
-	var f string
-	var a []interface{}
-
-	go sseSubscribe(host, endpoint, token, stream, func(event []byte) {
-		// clean msg body of any null characters
-		cleanedInput := bytes.Trim(event, "\x00")
-
-		in := make(map[string]interface{})
-
-		err := json.Unmarshal(cleanedInput, &in)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		subject := in["_subject"].(string)
-
-		switch {
-		case subject == "service.create":
-			s = processServiceEvent(in)
-			f, a = renderOutput(s)
-		case subject == "service.create.done":
-			s = processServiceEvent(in)
-			a = renderUpdate(s, c, a)
-		default:
-			c = processComponentEvent(in)
-			a = renderUpdate(s, c, a)
-		}
-	})
+	var format string
+	var args []interface{}
 
 	writer := uilive.New()
 	writer.Start()
 
-	for {
-		// Revisit this
-		time.Sleep(time.Second * 1)
-		fmt.Fprintf(writer, f, a...)
+	sseSubscribe(host, endpoint, token, stream, func(event []byte) {
+		// clean msg body of any null characters
+		cleanedInput := bytes.Trim(event, "\x00")
 
-		if s.Subject == "service.create.done" {
-			writer.Stop()
+		msg := make(map[string]interface{})
 
-			// build details
-			out, err := exec.Command("ernest service info").Output()
-			if err != nil {
-				panic(err)
-			}
-			fmt.Printf("%s", out)
-			break
+		err := json.Unmarshal(cleanedInput, &msg)
+		if err != nil {
+			fmt.Println(err)
 		}
 
-		// why doesn't this work?
-		//		switch s.Subject {
-		//		case "service.create.done", "service.delete.done", "service.import.done", "service.create.error", "service.delete.error", "service.import.error":
-		//			writer.Stop()
-		//			break
-		//		}
-	}
-	os.Exit(0)
+		subject := msg["_subject"].(string)
+
+		switch subject {
+		case "service.create":
+			s = processServiceEvent(msg)
+			format, args = renderOutput(s)
+		case "service.create.done", "service.create.error":
+			s = processServiceEvent(msg)
+			err = renderUpdate(s, c, format, args)
+		default:
+			c = processComponentEvent(msg)
+			err = renderUpdate(s, c, format, args)
+		}
+
+		time.Sleep(time.Second * 1)
+		fmt.Fprintf(writer, format, args...)
+
+		switch subject {
+		case "service.create.done", "service.delete.done", "service.import.done", "service.create.error", "service.delete.error", "service.import.error":
+			writer.Stop()
+			if err != nil {
+				fmt.Printf("Message: %s\n\n", red(err))
+			}
+			os.Exit(0)
+		}
+	})
 }
 
-func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{}) []interface{} {
-	var green = color.New(color.FgGreen).SprintFunc()
-	var yellow = color.New(color.FgYellow).SprintFunc()
-	var red = color.New(color.FgRed).SprintFunc()
+func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, f string, a []interface{}) error {
+	var err error
 
 	if len(s.Changes) > 0 {
 		// component status
@@ -104,7 +92,7 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 					a[i+1] = green(c.State)
 				case "errored":
 					a[i+1] = red(c.State)
-					//			errMsg = c.Error
+					err = errors.New(c.Error)
 				default:
 					a[i+1] = yellow(c.State)
 				}
@@ -118,13 +106,15 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 		a[len(a)-1] = green("Applied")
 	case "service.create.error", "service.delete.error", "service.import.error":
 		a[len(a)-1] = red("Error")
-		//		f = f + "Message: %s\n\n"
-		//		a = append(a, red(errMsg))
 	default:
 		a[len(a)-1] = yellow("Applying")
 	}
 
-	return a
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func renderOutput(s model.ServiceEvent) (string, []interface{}) {
@@ -133,7 +123,9 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 	f := "\nService ID: %s\n\n"
 	a := []interface{}{blue(s.ID)}
 
-	if len(s.Changes) > 0 {
+	if len(s.Changes) == 0 {
+		f = f + green("No changes detected\n")
+	} else {
 		for _, sc := range s.Changes {
 			f = f + "%s...  %s\n"
 			t := formatType(sc.Type)
