@@ -59,10 +59,10 @@ func Monitorize(host, endpoint, token, stream string) {
 			format, args = renderOutput(s)
 		case "service.create.done", "service.create.error":
 			s = processServiceEvent(msg)
-			err = renderUpdate(s, c, format, args)
+			err = renderUpdate(s, model.ComponentEvent{}, args)
 		default:
 			c = processComponentEvent(msg)
-			err = renderUpdate(s, c, format, args)
+			err = renderUpdate(model.ServiceEvent{}, c, args)
 		}
 
 		time.Sleep(time.Second * 1)
@@ -79,23 +79,27 @@ func Monitorize(host, endpoint, token, stream string) {
 	})
 }
 
-func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, f string, a []interface{}) error {
+func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{}) error {
 	var err error
 
-	if len(s.Changes) > 0 {
-		// component status
-		for i, v := range a {
-			t := formatType(c.Type)
-			if v == t {
-				switch c.State {
-				case "completed":
-					a[i+1] = green(c.State)
-				case "errored":
-					a[i+1] = red(c.State)
-					err = errors.New(c.Error)
-				default:
-					a[i+1] = yellow(c.State)
+	// component status
+	for i, v := range a {
+		t := formatType(c.Type)
+		if v == t {
+			switch c.State {
+			case "running":
+				a[i+1] = a[i+1].(int) + 1
+				a[i+3] = yellow(c.State)
+			case "completed":
+				//a[i+1] = a[i+1].(int) + 1
+				if a[i+1] == a[i+2] {
+					a[i+3] = green(c.State)
 				}
+			case "errored":
+				a[i+3] = red(c.State)
+				err = errors.New(c.Error)
+			default:
+				a[i+3] = yellow(c.State)
 			}
 		}
 	}
@@ -126,18 +130,29 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 	if len(s.Changes) == 0 {
 		f = f + green("No changes detected\n")
 	} else {
-		for _, sc := range s.Changes {
-			f = f + "%s...  %s\n"
-			t := formatType(sc.Type)
-			a = append(a, t)
-			a = append(a, "")
+
+		changes := ParseChanges(s.Changes)
+
+		for k, v := range changes {
+			f = f + "%s...  %d/%d  %s\n"
+			t := formatType(k)
+			a = append(a, t, 0, v, "")
 		}
+
 	}
 
 	f = f + "\nStatus: %s\n\n"
 	a = append(a, "")
 
 	return f, a
+}
+
+func ParseChanges(c []model.ComponentEvent) map[string]int {
+	seen := map[string]int{}
+	for _, v := range c {
+		seen[v.Type] += 1
+	}
+	return seen
 }
 
 func formatType(t string) string {
