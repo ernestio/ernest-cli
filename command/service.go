@@ -52,11 +52,6 @@ var ApplyService = cli.Command{
 	ArgsUsage: "<file.yml>",
 	Usage:     "Builds or changes infrastructure.",
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "build_id",
-			Value: "",
-			Usage: "Build id you want to be applied",
-		},
 		cli.BoolFlag{
 			Name:  "dry",
 			Usage: "print the changes to be applied on a service intead of applying them",
@@ -83,11 +78,16 @@ var ApplyService = cli.Command{
 		}
 
 		var err error
-		response, err := m.Apply(cfg.Token, file, false, c.Bool("dry"))
+		dry := c.Bool("dry")
+		monit := true
+		if dry == true {
+			monit = false
+		}
+		response, err := m.Apply(cfg.Token, file, monit, dry)
 		if err != nil {
 			color.Red(err.Error())
 		}
-		if c.Bool("dry") == true {
+		if dry == true {
 			fmt.Println(string(response))
 		}
 		return nil
