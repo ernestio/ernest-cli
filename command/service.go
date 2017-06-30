@@ -63,8 +63,8 @@ var ApplyService = cli.Command{
    If the file is not provided, ernest.yml will be used by default.
 
    Examples:
-    $ ernest apply myservice.yml
-    $ ernest apply --dry myservice.yml
+    $ ernest service apply myservice.yml
+    $ ernest service apply --dry myservice.yml
 	`,
 	Action: func(c *cli.Context) error {
 		file := "ernest.yml"
@@ -231,7 +231,14 @@ var RevertService = cli.Command{
 
    Example:
     $ ernest service revert <service_name> <build_id>
+    $ ernest service revert --dry <service_name> <build_id>
   `,
+	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name:  "dry",
+			Usage: "print the changes to be applied on a service intead of applying them",
+		},
+	},
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -244,11 +251,17 @@ var RevertService = cli.Command{
 			return nil
 		}
 		serviceName := c.Args()[0]
+
+		dry := c.Bool("dry")
+
 		buildID := c.Args()[1]
-		_, err := m.RevertService(serviceName, buildID, cfg.Token)
+		response, err := m.RevertService(serviceName, buildID, cfg.Token, dry)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
+		}
+		if dry == true {
+			fmt.Println(string(response))
 		}
 
 		return nil
