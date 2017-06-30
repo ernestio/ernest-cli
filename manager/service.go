@@ -127,7 +127,7 @@ func (m *Manager) ResetService(name string, token string) error {
 }
 
 // RevertService reverts a service to a previous known state using a build ID
-func (m *Manager) RevertService(name string, buildID string, token string) (string, error) {
+func (m *Manager) RevertService(name string, buildID string, token string, dry bool) (string, error) {
 	// get requested manifest
 	s, err := m.ServiceBuildStatus(token, name, buildID)
 	if err != nil {
@@ -146,6 +146,10 @@ func (m *Manager) RevertService(name string, buildID string, token string) (stri
 	payload, err = d.Save()
 	if err != nil {
 		return "", errors.New("Could not finalize definition yaml")
+	}
+
+	if dry {
+		return m.dryApply(token, payload)
 	}
 
 	color.Green("Reverting service...")
@@ -255,22 +259,7 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 	}
 
 	if dry {
-		var body string
-		body, resp, err := m.doRequest("/api/services/?dry=true", "POST", payload, token, "application/yaml")
-		if err != nil {
-			if resp == nil {
-				return "", CONNECTIONREFUSED
-			}
-			var internalError struct {
-				Message string `json:"message"`
-			}
-			if err := json.Unmarshal([]byte(body), &internalError); err != nil {
-				return "", errors.New(body)
-			}
-			return "", errors.New(internalError.Message)
-		}
-		view.ServiceDry(body)
-		return "", nil
+		return m.dryApply(token, payload)
 	}
 
 	color.Green("Environment creation requested")
@@ -344,4 +333,23 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 	runtime.Goexit()
 
 	return streamID, nil
+}
+
+func (m *Manager) dryApply(token string, payload []byte) (string, error) {
+	var body string
+	body, resp, err := m.doRequest("/api/services/?dry=true", "POST", payload, token, "application/yaml")
+	if err != nil {
+		if resp == nil {
+			return "", CONNECTIONREFUSED
+		}
+		var internalError struct {
+			Message string `json:"message"`
+		}
+		if err := json.Unmarshal([]byte(body), &internalError); err != nil {
+			return "", errors.New(body)
+		}
+		return "", errors.New(internalError.Message)
+	}
+	view.ServiceDry(body)
+	return "", nil
 }
