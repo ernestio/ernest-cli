@@ -87,11 +87,8 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 		t := formatType(c.Type)
 		if v == t {
 			switch c.State {
-			case "running":
-				a[i+1] = a[i+1].(int) + 1
-				a[i+3] = yellow(c.State)
 			case "completed":
-				//a[i+1] = a[i+1].(int) + 1
+				a[i+1] = a[i+1].(int) + 1
 				if a[i+1] == a[i+2] {
 					a[i+3] = green(c.State)
 				}
@@ -124,8 +121,10 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 	var blue = color.New(color.FgBlue).SprintFunc()
 
-	f := "\nService ID: %s\n\n"
-	a := []interface{}{blue(s.ID)}
+	f := "\nService Name: %s\n"
+	a := []interface{}{blue(s.Name)}
+	f = f + "Service ID: %s\n\n"
+	a = append(a, blue(s.ID))
 
 	if len(s.Changes) == 0 {
 		f = f + green("No changes detected\n")

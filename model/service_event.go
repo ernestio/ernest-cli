@@ -6,6 +6,7 @@ package model
 
 type ServiceEvent struct {
 	ID      string           `json:"id"`
+	Name    string           `json:"name"`
 	Subject string           `json:"_subject"`
 	Changes []ComponentEvent `json:"changes"`
 }
