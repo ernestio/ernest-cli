@@ -11,6 +11,8 @@ import (
 	"io/ioutil"
 	"runtime"
 
+	yaml "gopkg.in/yaml.v2"
+
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
@@ -257,7 +259,7 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 	s.Name = name
 	s.Datacenter = datacenter
 	s.ImportFilters = filters
-	payload, err := json.Marshal(s)
+	payload, err := yaml.Marshal(s)
 	if err != nil {
 		return "", errors.New("Invalid name or datacenter")
 	}
