@@ -8,11 +8,11 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -77,17 +77,13 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 			os.Exit(0)
 		case "service.create.error", "service.delete.error", "service.import.error":
 			writer.Stop()
-			if err != nil {
-				fmt.Printf("Message: %s\n\n", red(err))
-			}
+			fmt.Printf("Message: %s\n\n", red(s.Changes[0].Error))
 			os.Exit(1)
 		}
 	})
 }
 
 func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{}) error {
-	var err error
-
 	// component status
 	for i, v := range a {
 		t := formatType(c.Type)
@@ -100,7 +96,6 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 				}
 			case "errored":
 				a[i+3] = red(c.State)
-				err = errors.New(c.Error)
 			default:
 				a[i+3] = yellow(c.State)
 			}
@@ -115,10 +110,6 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 		a[len(a)-1] = red("Error")
 	default:
 		a[len(a)-1] = yellow("Applying")
-	}
-
-	if err != nil {
-		return err
 	}
 
 	return nil
@@ -138,10 +129,16 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 
 		changes := ParseChanges(s.Changes)
 
-		for k, v := range changes {
+		keys := []string{}
+		for key := range changes {
+			keys = append(keys, key)
+		}
+		sort.Strings(keys)
+
+		for _, k := range keys {
 			f = f + "%s...  %d/%d  %s\n"
 			t := formatType(k)
-			a = append(a, t, 0, v, "")
+			a = append(a, t, 0, changes[k], "")
 		}
 
 	}
