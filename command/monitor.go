@@ -5,7 +5,7 @@
 package command
 
 import (
-	"runtime"
+	"os"
 	"strings"
 
 	"github.com/fatih/color"
@@ -61,8 +61,11 @@ var MonitorService = cli.Command{
 			return nil
 		}
 
-		helper.Monitorize(cfg.URL, "/events", cfg.Token, parts[len(parts)-1])
-		runtime.Goexit()
+		resc := make(chan string)
+		go helper.Monitorize(cfg.URL, "/events", cfg.Token, parts[len(parts)-1], resc)
+		<-resc
+		os.Exit(0)
+
 		return nil
 	},
 }

@@ -31,7 +31,7 @@ var yellow = color.New(color.FgYellow).SprintFunc()
 var red = color.New(color.FgRed).SprintFunc()
 
 // Monitorize opens a websocket connection to get input messages
-func Monitorize(host, endpoint, token, stream string) {
+func Monitorize(host, endpoint, token, stream string, resc chan string) {
 	var s model.ServiceEvent
 	var c model.ComponentEvent
 	var format string
@@ -69,12 +69,18 @@ func Monitorize(host, endpoint, token, stream string) {
 		fmt.Fprintf(writer, format, args...)
 
 		switch subject {
-		case "service.create.done", "service.delete.done", "service.import.done", "service.create.error", "service.delete.error", "service.import.error":
+		case "service.create.done":
+			writer.Stop()
+			resc <- s.Name
+		case "service.delete.done", "service.import.done":
+			writer.Stop()
+			os.Exit(0)
+		case "service.create.error", "service.delete.error", "service.import.error":
 			writer.Stop()
 			if err != nil {
 				fmt.Printf("Message: %s\n\n", red(err))
 			}
-			os.Exit(0)
+			os.Exit(1)
 		}
 	})
 }

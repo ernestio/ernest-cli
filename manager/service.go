@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"runtime"
 	"strconv"
 
@@ -209,8 +210,9 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 
 	if monit == true {
 		if str, ok := res["stream_id"].(string); ok {
-			helper.Monitorize(m.URL, "/events", token, str)
-			runtime.Goexit()
+			resc := make(chan string)
+			go helper.Monitorize(m.URL, "/events", token, str, resc)
+			<-resc
 		}
 	}
 
@@ -236,6 +238,7 @@ func (m *Manager) ForceDestroy(token, name string) error {
 // Apply : Applies a yaml to create / update a new service
 func (m *Manager) Apply(token string, path string, monit, dry bool) (string, error) {
 	var d model.Definition
+	resc := make(chan string)
 
 	payload, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -269,7 +272,7 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 	}
 
 	if monit == true {
-		go helper.Monitorize(m.URL, "/events", token, streamID)
+		go helper.Monitorize(m.URL, "/events", token, streamID, resc)
 	} else {
 		fmt.Println("Additionally you can trace your service on ernest monitor tool with id: " + streamID)
 	}
@@ -288,7 +291,12 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 	}
 
 	if monit == true {
-		runtime.Goexit()
+		name := <-resc
+		fmt.Println("================\nPlatform Details\n================\n")
+		var srv model.Service
+		srv, err = m.ServiceStatus(token, name)
+		view.PrintServiceInfo(&srv)
+		os.Exit(0)
 	}
 	return streamID, nil
 }
@@ -318,7 +326,8 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 		return "", nil
 	}
 
-	go helper.Monitorize(m.URL, "/events", token, streamID)
+	resc := make(chan string)
+	go helper.Monitorize(m.URL, "/events", token, streamID, resc)
 
 	if body, resp, err := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
@@ -326,7 +335,8 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 		}
 		return "", errors.New(body)
 	}
-	runtime.Goexit()
+
+	<-resc
 
 	return streamID, nil
 }
