@@ -142,7 +142,7 @@ var DestroyService = cli.Command{
 					return nil
 				}
 			} else {
-				fmt.Print("Do you really want to destroy this service? (Y/n)")
+				fmt.Print("Do you really want to destroy this service? (Y/n) ")
 				if askForConfirmation() == false {
 					return nil
 				}
