@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -37,6 +38,7 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 	var c model.ComponentEvent
 	var format string
 	var args []interface{}
+	var resourceErr error
 
 	writer := uilive.New()
 	writer.Start()
@@ -55,15 +57,18 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 		subject := msg["_subject"].(string)
 
 		switch subject {
-		case "service.create":
+		case "service.create", "service.delete":
 			s = processServiceEvent(msg)
 			format, args = renderOutput(s)
-		case "service.create.done", "service.create.error":
+		case "service.create.done", "service.create.error", "service.delete.done", "service.delete.error":
 			s = processServiceEvent(msg)
 			err = renderUpdate(s, model.ComponentEvent{}, args)
 		default:
 			c = processComponentEvent(msg)
 			err = renderUpdate(model.ServiceEvent{}, c, args)
+			if err != nil {
+				resourceErr = err
+			}
 		}
 
 		time.Sleep(time.Second * 1)
@@ -78,7 +83,7 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 			os.Exit(0)
 		case "service.create.error", "service.delete.error", "service.import.error":
 			writer.Stop()
-			fmt.Printf("Message: %s\n\n", red(s.Changes[0].Error))
+			fmt.Printf("Message: %s\n\n", red(resourceErr))
 			os.Exit(1)
 		}
 	})
@@ -89,28 +94,39 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 	for i, v := range a {
 		t := formatType(c.Type)
 		if v == t {
-			switch c.State {
-			case "completed":
+			if c.Action == "create" && c.State == "running" {
+				a[i+3] = yellow("Creating")
+			} else if c.Action == "create" && c.State == "completed" {
 				a[i+1] = a[i+1].(int) + 1
 				if a[i+1] == a[i+2] {
-					a[i+3] = green(c.State)
+					a[i+3] = green("Created")
 				}
-			case "errored":
-				a[i+3] = red(c.State)
-			default:
-				a[i+3] = yellow(c.State)
+			}
+			if c.Action == "delete" && c.State == "running" {
+				a[i+3] = yellow("Deleting")
+			} else if c.Action == "delete" && c.State == "completed" {
+				a[i+1] = a[i+1].(int) + 1
+				if a[i+1] == a[i+2] {
+					a[i+3] = green("Deleted")
+				}
+			}
+			if c.State == "errored" {
+				a[i+3] = red("Error")
+				return errors.New(c.Error)
 			}
 		}
 	}
 
 	// overall status
 	switch s.Subject {
-	case "service.create.done", "service.delete.done", "service.import.done":
+	case "service.delete.done":
+		a[len(a)-1] = green("Destroyed")
+	case "service.create.done":
 		a[len(a)-1] = green("Applied")
+	case "service.import.done":
+		a[len(a)-1] = green("Imported")
 	case "service.create.error", "service.delete.error", "service.import.error":
 		a[len(a)-1] = red("Error")
-	default:
-		a[len(a)-1] = yellow("Applying")
 	}
 
 	return nil
@@ -150,7 +166,18 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 	}
 
 	f = f + "\nStatus: %s\n\n"
-	a = append(a, "")
+	var status string
+	switch s.Subject {
+	case "service.create":
+		status = yellow("Applying")
+	case "service.delete":
+		status = yellow("Destroying")
+	case "service.import":
+		status = yellow("Importing")
+	default:
+		status = yellow("Unknown")
+	}
+	a = append(a, status)
 
 	return f, a
 }
