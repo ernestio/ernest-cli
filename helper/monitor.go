@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -126,7 +127,6 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 	if len(s.Changes) == 0 {
 		f = f + green("No changes detected\n")
 	} else {
-
 		changes := ParseChanges(s.Changes)
 
 		keys := []string{}
@@ -135,12 +135,18 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 		}
 		sort.Strings(keys)
 
+		longestKey := 0
 		for _, k := range keys {
-			f = f + "%s...  %d/%d  %s\n"
+			if len(k) > longestKey {
+				longestKey = len(k)
+			}
+		}
+
+		for _, k := range keys {
+			f = f + "%-" + strconv.Itoa(longestKey+1) + "s %3d/%-3d %s\n"
 			t := formatType(k)
 			a = append(a, t, 0, changes[k], "")
 		}
-
 	}
 
 	f = f + "\nStatus: %s\n\n"
