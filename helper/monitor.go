@@ -57,12 +57,15 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 		subject := msg["_subject"].(string)
 
 		switch subject {
-		case "service.create", "service.delete":
+		case "service.create", "service.delete", "service.import":
 			s = processServiceEvent(msg)
 			format, args = renderOutput(s)
-		case "service.create.done", "service.create.error", "service.delete.done", "service.delete.error":
+		case "service.create.done", "service.create.error", "service.delete.done", "service.delete.error", "service.import.done", "service.import.error":
 			s = processServiceEvent(msg)
 			err = renderUpdate(s, model.ComponentEvent{}, args)
+			if err != nil {
+				log.Println(err)
+			}
 		default:
 			c = processComponentEvent(msg)
 			err = renderUpdate(model.ServiceEvent{}, c, args)
@@ -71,7 +74,7 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 			}
 		}
 
-		time.Sleep(time.Second * 1)
+		time.Sleep(time.Millisecond * 100)
 		fmt.Fprintf(writer, format, args...)
 
 		switch subject {
@@ -100,6 +103,17 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 				a[i+1] = a[i+1].(int) + 1
 				if a[i+1] == a[i+2] {
 					a[i+3] = green("Created")
+				}
+			}
+			if c.Action == "find" && c.State == "running" {
+				a[i+3] = yellow("Searching")
+			} else if c.Action == "find" && c.State == "completed" {
+				if len(c.Components) > 0 {
+					a[i+1] = len(c.Components)
+					a[i+2] = len(c.Components)
+					a[i+3] = green("Imported")
+				} else {
+					a[i+3] = yellow("None")
 				}
 			}
 			if c.Action == "delete" && c.State == "running" {
@@ -161,7 +175,11 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 		for _, k := range keys {
 			f = f + "%-" + strconv.Itoa(longestKey+1) + "s %3d/%-3d %s\n"
 			t := formatType(k)
-			a = append(a, t, 0, changes[k], "")
+			if s.Subject == "service.import" {
+				a = append(a, t, 0, 0, "")
+			} else {
+				a = append(a, t, 0, changes[k], "")
+			}
 		}
 	}
 
@@ -192,8 +210,7 @@ func ParseChanges(c []model.ComponentEvent) map[string]int {
 
 func formatType(t string) string {
 	s := strings.Replace(t, "_", " ", -1)
-	s = strings.Title(s + "s")
-	return s
+	return strings.Title(s)
 }
 
 func processServiceEvent(s map[string]interface{}) model.ServiceEvent {

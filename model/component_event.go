@@ -5,13 +5,14 @@
 package model
 
 type ComponentEvent struct {
-	ID       string `json:"_component_id"`
-	Subject  string `json:"_subject"`
-	Type     string `json:"_component"`
-	State    string `json:"_state"`
-	Action   string `json:"_action"`
-	Provider string `json:"_provider"`
-	Name     string `json:"name"`
-	Error    string `json:"error,omitempty"`
-	Service  string `json:"service,omitempty"`
+	ID         string           `json:"_component_id"`
+	Subject    string           `json:"_subject"`
+	Type       string           `json:"_component"`
+	State      string           `json:"_state"`
+	Action     string           `json:"_action"`
+	Provider   string           `json:"_provider"`
+	Name       string           `json:"name"`
+	Error      string           `json:"error,omitempty"`
+	Service    string           `json:"service,omitempty"`
+	Components []ComponentEvent `json:"components,omitempty"`
 }
