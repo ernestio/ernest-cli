@@ -4,6 +4,7 @@
 
 package model
 
+// ServiceEvent represents an event of type service from a SSE stream
 type ServiceEvent struct {
 	ID      string           `json:"id"`
 	Name    string           `json:"name"`

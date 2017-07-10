@@ -4,6 +4,7 @@
 
 package model
 
+// ComponentEvent represents an event of type component from a SSE stream
 type ComponentEvent struct {
 	ID         string           `json:"_component_id"`
 	Subject    string           `json:"_subject"`

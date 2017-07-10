@@ -27,7 +27,7 @@ func (m *Manager) CreateNotification(token string, name string, ntype string, co
 	body, res, err := m.doRequest("/api/notifications/", "POST", payload, token, "")
 	if err != nil {
 		if res == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		if res.StatusCode == 409 {
 			return "Notification '" + name + "' already exists, please specify a different name", err
@@ -45,7 +45,7 @@ func (m *Manager) ListNotifications(token string) (notifications []model.Notific
 	body, res, err := m.doRequest("/api/notifications/", "GET", []byte(""), token, "")
 	if err != nil {
 		if res == nil {
-			return nil, CONNECTIONREFUSED
+			return nil, ErrConnectionRefused
 		}
 		if res.StatusCode == 403 {
 			return nil, errors.New(body)
@@ -70,7 +70,7 @@ func (m *Manager) DeleteNotification(token string, name string) (err error) {
 	body, res, err := m.doRequest("/api/notifications/"+id, "DELETE", []byte(""), token, "")
 	if err != nil {
 		if res == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -103,7 +103,7 @@ func (m *Manager) UpdateNotification(token, name, config string) (err error) {
 	body, res, err := m.doRequest("/api/notifications/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -141,7 +141,7 @@ func (m *Manager) AddServiceToNotification(token, service, name string, delete b
 	body, res, err := m.doRequest("/api/notifications/"+id+"/"+service, method, payload, token, "")
 	if err != nil {
 		if res == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)

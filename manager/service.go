@@ -23,7 +23,7 @@ func (m *Manager) ListServices(token string) (services []model.Service, err erro
 	body, resp, err := m.doRequest("/api/services/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return nil, CONNECTIONREFUSED
+			return nil, ErrConnectionRefused
 		}
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (m *Manager) ListBuilds(name string, token string) (builds []model.Service,
 	body, resp, err := m.doRequest("/api/services/"+name+"/builds/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return nil, CONNECTIONREFUSED
+			return nil, ErrConnectionRefused
 		}
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service model
 	body, resp, err := m.doRequest("/api/services/"+serviceName, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return service, CONNECTIONREFUSED
+			return service, ErrConnectionRefused
 		}
 		if resp.StatusCode == 403 {
 			return service, errors.New("You don't have permissions to perform this action")
@@ -88,7 +88,7 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 	body, resp, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return service, CONNECTIONREFUSED
+			return service, ErrConnectionRefused
 		}
 		if resp.StatusCode == 403 {
 			return service, errors.New("You don't have permissions to perform this action")
@@ -120,7 +120,7 @@ func (m *Manager) ResetService(name string, token string) error {
 	_, resp, err := m.doRequest("/api/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 	}
 	return err
@@ -163,7 +163,7 @@ func (m *Manager) RevertService(name string, buildID string, token string, dry b
 
 	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		var internalError struct {
 			Message string `json:"message"`
@@ -193,7 +193,7 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 	body, resp, err := m.doRequest("/api/services/"+name, "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 		if resp.StatusCode == 404 {
 			return errors.New("Specified service name does not exist")
@@ -223,7 +223,7 @@ func (m *Manager) ForceDestroy(token, name string) error {
 	_, resp, err := m.doRequest("/api/services/"+name+"/force/", "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 		if resp.StatusCode == 404 {
 			return errors.New("Specified service name does not exist")
@@ -278,7 +278,7 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 
 	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		var internalError struct {
 			Message string `json:"message"`
@@ -291,7 +291,7 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 
 	if monit == true {
 		name := <-resc
-		fmt.Println("================\nPlatform Details\n================\n")
+		fmt.Println("================\nPlatform Details\n================\n ")
 		var srv model.Service
 		srv, err = m.ServiceStatus(token, name)
 		view.PrintServiceInfo(&srv)
@@ -326,7 +326,7 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 
 	if body, resp, err := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		return "", errors.New(body)
 	}
@@ -341,7 +341,7 @@ func (m *Manager) dryApply(token string, payload []byte) (string, error) {
 	body, resp, err := m.doRequest("/api/services/?dry=true", "POST", payload, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		var internalError struct {
 			Message string `json:"message"`

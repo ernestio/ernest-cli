@@ -204,10 +204,12 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 	return f, a
 }
 
+// ParseChanges takes a list of components, counts duplicates (removing them
+// from the list) and returns a map with the type and count.
 func ParseChanges(c []model.ComponentEvent) map[string]int {
 	seen := map[string]int{}
 	for _, v := range c {
-		seen[v.Type] += 1
+		seen[v.Type]++
 	}
 	return seen
 }

@@ -16,7 +16,7 @@ func (m *Manager) ListLoggers(token string) (loggers []model.Logger, err error) 
 	body, resp, err := m.doRequest("/api/loggers/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return nil, CONNECTIONREFUSED
+			return nil, ErrConnectionRefused
 		}
 		return nil, err
 	}
@@ -35,7 +35,7 @@ func (m *Manager) SetLogger(token string, logger model.Logger) (err error) {
 	}
 	if body, resp, err := m.doRequest("/api/loggers/", "POST", body, token, ""); err != nil {
 		if resp == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 		if resp.StatusCode == 403 {
 			return errors.New("You're not allowed to perform this action, please log in with an admin account")
@@ -55,7 +55,7 @@ func (m *Manager) DelLogger(token string, logger model.Logger) (err error) {
 	}
 	if body, resp, err := m.doRequest("/api/loggers/"+logger.Type, "DELETE", body, token, ""); err != nil {
 		if resp == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 		if resp.StatusCode == 403 {
 			return errors.New("You're not allowed to perform this action, please log in with an admin account")
