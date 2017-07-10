@@ -96,7 +96,7 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 	// component status
 	for i, v := range a {
 		t := formatType(c.Type)
-		if v == t {
+		if v == t || v == t+"s" {
 			if c.Action == "create" && c.State == "running" {
 				a[i+3] = yellow("Creating")
 			} else if c.Action == "create" && c.State == "completed" {
@@ -111,7 +111,7 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 				if len(c.Components) > 0 {
 					a[i+1] = len(c.Components)
 					a[i+2] = len(c.Components)
-					a[i+3] = green("Imported")
+					a[i+3] = green("Found")
 				} else {
 					a[i+3] = yellow("None")
 				}
@@ -178,7 +178,7 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 			if s.Subject == "service.import" {
 				a = append(a, t, 0, 0, "")
 			} else {
-				a = append(a, t, 0, changes[k], "")
+				a = append(a, t+"s", 0, changes[k], "")
 			}
 		}
 	}
@@ -209,8 +209,8 @@ func ParseChanges(c []model.ComponentEvent) map[string]int {
 }
 
 func formatType(t string) string {
-	s := strings.Replace(t, "_", " ", -1)
-	return strings.Title(s)
+	t = strings.Replace(t, "_", " ", -1)
+	return strings.Title(t)
 }
 
 func processServiceEvent(s map[string]interface{}) model.ServiceEvent {
