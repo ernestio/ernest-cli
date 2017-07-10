@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"runtime"
 	"strconv"
 
 	"github.com/ernestio/ernest-cli/helper"
@@ -153,15 +152,14 @@ func (m *Manager) RevertService(name string, buildID string, token string, dry b
 		return m.dryApply(token, payload)
 	}
 
-	color.Green("Reverting service...")
-
 	streamID := m.GetUUID(token, payload)
 	if streamID == "" {
 		color.Red("Please log in")
 		return "", nil
 	}
 
-	go helper.Monitorize(m.URL, "/events", token, streamID)
+	resc := make(chan string)
+	go helper.Monitorize(m.URL, "/events", token, streamID, resc)
 
 	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
@@ -176,7 +174,8 @@ func (m *Manager) RevertService(name string, buildID string, token string, dry b
 		return "", errors.New(internalError.Message)
 	}
 
-	runtime.Goexit()
+	<-resc
+	os.Exit(0)
 
 	return streamID, nil
 }
