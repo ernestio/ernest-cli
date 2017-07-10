@@ -28,17 +28,21 @@ import (
 
 type print func([]byte)
 
-var green = color.New(color.FgGreen).SprintFunc()
-var yellow = color.New(color.FgYellow).SprintFunc()
-var red = color.New(color.FgRed).SprintFunc()
+var (
+	green  = color.New(color.FgGreen).SprintFunc()
+	yellow = color.New(color.FgYellow).SprintFunc()
+	red    = color.New(color.FgRed).SprintFunc()
+)
 
 // Monitorize opens a websocket connection to get input messages
 func Monitorize(host, endpoint, token, stream string, resc chan string) {
-	var s model.ServiceEvent
-	var c model.ComponentEvent
-	var format string
-	var args []interface{}
-	var resourceErr error
+	var (
+		s           model.ServiceEvent
+		c           model.ComponentEvent
+		format      string
+		args        []interface{}
+		resourceErr error
+	)
 
 	writer := uilive.New()
 	writer.Start()
@@ -64,7 +68,7 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 			s = processServiceEvent(msg)
 			err = renderUpdate(s, model.ComponentEvent{}, args)
 			if err != nil {
-				log.Println(err)
+				fmt.Println(err)
 			}
 		default:
 			c = processComponentEvent(msg)
