@@ -11,13 +11,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/fatih/color"
-
-	yaml "gopkg.in/yaml.v2"
 )
 
 // Manager manages all api communications
@@ -115,34 +112,4 @@ func (m *Manager) GetSession(token string) (session Session, err error) {
 		return session, err
 	}
 	return session, nil
-}
-
-// GetUUID ...
-func (m *Manager) GetUUID(token string, payload []byte) string {
-	id, err := buildServiceUUID(payload)
-	if err != nil {
-		log.Fatal(err)
-	}
-	body, _, _ := m.doRequest("/api/services/uuid/", "POST", []byte(`{"id":"`+id+`"}`), token, "")
-	var dat map[string]interface{}
-	err = json.Unmarshal([]byte(body), &dat)
-	if err != nil {
-		return ""
-	}
-
-	if str, ok := dat["uuid"].(string); ok {
-		return str
-	}
-	return ""
-}
-
-func buildServiceUUID(payload []byte) (string, error) {
-	var definition struct {
-		Name       string
-		Datacenter string
-	}
-	if err := yaml.Unmarshal(payload, &definition); err != nil {
-		return "", err
-	}
-	return definition.Name + "-" + definition.Datacenter, nil
 }

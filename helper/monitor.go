@@ -35,7 +35,7 @@ var (
 )
 
 // Monitorize opens a websocket connection to get input messages
-func Monitorize(host, endpoint, token, stream string, resc chan string) {
+func Monitorize(host, endpoint, token, stream string) error {
 	var (
 		s           model.ServiceEvent
 		c           model.ComponentEvent
@@ -46,8 +46,9 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 
 	writer := uilive.New()
 	writer.Start()
+	defer writer.Stop()
 
-	sseSubscribe(host, endpoint, token, stream, func(event []byte) {
+	err := subscribe(host, endpoint, token, stream, func(event []byte) {
 		// clean msg body of any null characters
 		cleanedInput := bytes.Trim(event, "\x00")
 
@@ -55,7 +56,7 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 
 		err := json.Unmarshal(cleanedInput, &msg)
 		if err != nil {
-			fmt.Println(err)
+			log.Println(err)
 		}
 
 		subject := msg["_subject"].(string)
@@ -82,10 +83,7 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 		fmt.Fprintf(writer, format, args...)
 
 		switch subject {
-		case "service.create.done":
-			writer.Stop()
-			resc <- s.Name
-		case "service.delete.done", "service.import.done":
+		case "service.create.done", "service.delete.done", "service.import.done":
 			writer.Stop()
 			os.Exit(0)
 		case "service.create.error", "service.delete.error", "service.import.error":
@@ -94,6 +92,8 @@ func Monitorize(host, endpoint, token, stream string, resc chan string) {
 			os.Exit(1)
 		}
 	})
+
+	return err
 }
 
 func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{}) error {
@@ -264,7 +264,7 @@ func processComponentEvent(c map[string]interface{}) model.ComponentEvent {
 
 // PrintLogs : prints logs inline
 func PrintLogs(host, endpoint, token, stream string) {
-	sseSubscribe(host, endpoint, token, stream, func(body []byte) {
+	subscribe(host, endpoint, token, stream, func(body []byte) {
 		m := model.Message{}
 
 		// clean msg body of any null characters
@@ -286,7 +286,7 @@ func PrintLogs(host, endpoint, token, stream string) {
 
 // PrintRawLogs : prints logs inline
 func PrintRawLogs(host, endpoint, token, stream string) {
-	sseSubscribe(host, endpoint, token, stream, func(body []byte) {
+	subscribe(host, endpoint, token, stream, func(body []byte) {
 		m := model.Message{}
 
 		// clean msg body of any null characters
@@ -300,10 +300,11 @@ func PrintRawLogs(host, endpoint, token, stream string) {
 	})
 }
 
-func sseSubscribe(host, endpoint, token, stream string, fn print) {
+func subscribe(host, endpoint, token, stream string, fn print) error {
 	url := host + endpoint
 	client := sse.NewClient(url)
 	client.EncodingBase64 = true
+	client.EventID = "0"
 	client.Connection.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -315,8 +316,10 @@ func sseSubscribe(host, endpoint, token, stream string, fn print) {
 			fn(msg.Data)
 		}
 	})
+
 	if err != nil {
-		log.Println("Failed with: " + err.Error())
-		os.Exit(1)
+		return fmt.Errorf("Failed with: " + err.Error())
 	}
+
+	return nil
 }
