@@ -39,7 +39,8 @@ type Session struct {
 	IsAdmin bool   `json:"admin"`
 }
 
-var CONNECTIONREFUSED = errors.New("Connection refused")
+// ErrConnectionRefused is the error response given
+var ErrConnectionRefused = errors.New("Connection refused")
 
 func (m *Manager) client() *http.Client {
 	tr := &http.Transport{
@@ -83,7 +84,7 @@ func (m *Manager) createClient(token string, name string) (string, error) {
 	body, resp, err := m.doRequest("/api/groups/", "POST", payload, token, "")
 	if err != nil {
 		if resp == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		return body, err
 	}
@@ -105,7 +106,7 @@ func (m *Manager) GetSession(token string) (session Session, err error) {
 	body, resp, err := m.doRequest("/api/session/", "GET", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return session, CONNECTIONREFUSED
+			return session, ErrConnectionRefused
 		}
 		return session, err
 	}

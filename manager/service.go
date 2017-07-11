@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"runtime"
+	"os"
 	"strconv"
 
 	"github.com/ernestio/ernest-cli/helper"
@@ -23,7 +23,7 @@ func (m *Manager) ListServices(token string) (services []model.Service, err erro
 	body, resp, err := m.doRequest("/api/services/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return nil, CONNECTIONREFUSED
+			return nil, ErrConnectionRefused
 		}
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (m *Manager) ListBuilds(name string, token string) (builds []model.Service,
 	body, resp, err := m.doRequest("/api/services/"+name+"/builds/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return nil, CONNECTIONREFUSED
+			return nil, ErrConnectionRefused
 		}
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service model
 	body, resp, err := m.doRequest("/api/services/"+serviceName, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return service, CONNECTIONREFUSED
+			return service, ErrConnectionRefused
 		}
 		if resp.StatusCode == 403 {
 			return service, errors.New("You don't have permissions to perform this action")
@@ -88,7 +88,7 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 	body, resp, err := m.doRequest("/api/services/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return service, CONNECTIONREFUSED
+			return service, ErrConnectionRefused
 		}
 		if resp.StatusCode == 403 {
 			return service, errors.New("You don't have permissions to perform this action")
@@ -120,7 +120,7 @@ func (m *Manager) ResetService(name string, token string) error {
 	_, resp, err := m.doRequest("/api/services/"+name+"/reset/", "POST", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 	}
 	return err
@@ -152,19 +152,18 @@ func (m *Manager) RevertService(name string, buildID string, token string, dry b
 		return m.dryApply(token, payload)
 	}
 
-	color.Green("Reverting service...")
-
 	streamID := m.GetUUID(token, payload)
 	if streamID == "" {
 		color.Red("Please log in")
 		return "", nil
 	}
 
-	go helper.Monitorize(m.URL, "/events", token, streamID)
+	resc := make(chan string)
+	go helper.Monitorize(m.URL, "/events", token, streamID, resc)
 
 	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		var internalError struct {
 			Message string `json:"message"`
@@ -175,7 +174,8 @@ func (m *Manager) RevertService(name string, buildID string, token string, dry b
 		return "", errors.New(internalError.Message)
 	}
 
-	runtime.Goexit()
+	<-resc
+	os.Exit(0)
 
 	return streamID, nil
 }
@@ -193,7 +193,7 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 	body, resp, err := m.doRequest("/api/services/"+name, "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 		if resp.StatusCode == 404 {
 			return errors.New("Specified service name does not exist")
@@ -209,8 +209,9 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 
 	if monit == true {
 		if str, ok := res["stream_id"].(string); ok {
-			helper.Monitorize(m.URL, "/events", token, str)
-			runtime.Goexit()
+			resc := make(chan string)
+			go helper.Monitorize(m.URL, "/events", token, str, resc)
+			<-resc
 		}
 	}
 
@@ -222,7 +223,7 @@ func (m *Manager) ForceDestroy(token, name string) error {
 	_, resp, err := m.doRequest("/api/services/"+name+"/force/", "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return CONNECTIONREFUSED
+			return ErrConnectionRefused
 		}
 		if resp.StatusCode == 404 {
 			return errors.New("Specified service name does not exist")
@@ -236,6 +237,7 @@ func (m *Manager) ForceDestroy(token, name string) error {
 // Apply : Applies a yaml to create / update a new service
 func (m *Manager) Apply(token string, path string, monit, dry bool) (string, error) {
 	var d model.Definition
+	resc := make(chan string)
 
 	payload, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -262,10 +264,6 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 		return m.dryApply(token, payload)
 	}
 
-	color.Green("Environment creation requested")
-	fmt.Println("Ernest will show you all output from your requested service creation")
-	fmt.Println("You can cancel at any moment with Ctrl+C, even the service is still being created, you won't have any output")
-
 	streamID := m.GetUUID(token, payload)
 	if streamID == "" {
 		color.Red("Please log in")
@@ -273,14 +271,14 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 	}
 
 	if monit == true {
-		go helper.Monitorize(m.URL, "/events", token, streamID)
+		go helper.Monitorize(m.URL, "/events", token, streamID, resc)
 	} else {
 		fmt.Println("Additionally you can trace your service on ernest monitor tool with id: " + streamID)
 	}
 
 	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		var internalError struct {
 			Message string `json:"message"`
@@ -292,7 +290,12 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 	}
 
 	if monit == true {
-		runtime.Goexit()
+		name := <-resc
+		fmt.Println("================\nPlatform Details\n================\n ")
+		var srv model.Service
+		srv, err = m.ServiceStatus(token, name)
+		view.PrintServiceInfo(&srv)
+		os.Exit(0)
 	}
 	return streamID, nil
 }
@@ -312,25 +315,23 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 		return "", errors.New("Invalid name or datacenter")
 	}
 
-	color.Green("Environment import requested")
-	fmt.Println("Ernest will show you all output from your requested service creation")
-	fmt.Println("You can cancel at any moment with Ctrl+C, even the service is still being imported, you won't have any output")
-
 	streamID = m.GetUUID(token, payload)
 	if streamID == "" {
 		color.Red("Please log in")
 		return "", nil
 	}
 
-	go helper.Monitorize(m.URL, "/events", token, streamID)
+	resc := make(chan string)
+	go helper.Monitorize(m.URL, "/events", token, streamID, resc)
 
 	if body, resp, err := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml"); err != nil {
 		if resp == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		return "", errors.New(body)
 	}
-	runtime.Goexit()
+
+	<-resc
 
 	return streamID, nil
 }
@@ -340,7 +341,7 @@ func (m *Manager) dryApply(token string, payload []byte) (string, error) {
 	body, resp, err := m.doRequest("/api/services/?dry=true", "POST", payload, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
-			return "", CONNECTIONREFUSED
+			return "", ErrConnectionRefused
 		}
 		var internalError struct {
 			Message string `json:"message"`
