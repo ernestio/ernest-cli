@@ -174,7 +174,12 @@ func (m *Manager) RevertService(name string, buildID string, token string, dry b
 		return "", errors.New(internalError.Message)
 	}
 
-	<-resc
+	name = <-resc
+	fmt.Println("================\nPlatform Details\n================\n ")
+	var srv model.Service
+	srv, err = m.ServiceStatus(token, name)
+	view.PrintServiceInfo(&srv)
+
 	os.Exit(0)
 
 	return streamID, nil
