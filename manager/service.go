@@ -175,6 +175,16 @@ func (m *Manager) RevertService(name string, buildID string, token string, dry b
 		return "", err
 	}
 
+	fmt.Println("================\nPlatform Details\n================\n ")
+	var srv model.Service
+
+	srv, err = m.ServiceStatus(token, name)
+	if err != nil {
+		return response.ID, err
+	}
+
+	view.PrintServiceInfo(&srv)
+
 	return response.ID, nil
 }
 
@@ -289,7 +299,12 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 
 	fmt.Println("================\nPlatform Details\n================\n ")
 	var srv model.Service
+
 	srv, err = m.ServiceStatus(token, response.Name)
+	if err != nil {
+		return response.ID, err
+	}
+
 	view.PrintServiceInfo(&srv)
 
 	return response.ID, nil
