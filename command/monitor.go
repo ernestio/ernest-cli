@@ -5,9 +5,6 @@
 package command
 
 import (
-	"os"
-	"strings"
-
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
@@ -50,22 +47,13 @@ var MonitorService = cli.Command{
 			color.Red(err.Error())
 			return nil
 		}
-		parts := strings.Split(service.ID, "-")
-		if len(parts) == 0 {
-			color.Red("Invalid service specified")
-			return nil
-		}
+
 		if service.Status == "done" {
 			color.Yellow("Service has been successfully built")
 			color.Yellow("You can check its information running `ernest-cli service info " + name + "`")
 			return nil
 		}
 
-		resc := make(chan string)
-		go helper.Monitorize(cfg.URL, "/events", cfg.Token, parts[len(parts)-1], resc)
-		<-resc
-		os.Exit(0)
-
-		return nil
+		return helper.Monitorize(cfg.URL, "/events", cfg.Token, service.ID)
 	},
 }

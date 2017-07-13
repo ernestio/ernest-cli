@@ -9,13 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strconv"
 
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
-	"github.com/fatih/color"
 )
 
 // ListServices ...
@@ -152,37 +150,42 @@ func (m *Manager) RevertService(name string, buildID string, token string, dry b
 		return m.dryApply(token, payload)
 	}
 
-	streamID := m.GetUUID(token, payload)
-	if streamID == "" {
-		color.Red("Please log in")
-		return "", nil
+	var response struct {
+		ID      string `json:"id,omitempty"`
+		Name    string `json:"name,omitempty"`
+		Message string `json:"message,omitempty"`
 	}
 
-	resc := make(chan string)
-	go helper.Monitorize(m.URL, "/events", token, streamID, resc)
-
-	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
-		if resp == nil {
-			return "", ErrConnectionRefused
-		}
-		var internalError struct {
-			Message string `json:"message"`
-		}
-		if err := json.Unmarshal([]byte(body), &internalError); err != nil {
-			return "", errors.New(body)
-		}
-		return "", errors.New(internalError.Message)
+	body, resp, rerr := m.doRequest("/api/services/", "POST", payload, token, "application/yaml")
+	if resp == nil {
+		return "", ErrConnectionRefused
 	}
 
-	name = <-resc
+	err = json.Unmarshal([]byte(body), &response)
+	if err != nil {
+		return "", errors.New(body)
+	}
+
+	if rerr != nil {
+		return "", errors.New(response.Message)
+	}
+
+	err = helper.Monitorize(m.URL, "/events", token, response.ID)
+	if err != nil {
+		return "", err
+	}
+
 	fmt.Println("================\nPlatform Details\n================\n ")
 	var srv model.Service
+
 	srv, err = m.ServiceStatus(token, name)
+	if err != nil {
+		return response.ID, err
+	}
+
 	view.PrintServiceInfo(&srv)
 
-	os.Exit(0)
-
-	return streamID, nil
+	return response.ID, nil
 }
 
 // Destroy : Destroys an existing service
@@ -212,12 +215,13 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 		return err
 	}
 
-	if monit == true {
-		if str, ok := res["stream_id"].(string); ok {
-			resc := make(chan string)
-			go helper.Monitorize(m.URL, "/events", token, str, resc)
-			<-resc
+	if id, ok := res["id"].(string); ok {
+		err = helper.Monitorize(m.URL, "/events", token, id)
+		if err != nil {
+			return err
 		}
+	} else {
+		return errors.New("could not read response")
 	}
 
 	return nil
@@ -242,7 +246,6 @@ func (m *Manager) ForceDestroy(token, name string) error {
 // Apply : Applies a yaml to create / update a new service
 func (m *Manager) Apply(token string, path string, monit, dry bool) (string, error) {
 	var d model.Definition
-	resc := make(chan string)
 
 	payload, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -269,40 +272,42 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 		return m.dryApply(token, payload)
 	}
 
-	streamID := m.GetUUID(token, payload)
-	if streamID == "" {
-		color.Red("Please log in")
-		return "", nil
+	var response struct {
+		ID      string `json:"id,omitempty"`
+		Name    string `json:"name,omitempty"`
+		Message string `json:"message,omitempty"`
 	}
 
-	if monit == true {
-		go helper.Monitorize(m.URL, "/events", token, streamID, resc)
-	} else {
-		fmt.Println("Additionally you can trace your service on ernest monitor tool with id: " + streamID)
+	body, resp, rerr := m.doRequest("/api/services/", "POST", payload, token, "application/yaml")
+	if resp == nil {
+		return "", ErrConnectionRefused
 	}
 
-	if body, resp, err := m.doRequest("/api/services/", "POST", payload, token, "application/yaml"); err != nil {
-		if resp == nil {
-			return "", ErrConnectionRefused
-		}
-		var internalError struct {
-			Message string `json:"message"`
-		}
-		if err := json.Unmarshal([]byte(body), &internalError); err != nil {
-			return "", errors.New(body)
-		}
-		return "", errors.New(internalError.Message)
+	err = json.Unmarshal([]byte(body), &response)
+	if err != nil {
+		return "", errors.New(body)
 	}
 
-	if monit == true {
-		name := <-resc
-		fmt.Println("================\nPlatform Details\n================\n ")
-		var srv model.Service
-		srv, err = m.ServiceStatus(token, name)
-		view.PrintServiceInfo(&srv)
-		os.Exit(0)
+	if rerr != nil {
+		return "", errors.New(response.Message)
 	}
-	return streamID, nil
+
+	err = helper.Monitorize(m.URL, "/events", token, response.ID)
+	if err != nil {
+		return response.ID, err
+	}
+
+	fmt.Println("================\nPlatform Details\n================\n ")
+	var srv model.Service
+
+	srv, err = m.ServiceStatus(token, response.Name)
+	if err != nil {
+		return response.ID, err
+	}
+
+	view.PrintServiceInfo(&srv)
+
+	return response.ID, nil
 }
 
 // Import : Imports an existing service
@@ -320,25 +325,29 @@ func (m *Manager) Import(token string, name string, datacenter string, filters [
 		return "", errors.New("Invalid name or datacenter")
 	}
 
-	streamID = m.GetUUID(token, payload)
-	if streamID == "" {
-		color.Red("Please log in")
-		return "", nil
+	var response struct {
+		ID      string `json:"id,omitempty"`
+		Name    string `json:"name,omitempty"`
+		Message string `json:"message,omitempty"`
 	}
 
-	resc := make(chan string)
-	go helper.Monitorize(m.URL, "/events", token, streamID, resc)
+	body, resp, rerr := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml")
+	if resp == nil {
+		return "", ErrConnectionRefused
+	}
 
-	if body, resp, err := m.doRequest("/api/services/import/", "POST", payload, token, "application/yaml"); err != nil {
-		if resp == nil {
-			return "", ErrConnectionRefused
-		}
+	err = json.Unmarshal([]byte(body), &response)
+	if err != nil {
 		return "", errors.New(body)
 	}
 
-	<-resc
+	if rerr != nil {
+		return "", errors.New(response.Message)
+	}
 
-	return streamID, nil
+	err = helper.Monitorize(m.URL, "/events", token, response.ID)
+
+	return response.ID, err
 }
 
 func (m *Manager) dryApply(token string, payload []byte) (string, error) {

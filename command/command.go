@@ -6,11 +6,12 @@ package command
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/ernestio/ernest-cli/manager"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
-	"log"
 )
 
 // setup ...
