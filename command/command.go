@@ -16,7 +16,6 @@ import (
 
 // setup ...
 func setup(c *cli.Context) (*manager.Manager, *model.Config) {
-
 	config := model.GetConfig()
 	if config == nil {
 		config = &model.Config{}
