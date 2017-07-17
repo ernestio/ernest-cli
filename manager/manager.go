@@ -58,7 +58,6 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
-
 	req.Header.Add("User-Agent", "Ernest/"+m.Version)
 
 	resp, err := m.client().Do(req)

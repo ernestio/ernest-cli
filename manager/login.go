@@ -31,6 +31,7 @@ func (m *Manager) Login(username string, password string) (token string, err err
 	req.Form = f
 	req.PostForm = f
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Add("User-Agent", "Ernest/"+m.Version)
 
 	resp, err := m.client().Do(req)
 	if err != nil {
