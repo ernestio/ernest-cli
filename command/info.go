@@ -26,7 +26,7 @@ var Info = cli.Command{
 		_, cfg := setup(c)
 		fmt.Println("Target: " + cfg.URL)
 		fmt.Println("User: " + cfg.User)
-		fmt.Println("Version: " + c.App.Version)
+		fmt.Println("CLI Version: " + c.App.Version)
 		return nil
 	},
 }
