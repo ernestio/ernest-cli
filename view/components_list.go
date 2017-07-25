@@ -21,7 +21,7 @@ func PrintComponentsList(components []interface{}) {
 		sw := false
 		for k, v := range c {
 			val, _ := json.Marshal(v)
-			if sw == false {
+			if !sw {
 				fmt.Println("- " + k + " : " + string(val))
 				sw = true
 			} else {

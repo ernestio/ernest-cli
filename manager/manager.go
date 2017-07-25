@@ -89,8 +89,6 @@ func (m *Manager) GetSession(token string) (session Session, err error) {
 		return session, err
 	}
 	err = json.Unmarshal([]byte(body), &session)
-	if err != nil {
-		return session, err
-	}
-	return session, nil
+
+	return session, err
 }

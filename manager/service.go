@@ -67,10 +67,8 @@ func (m *Manager) ServiceStatus(token string, serviceName string) (service model
 		return service, errors.New("Unexpected endpoint response : " + string(body))
 	}
 	err = json.Unmarshal([]byte(body), &service)
-	if err != nil {
-		return service, err
-	}
-	return service, nil
+
+	return service, err
 }
 
 // ServiceBuildStatus ...
@@ -100,10 +98,7 @@ func (m *Manager) ServiceBuildStatus(token string, serviceName string, serviceID
 		return service, errors.New("Unexpected endpoint response : " + string(body))
 	}
 	err = json.Unmarshal([]byte(body), &service)
-	if err != nil {
-		return service, err
-	}
-	return service, nil
+	return service, err
 }
 
 // ResetService ...

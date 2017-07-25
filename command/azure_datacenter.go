@@ -120,7 +120,7 @@ var CreateAzureDatacenter = cli.Command{
 		if c.String("environment") != "" {
 			environment = c.String("environment")
 		}
-		if fake == false {
+		if !fake {
 			fake = c.Bool("fake")
 		}
 

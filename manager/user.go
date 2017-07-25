@@ -57,10 +57,8 @@ func (m *Manager) GetUser(token string, userid string) (user model.User, err err
 		return user, err
 	}
 	err = json.Unmarshal([]byte(body), &user)
-	if err != nil {
-		return user, err
-	}
-	return user, nil
+
+	return user, err
 }
 
 // CreateUser ...
