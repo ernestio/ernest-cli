@@ -6,6 +6,7 @@ package command
 
 import (
 	"fmt"
+
 	"github.com/urfave/cli"
 )
 
@@ -23,8 +24,9 @@ var Info = cli.Command{
 	`,
 	Action: func(c *cli.Context) error {
 		_, cfg := setup(c)
-		fmt.Println("Current target : " + cfg.URL)
-		fmt.Println("Current user : " + cfg.User)
+		fmt.Println("Target: " + cfg.URL)
+		fmt.Println("User: " + cfg.User)
+		fmt.Println("CLI Version: " + c.App.Version)
 		return nil
 	},
 }
