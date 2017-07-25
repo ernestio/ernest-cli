@@ -6,7 +6,6 @@ package command
 
 // CmdDatacenter subcommand
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -476,17 +475,6 @@ var ImportService = cli.Command{
 		}
 		return nil
 	},
-}
-
-func getServiceUUID(output []byte) (string, error) {
-	var service struct {
-		ID string `json:"id"`
-	}
-	err := json.Unmarshal(output, &service)
-	if err != nil {
-		return "", err
-	}
-	return service.ID, nil
 }
 
 // posString returns the first index of element in slice.
