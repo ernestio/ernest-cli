@@ -6,6 +6,7 @@ package command
 
 import (
 	"runtime"
+	"strings"
 
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
@@ -24,11 +25,16 @@ var CmdLog = cli.Command{
    Example:
     $ ernest log
     $ ernest log --raw
+    $ ernest log --blacklist service.create,service.delete
 	`,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "raw",
 			Usage: "Raw output will be displayed instead of pretty-printed",
+		},
+		cli.StringFlag{
+			Name:  "blacklist",
+			Usage: "Comma separated list of blacklisted subjects",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -50,9 +56,13 @@ var CmdLog = cli.Command{
 		}
 
 		if c.Bool("raw") {
-			helper.PrintRawLogs(cfg.URL, "/logs", cfg.Token, logger.UUID)
+			_ = helper.PrintRawLogs(cfg.URL, "/logs", cfg.Token, logger.UUID)
 		} else {
-			helper.PrintLogs(cfg.URL, "/logs", cfg.Token, logger.UUID)
+			blacklist := make(map[string]string, 0)
+			for _, key := range strings.Split(c.String("blacklist"), ",") {
+				blacklist[key] = ""
+			}
+			_ = helper.PrintLogs(cfg.URL, "/logs", cfg.Token, logger.UUID, blacklist)
 		}
 
 		defer func() {

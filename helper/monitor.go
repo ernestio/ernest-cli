@@ -18,14 +18,23 @@ import (
 type handler func([]byte) error
 
 const (
-	SERVICECREATE      = "service.create"
-	SERVICEDELETE      = "service.delete"
-	SERVICEIMPORT      = "service.import"
-	SERVICECREATEDONE  = "service.create.done"
-	SERVICEDELETEDONE  = "service.delete.done"
-	SERVICEIMPORTDONE  = "service.import.done"
+	// SERVICECREATE ...
+	SERVICECREATE = "service.create"
+	// SERVICEDELETE ...
+	SERVICEDELETE = "service.delete"
+	// SERVICEIMPORT ...
+	SERVICEIMPORT = "service.import"
+	// SERVICECREATEDONE ...
+	SERVICECREATEDONE = "service.create.done"
+	// SERVICEDELETEDONE ...
+	SERVICEDELETEDONE = "service.delete.done"
+	// SERVICEIMPORTDONE ...
+	SERVICEIMPORTDONE = "service.import.done"
+	// SERVICECREATEERROR ...
 	SERVICECREATEERROR = "service.create.error"
+	// SERVICEDELETEERROR ...
 	SERVICEDELETEERROR = "service.delete.error"
+	// SERVICEIMPORTERROR ...
 	SERVICEIMPORTERROR = "service.import.error"
 )
 
@@ -49,9 +58,10 @@ func Monitorize(host, endpoint, token, stream string) error {
 }
 
 // PrintLogs : prints logs inline
-func PrintLogs(host, endpoint, token, stream string) error {
+func PrintLogs(host, endpoint, token, stream string, blacklist map[string]string) error {
 	h := loghandler{
-		stream: OpenStream(host, endpoint, token, stream),
+		stream:    OpenStream(host, endpoint, token, stream),
+		blacklist: blacklist,
 	}
 
 	return h.subscribe()
