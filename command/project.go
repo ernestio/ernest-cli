@@ -4,7 +4,7 @@
 
 package command
 
-// CmdDatacenter subcommand
+// CmdProject subcommand
 import (
 	"errors"
 	"io/ioutil"
@@ -16,15 +16,15 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// ListDatacenters ...
-var ListDatacenters = cli.Command{
+// ListProjects ...
+var ListProjects = cli.Command{
 	Name:      "list",
-	Usage:     "List available datacenters.",
+	Usage:     "List available projects.",
 	ArgsUsage: " ",
-	Description: `List available datacenters.
+	Description: `List available projects.
 
    Example:
-    $ ernest datacenter list
+    $ ernest project list
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -32,55 +32,55 @@ var ListDatacenters = cli.Command{
 			color.Red("You're not allowed to perform this action, please log in")
 			return nil
 		}
-		datacenters, err := m.ListDatacenters(cfg.Token)
+		projects, err := m.ListProjects(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
 
-		view.PrintDatacenterList(datacenters)
+		view.PrintProjectList(projects)
 
 		return nil
 	},
 }
 
-// UpdateDatacenters : Will update the datacenter specific fields
-var UpdateDatacenters = cli.Command{
+// UpdateProjects : Will update the project specific fields
+var UpdateProjects = cli.Command{
 	Name:        "update",
-	Usage:       "Updates an existing datacenter.",
-	Description: "Update an existing datacenter on the targeted instance of Ernest.",
+	Usage:       "Updates an existing project.",
+	Description: "Update an existing project on the targeted instance of Ernest.",
 	Subcommands: []cli.Command{
-		UpdateVCloudDatacenter,
-		UpdateAWSDatacenter,
-		UpdateAzureDatacenter,
+		UpdateVCloudProject,
+		UpdateAWSProject,
+		UpdateAzureProject,
 	},
 }
 
-// CreateDatacenters ...
-var CreateDatacenters = cli.Command{
+// CreateProjects ...
+var CreateProjects = cli.Command{
 	Name:        "create",
-	Usage:       "Create a new datacenter.",
-	Description: "Create a new datacenter on the targeted instance of Ernest.",
+	Usage:       "Create a new project.",
+	Description: "Create a new project on the targeted instance of Ernest.",
 	Subcommands: []cli.Command{
-		CreateVcloudDatacenter,
-		CreateAWSDatacenter,
-		CreateAzureDatacenter,
+		CreateVcloudProject,
+		CreateAWSProject,
+		CreateAzureProject,
 	},
 }
 
-// CmdDatacenter ...
-var CmdDatacenter = cli.Command{
-	Name:  "datacenter",
-	Usage: "Datacenter related subcommands",
+// CmdProject ...
+var CmdProject = cli.Command{
+	Name:  "project",
+	Usage: "Project related subcommands",
 	Subcommands: []cli.Command{
-		ListDatacenters,
-		CreateDatacenters,
-		UpdateDatacenters,
-		DeleteDatacenter,
+		ListProjects,
+		CreateProjects,
+		UpdateProjects,
+		DeleteProject,
 	},
 }
 
-func getDatacenterTemplate(template string, t *model.DatacenterTemplate) (err error) {
+func getProjectTemplate(template string, t *model.ProjectTemplate) (err error) {
 	payload, err := ioutil.ReadFile(template)
 	if err != nil {
 		return errors.New("Template file '" + template + "' not found")

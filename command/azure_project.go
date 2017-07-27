@@ -4,7 +4,7 @@
 
 package command
 
-// CmdDatacenter subcommand
+// CmdProject subcommand
 import (
 	"fmt"
 
@@ -12,18 +12,18 @@ import (
 	"github.com/urfave/cli"
 )
 
-// CreateAzureDatacenter : Creates an AWS datacenter
-var CreateAzureDatacenter = cli.Command{
+// CreateAzureProject : Creates an AWS project
+var CreateAzureProject = cli.Command{
 	Name:  "azure",
-	Usage: "Create a new azure datacenter.",
-	Description: `Create a new Azure datacenter on the targeted instance of Ernest.
+	Usage: "Create a new azure project.",
+	Description: `Create a new Azure project on the targeted instance of Ernest.
 
 	Example:
-	 $ ernest datacenter create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_datacenter
+	 $ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
 
    Template example:
-    $ ernest datacenter create azure --template mydatacenter.yml mydatacenter
-    Where mydatacenter.yaml will look like:
+    $ ernest project create azure --template myproject.yml myproject
+    Where myproject.yaml will look like:
       ---
       fake: true
       region: westus
@@ -33,12 +33,12 @@ var CreateAzureDatacenter = cli.Command{
 			tenant_id: TENANT
 			environment: public
 	 `,
-	ArgsUsage: "<datacenter-name>",
+	ArgsUsage: "<project-name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "region, r",
 			Value: "",
-			Usage: "Datacenter region",
+			Usage: "Project region",
 		},
 		cli.StringFlag{
 			Name:  "subscription_id, s",
@@ -67,7 +67,7 @@ var CreateAzureDatacenter = cli.Command{
 		},
 		cli.BoolFlag{
 			Name:  "fake, f",
-			Usage: "Fake datacenter",
+			Usage: "Fake project",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -77,7 +77,7 @@ var CreateAzureDatacenter = cli.Command{
 		m, cfg := setup(c)
 
 		if len(c.Args()) < 1 {
-			msg := "You should specify the datacenter name"
+			msg := "You should specify the project name"
 			color.Red(msg)
 			return nil
 		}
@@ -91,8 +91,8 @@ var CreateAzureDatacenter = cli.Command{
 		template := c.String("template")
 		if template != "" {
 			/*
-				var t model.DatacenterTemplate
-				if err := getDatacenterTemplate(template, &t); err != nil {
+				var t model.ProjectTemplate
+				if err := getProjectTemplate(template, &t); err != nil {
 					color.Red(err.Error())
 					return nil
 				}
@@ -153,25 +153,25 @@ var CreateAzureDatacenter = cli.Command{
 		if fake {
 			rtype = "azure-fake"
 		}
-		body, err := m.CreateAzureDatacenter(cfg.Token, name, rtype, region, subscriptionID, clientID, clientSecret, tenantID, environment)
+		body, err := m.CreateAzureProject(cfg.Token, name, rtype, region, subscriptionID, clientID, clientSecret, tenantID, environment)
 		if err != nil {
 			color.Red(body)
 		} else {
-			color.Green("Datacenter '" + name + "' successfully created ")
+			color.Green("Project '" + name + "' successfully created ")
 		}
 		return nil
 	},
 }
 
-// UpdateAzureDatacenter : Updates the specified VCloud datacenter
-var UpdateAzureDatacenter = cli.Command{
+// UpdateAzureProject : Updates the specified VCloud project
+var UpdateAzureProject = cli.Command{
 	Name:      "azure",
-	Usage:     "Updates the specified Azure datacenter.",
-	ArgsUsage: "<datacenter-name>",
-	Description: `Updates the specified Azure datacenter.
+	Usage:     "Updates the specified Azure project.",
+	ArgsUsage: "<project-name>",
+	Description: `Updates the specified Azure project.
 
    Example:
-	 $ ernest datacenter update azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_datacenter
+	 $ ernest project update azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -210,7 +210,7 @@ var UpdateAzureDatacenter = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the datacenter name")
+			color.Red("You should specify the project name")
 			return nil
 		}
 		name := c.Args()[0]
@@ -254,12 +254,12 @@ var UpdateAzureDatacenter = cli.Command{
 			return nil
 		}
 
-		err := m.UpdateAzureDatacenter(cfg.Token, name, subscriptionID, clientID, clientSecret, tenantID, environment)
+		err := m.UpdateAzureProject(cfg.Token, name, subscriptionID, clientID, clientSecret, tenantID, environment)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
-		color.Green("Datacenter " + name + " successfully updated")
+		color.Green("Project " + name + " successfully updated")
 
 		return nil
 	},

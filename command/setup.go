@@ -25,7 +25,7 @@ var CmdSetup = cli.Command{
 - [ ] create a group
 - [ ] link the user to the group
 - [ ] login as the newly created user.
-- [ ] create a new datacenter (optional)
+- [ ] create a new project (optional)
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -60,11 +60,7 @@ var CmdSetup = cli.Command{
 		adminToken := adminLogin(m, c.String("user"), c.String("password"))
 
 		usr, pwd := createUser(adminToken, m)
-		group := createGroup(adminToken, m)
-		if err := m.GroupAddUser(adminToken, usr, group); err != nil {
-			color.Red(err.Error())
-			return nil
-		}
+
 		// Login as plain user
 		if token, err = m.Login(usr, pwd); err != nil {
 			fmt.Println("Ups, something went wrong creating the plain user")
@@ -78,18 +74,18 @@ var CmdSetup = cli.Command{
 		}
 		color.Green("Ernest is successfully set up!")
 		fmt.Println("")
-		fmt.Print("Would you like to create a datacenter now? (Y/n): ")
+		fmt.Print("Would you like to create a project now? (Y/n): ")
 
-		datacenterCreation := askForConfirmation()
-		if datacenterCreation {
-			createDatacenter(token, m)
+		projectCreation := askForConfirmation()
+		if projectCreation {
+			createProject(token, m)
 		}
 		color.Green("Congratulations, you've successfully set up your ernest istance.")
 		fmt.Println("")
 		color.Green("What's next?")
 
-		if datacenterCreation == false {
-			color.Green("- Create a datacenter with command 'ernest-cli datacenter create --help'")
+		if projectCreation == false {
+			color.Green("- Create a project with command 'ernest-cli project create --help'")
 		}
 		color.Green("- Apply a service definition with 'ernest-cli service apply your-template.yml'")
 		color.Green("- Need some extra documentation? Run 'ernest-cli docs'")
@@ -98,33 +94,33 @@ var CmdSetup = cli.Command{
 	},
 }
 
-func createDatacenter(token string, m *manager.Manager) {
+func createProject(token string, m *manager.Manager) {
 	dt := reAsk("- Please specify the provider you want to work with? (vcloud / aws)")
 	if dt == "aws" {
-		createAWSDatacenter(token, m)
+		createAWSProject(token, m)
 	} else if dt == "vcloud" {
-		createVCloudDatacenter(token, m)
+		createVCloudProject(token, m)
 	} else {
 		fmt.Println("Invalid provider. Valid providers are (vcloud and aws)")
-		createDatacenter(token, m)
+		createProject(token, m)
 	}
 }
 
-func createAWSDatacenter(token string, m *manager.Manager) {
-	fmt.Println("In order to create an AWS datacenter we will need some info: ")
+func createAWSProject(token string, m *manager.Manager) {
+	fmt.Println("In order to create an AWS project we will need some info: ")
 	dt := "aws"
 	dname := reAsk("- Name:")
 	dregion := reAsk("- Region:")
 	dkey := reAsk("- Access key id:")
 	dsecret := reAsk("- Secret access key:")
-	if body, err := m.CreateAWSDatacenter(token, dname, dt, dregion, dkey, dsecret); err != nil {
+	if body, err := m.CreateAWSProject(token, dname, dt, dregion, dkey, dsecret); err != nil {
 		color.Red("ERROR: " + body)
-		createAWSDatacenter(token, m)
+		createAWSProject(token, m)
 	}
 }
 
-func createVCloudDatacenter(token string, m *manager.Manager) {
-	fmt.Println("In order to create a VCloud datacenter we will need some info: ")
+func createVCloudProject(token string, m *manager.Manager) {
+	fmt.Println("In order to create a VCloud project we will need some info: ")
 	dt := "vcloud"
 	dname := reAsk("- Name:")
 	dusername := reAsk("- Username:")
@@ -135,23 +131,10 @@ func createVCloudDatacenter(token string, m *manager.Manager) {
 	dnetwork := reAsk("- Network:")
 	dvse := reAsk("- VSE url:")
 
-	if body, err := m.CreateVcloudDatacenter(token, dname, dt, dusername, dpassword, durl, dnetwork, dvse); err != nil {
+	if body, err := m.CreateVcloudProject(token, dname, dt, dusername, dpassword, durl, dnetwork, dvse); err != nil {
 		color.Red("ERROR: " + body)
-		createVCloudDatacenter(token, m)
+		createVCloudProject(token, m)
 	}
-}
-
-func createGroup(adminToken string, m *manager.Manager) string {
-	fmt.Println("")
-	fmt.Println("To collaborate with your teammates ernest will define a group name")
-	group := reAskDef("Group name (default):", "default")
-	if err := m.CreateGroup(adminToken, group); err != nil {
-		color.Red(err.Error() + ". Please try again")
-		return createGroup(adminToken, m)
-	}
-	color.Green("Group '" + group + "' successfully created")
-
-	return group
 }
 
 func createUser(adminToken string, m *manager.Manager) (string, string) {

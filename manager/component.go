@@ -9,8 +9,8 @@ import (
 )
 
 // FindComponents ...
-func (m *Manager) FindComponents(token, datacenter, component, service string) (components []interface{}, err error) {
-	body, resp, err := m.doRequest("/api/components/"+component+"/?datacenter="+datacenter+"&service="+service, "GET", []byte(""), token, "")
+func (m *Manager) FindComponents(token, project, component, service string) (components []interface{}, err error) {
+	body, resp, err := m.doRequest("/api/components/"+component+"/?project="+project+"&service="+service, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
 			return nil, ErrConnectionRefused

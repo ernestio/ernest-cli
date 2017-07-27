@@ -8,7 +8,7 @@ package model
 type Service struct {
 	ID         string `json:"id"`
 	Name       string `json:"name"`
-	Datacenter int    `json:"datacenter_id"`
+	Project    int    `json:"project_id"`
 	Version    string `json:"version"`
 	UserName   string `json:"user_name"`
 	Status     string `json:"status"`

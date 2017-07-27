@@ -4,7 +4,7 @@
 
 package command
 
-// CmdDatacenter subcommand
+// CmdProject subcommand
 import (
 	"fmt"
 
@@ -13,30 +13,30 @@ import (
 	"github.com/urfave/cli"
 )
 
-// CreateAWSDatacenter : Creates an AWS datacenter
-var CreateAWSDatacenter = cli.Command{
+// CreateAWSProject : Creates an AWS project
+var CreateAWSProject = cli.Command{
 	Name:  "aws",
-	Usage: "Create a new aws datacenter.",
-	Description: `Create a new AWS datacenter on the targeted instance of Ernest.
+	Usage: "Create a new aws project.",
+	Description: `Create a new AWS project on the targeted instance of Ernest.
 
 	Example:
-	 $ ernest datacenter create aws --region us-west-2 --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_datacenter
+	 $ ernest project create aws --region us-west-2 --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_project
 
    Template example:
-    $ ernest datacenter create aws --template mydatacenter.yml mydatacenter
-    Where mydatacenter.yaml will look like:
+    $ ernest project create aws --template myproject.yml myproject
+    Where myproject.yaml will look like:
       ---
       fake: true
       access_key_id : AKIAIOSFODNN7EXAMPLE
       secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
       region: us-west-2
 	 `,
-	ArgsUsage: "<datacenter-name>",
+	ArgsUsage: "<project-name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "region, r",
 			Value: "",
-			Usage: "Datacenter region",
+			Usage: "Project region",
 		},
 		cli.StringFlag{
 			Name:  "access_key_id, k",
@@ -51,11 +51,11 @@ var CreateAWSDatacenter = cli.Command{
 		cli.StringFlag{
 			Name:  "template, t",
 			Value: "",
-			Usage: "Datacenter template",
+			Usage: "Project template",
 		},
 		cli.BoolFlag{
 			Name:  "fake, f",
-			Usage: "Fake datacenter",
+			Usage: "Fake project",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -65,7 +65,7 @@ var CreateAWSDatacenter = cli.Command{
 		m, cfg := setup(c)
 
 		if len(c.Args()) < 1 {
-			msg := "You should specify the datacenter name"
+			msg := "You should specify the project name"
 			color.Red(msg)
 			return nil
 		}
@@ -78,8 +78,8 @@ var CreateAWSDatacenter = cli.Command{
 
 		template := c.String("template")
 		if template != "" {
-			var t model.DatacenterTemplate
-			if err := getDatacenterTemplate(template, &t); err != nil {
+			var t model.ProjectTemplate
+			if err := getProjectTemplate(template, &t); err != nil {
 				color.Red(err.Error())
 				return nil
 			}
@@ -126,25 +126,25 @@ var CreateAWSDatacenter = cli.Command{
 		if fake {
 			rtype = "aws-fake"
 		}
-		body, err := m.CreateAWSDatacenter(cfg.Token, name, rtype, region, accessKeyID, secretAccessKey)
+		body, err := m.CreateAWSProject(cfg.Token, name, rtype, region, accessKeyID, secretAccessKey)
 		if err != nil {
 			color.Red(body)
 		} else {
-			color.Green("Datacenter '" + name + "' successfully created ")
+			color.Green("Project '" + name + "' successfully created ")
 		}
 		return nil
 	},
 }
 
-// UpdateAWSDatacenter : Updates the specified VCloud datacenter
-var UpdateAWSDatacenter = cli.Command{
+// UpdateAWSProject : Updates the specified VCloud project
+var UpdateAWSProject = cli.Command{
 	Name:      "aws",
-	Usage:     "Updates the specified AWS datacenter.",
-	ArgsUsage: "<datacenter-name>",
-	Description: `Updates the specified AWS datacenter.
+	Usage:     "Updates the specified AWS project.",
+	ArgsUsage: "<project-name>",
+	Description: `Updates the specified AWS project.
 
    Example:
-		$ ernest datacenter update aws --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_datacenter
+		$ ernest project update aws --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_project
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -167,7 +167,7 @@ var UpdateAWSDatacenter = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the datacenter name")
+			color.Red("You should specify the project name")
 			return nil
 		}
 		name := c.Args()[0]
@@ -183,12 +183,12 @@ var UpdateAWSDatacenter = cli.Command{
 			return nil
 		}
 
-		err := m.UpdateAWSDatacenter(cfg.Token, name, accessKeyID, secretAccessKey)
+		err := m.UpdateAWSProject(cfg.Token, name, accessKeyID, secretAccessKey)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
-		color.Green("Datacenter " + name + " successfully updated")
+		color.Green("Project " + name + " successfully updated")
 
 		return nil
 	},

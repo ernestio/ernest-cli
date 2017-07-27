@@ -4,8 +4,8 @@
 
 package model
 
-// Datacenter : Representation of a datacenter
-type Datacenter struct {
+// Project : Representation of a project
+type Project struct {
 	ID              int    `json:"id"`
 	Name            string `json:"name"`
 	Type            string `json:"type"`

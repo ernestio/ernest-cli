@@ -4,7 +4,7 @@
 
 package command
 
-// CmdDatacenter subcommand
+// CmdProject subcommand
 import (
 	"encoding/json"
 	"fmt"
@@ -427,9 +427,9 @@ var ImportService = cli.Command{
 	ArgsUsage: "<service_name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "datacenter",
+			Name:  "project",
 			Value: "",
-			Usage: "Datacenter name",
+			Usage: "Project name",
 		},
 		cli.StringFlag{
 			Name:  "filters",
@@ -437,11 +437,11 @@ var ImportService = cli.Command{
 			Usage: "Import filters comma delimited list",
 		},
 	},
-	Usage: "$ ernest service import <my_datacenter> <my_service>",
-	Description: `Will import te service <my_service> from datacenter <datacenter_name>
+	Usage: "$ ernest service import <my_project> <my_service>",
+	Description: `Will import te service <my_service> from project <project_name>
 
    Examples:
-    $ ernest service import my_datacenter my_service
+    $ ernest service import my_project my_service
 	`,
 	Action: func(c *cli.Context) error {
 		var err error
@@ -454,7 +454,7 @@ var ImportService = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify an existing datacenter name")
+			color.Red("You should specify an existing project name")
 			return nil
 		}
 		if len(c.Args()) == 1 {
@@ -466,9 +466,9 @@ var ImportService = cli.Command{
 			filters = strings.Split(c.String("filters"), ",")
 		}
 
-		datacenter := c.Args()[0]
+		project := c.Args()[0]
 		name := c.Args()[1]
-		_, err = m.Import(cfg.Token, name, datacenter, filters)
+		_, err = m.Import(cfg.Token, name, project, filters)
 
 		if err != nil {
 			color.Red(err.Error())
