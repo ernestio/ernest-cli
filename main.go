@@ -27,7 +27,7 @@ func main() {
 		command.Logout,
 		command.CmdUser,
 		command.CmdProject,
-		command.CmdService,
+		command.CmdEnv,
 		command.CmdPreferences,
 		command.CmdDocs,
 		command.CmdSetup,

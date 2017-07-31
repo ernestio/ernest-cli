@@ -7,21 +7,25 @@ package view
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/olekukonko/tablewriter"
 )
 
-// PrintServiceList : Pretty print for a services list
-func PrintServiceList(services []model.Service) {
+// PrintEnvHistory : Pretty print for service history
+func PrintEnvHistory(services []model.Service) {
 	if len(services) == 0 {
-		fmt.Println("\nThere are no services created yet")
+		fmt.Println("\nThere are no registered builds for this environment")
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Status", "Endpoint", "Last build", "User"})
+		table.SetHeader([]string{"ID", "Name", "Status", "Version", "User"})
+		num := len(services) + 1
 		for _, s := range services {
-			table.Append([]string{s.Name, s.Status, s.Endpoint, s.Version, s.UserName})
+			num = num - 1
+			id := strconv.Itoa(num)
+			table.Append([]string{id, s.Name, s.Status, s.Version, s.UserName})
 		}
 		table.Render()
 	}

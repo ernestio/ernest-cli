@@ -7,8 +7,8 @@ import (
 	"github.com/fatih/color"
 )
 
-// ServiceDry : Pretty print for service Dry
-func ServiceDry(body string) {
+// EnvDry : Pretty print for env Dry
+func EnvDry(body string) {
 	var lines []string
 	if err := json.Unmarshal([]byte(body), &lines); err != nil {
 		color.Red("Unexpected response from ernest")

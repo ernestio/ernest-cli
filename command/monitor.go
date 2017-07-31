@@ -17,17 +17,17 @@ type NullWriter int
 // Write sends to nowhere the log messages
 func (NullWriter) Write([]byte) (int, error) { return 0, nil }
 
-// MonitorService command
+// MonitorEnv command
 // Monitorizes an service and shows the actions being performed on it
-var MonitorService = cli.Command{
+var MonitorEnv = cli.Command{
 	Name:      "monitor",
 	Aliases:   []string{"m"},
-	Usage:     "Monitor a service.",
-	ArgsUsage: "<service_name>",
-	Description: `Monitors a service while it is being built by its service name.
+	Usage:     "Monitor an environment creation.",
+	ArgsUsage: "<env_name>",
+	Description: `Monitors an environment while it is being built by its name.
 
    Example:
-    $ ernest monitor my_service
+    $ ernest monitor my_env
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -37,12 +37,12 @@ var MonitorService = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify an existing service name")
+			color.Red("You should specify an existing env name")
 			return nil
 		}
 
 		name := c.Args()[0]
-		service, err := m.ServiceStatus(cfg.Token, name)
+		service, err := m.EnvStatus(cfg.Token, name)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
@@ -50,7 +50,7 @@ var MonitorService = cli.Command{
 
 		if service.Status == "done" {
 			color.Yellow("Service has been successfully built")
-			color.Yellow("You can check its information running `ernest-cli service info " + name + "`")
+			color.Yellow("You can check its information running `ernest-cli env info " + name + "`")
 			return nil
 		}
 

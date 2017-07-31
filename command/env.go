@@ -17,15 +17,15 @@ import (
 	"github.com/urfave/cli"
 )
 
-// ListServices ...
-var ListServices = cli.Command{
+// ListEnvs ...
+var ListEnvs = cli.Command{
 	Name:      "list",
-	Usage:     "List available services.",
+	Usage:     "List available environments.",
 	ArgsUsage: " ",
-	Description: `List available services and shows its most relevant information.
+	Description: `List available environments and shows its most relevant information.
 
    Example:
-    $ ernest service list
+    $ ernest environment list
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -33,20 +33,20 @@ var ListServices = cli.Command{
 			color.Red("You're not allowed to perform this action, please log in")
 			return nil
 		}
-		services, err := m.ListServices(cfg.Token)
+		envs, err := m.ListEnvs(cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
 			return err
 		}
 
-		view.PrintServiceList(services)
+		view.PrintEnvsList(envs)
 		return nil
 	},
 }
 
-// ApplyService command
-// Applies changes described on a YAML file to a service
-var ApplyService = cli.Command{
+// ApplyEnv command
+// Applies changes described on a YAML file to an env
+var ApplyEnv = cli.Command{
 	Name:      "apply",
 	Aliases:   []string{"a"},
 	ArgsUsage: "<file.yml>",
@@ -54,17 +54,17 @@ var ApplyService = cli.Command{
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "dry",
-			Usage: "print the changes to be applied on a service intead of applying them",
+			Usage: "print the changes to be applied on an environment intead of applying them",
 		},
 	},
-	Description: `Sends a service YAML description file to Ernest to be executed.
+	Description: `Sends an environment YAML description file to Ernest to be executed.
    You must be logged in to execute this command.
 
    If the file is not provided, ernest.yml will be used by default.
 
    Examples:
-    $ ernest service apply myservice.yml
-    $ ernest service apply --dry myservice.yml
+    $ ernest env apply myenvironment.yml
+    $ ernest env apply --dry myenvironment.yml
 	`,
 	Action: func(c *cli.Context) error {
 		file := "ernest.yml"
@@ -94,25 +94,25 @@ var ApplyService = cli.Command{
 	},
 }
 
-// DestroyService command
-var DestroyService = cli.Command{
+// DestroyEnv command
+var DestroyEnv = cli.Command{
 	Name:      "destroy",
 	Aliases:   []string{"d"},
-	ArgsUsage: "<service_name>",
-	Usage:     "Destroy a service.",
-	Description: `Destroys a service by its name.
+	ArgsUsage: "<environment_name>",
+	Usage:     "Destroy an environment.",
+	Description: `Destroys an environment by name.
 
    Example:
-    $ ernest destroy myservice
+    $ ernest env destroy myenv
   `,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "force,f",
-			Usage: "Hard ernest service removal.",
+			Usage: "Hard ernest env removal.",
 		},
 		cli.BoolFlag{
 			Name:  "yes,y",
-			Usage: "Destroy a service without prompting confirmation.",
+			Usage: "Destroy an environment without prompting confirmation.",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -123,7 +123,7 @@ var DestroyService = cli.Command{
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify an existing service name")
+			color.Red("You should specify an existing environment name")
 			return nil
 		}
 		name := c.Args()[0]
@@ -142,7 +142,7 @@ var DestroyService = cli.Command{
 					return nil
 				}
 			} else {
-				fmt.Print("Do you really want to destroy this service? (Y/n) ")
+				fmt.Print("Do you really want to destroy this environment? (Y/n) ")
 				if askForConfirmation() == false {
 					return nil
 				}
@@ -153,21 +153,21 @@ var DestroyService = cli.Command{
 				}
 			}
 		}
-		color.Green("Service successfully removed")
+		color.Green("Environment successfully removed")
 		return nil
 	},
 }
 
-// HistoryService command
-// Shows the history of a service, a list of builds
-var HistoryService = cli.Command{
+// HistoryEnv command
+// Shows the history of an env, a list of builds
+var HistoryEnv = cli.Command{
 	Name:      "history",
-	Usage:     "Shows the history of a service, a list of builds",
-	ArgsUsage: "<service_name>",
-	Description: `Shows the history of a service, a list of builds and its status and basic information.
+	Usage:     "Shows the history of an environment, a list of builds",
+	ArgsUsage: "<env_name>",
+	Description: `Shows the history of an environment, a list of builds and its status and basic information.
 
    Example:
-    $ ernest history myservice
+    $ ernest env history <my_env>
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -177,27 +177,27 @@ var HistoryService = cli.Command{
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify an existing service name")
+			color.Red("You should specify an existing environment name")
 			return nil
 		}
 
-		serviceName := c.Args()[0]
+		envName := c.Args()[0]
 
-		services, _ := m.ListBuilds(serviceName, cfg.Token)
-		view.PrintServiceHistory(services)
+		envs, _ := m.ListBuilds(envName, cfg.Token)
+		view.PrintEnvHistory(envs)
 		return nil
 	},
 }
 
-// ResetService command
-var ResetService = cli.Command{
+// ResetEnv command
+var ResetEnv = cli.Command{
 	Name:      "reset",
-	ArgsUsage: "<service_name>",
-	Usage:     "Reset an in progress service.",
-	Description: `Reseting a service creation may cause problems, please make sure you know what are you doing.
+	ArgsUsage: "<env_name>",
+	Usage:     "Reset an in progress environment.",
+	Description: `Reseting an environment creation may cause problems, please make sure you know what are you doing.
 
    Example:
-    $ ernest service reset myservice
+    $ ernest env reset <my_env>
   `,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -207,36 +207,36 @@ var ResetService = cli.Command{
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify the service name")
+			color.Red("You should specify the environment name")
 			return nil
 		}
-		serviceName := c.Args()[0]
-		err := m.ResetService(serviceName, cfg.Token)
+		envName := c.Args()[0]
+		err := m.ResetEnv(envName, cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
-		color.Red("You've successfully resetted the service '" + serviceName + "'")
+		color.Red("You've successfully resetted the environment '" + envName + "'")
 
 		return nil
 	},
 }
 
-// RevertService command
-var RevertService = cli.Command{
+// RevertEnv command
+var RevertEnv = cli.Command{
 	Name:      "revert",
-	ArgsUsage: "<service_name> <build_id>",
-	Usage:     "Reverts a service to a previous state",
-	Description: `Reverts a service to a previous known state using a build ID from 'ernest service history'.
+	ArgsUsage: "<env_name> <build_id>",
+	Usage:     "Reverts an environment to a previous state",
+	Description: `Reverts an environment to a previous known state using a build ID from 'ernest service history'.
 
    Example:
-    $ ernest service revert <service_name> <build_id>
-    $ ernest service revert --dry <service_name> <build_id>
+    $ ernest env revert <env_name> <build_id>
+    $ ernest env revert --dry <env_name> <build_id>
   `,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "dry",
-			Usage: "print the changes to be applied on a service intead of applying them",
+			Usage: "print the changes to be applied on an environment intead of applying them",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -247,15 +247,15 @@ var RevertService = cli.Command{
 		}
 
 		if len(c.Args()) < 2 {
-			color.Red("Please specify a service name and build ID")
+			color.Red("Please specify an environment name and build ID")
 			return nil
 		}
-		serviceName := c.Args()[0]
+		envName := c.Args()[0]
 
 		dry := c.Bool("dry")
 
 		buildID := c.Args()[1]
-		response, err := m.RevertService(serviceName, buildID, cfg.Token, dry)
+		response, err := m.RevertEnv(envName, buildID, cfg.Token, dry)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
@@ -268,12 +268,12 @@ var RevertService = cli.Command{
 	},
 }
 
-// DefinitionService command
-// Shows the current definition of a service by its name
-var DefinitionService = cli.Command{
+// DefinitionEnv command
+// Shows the current definition of an environment by its name
+var DefinitionEnv = cli.Command{
 	Name:      "definition",
 	Aliases:   []string{"s"},
-	ArgsUsage: "<service_name>",
+	ArgsUsage: "<env_name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "build",
@@ -281,11 +281,11 @@ var DefinitionService = cli.Command{
 			Usage: "Build ID",
 		},
 	},
-	Usage: "Show the current definition of a service by its name",
-	Description: `Show the current definition of a service by its name getting the definition about the build.
+	Usage: "Show the current definition of an environment by its name",
+	Description: `Show the current definition of an environment by its name getting the definition about the build.
 
    Example:
-    $ ernest service definition myservice
+    $ ernest environment definition <my_env>
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -295,35 +295,35 @@ var DefinitionService = cli.Command{
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify the service name")
+			color.Red("You should specify the env name")
 			return nil
 		}
-		serviceName := c.Args()[0]
+		envName := c.Args()[0]
 		if c.String("build") != "" {
-			service, err := m.ServiceBuildStatus(cfg.Token, serviceName, c.String("build"))
+			env, err := m.EnvBuildStatus(cfg.Token, envName, c.String("build"))
 			if err != nil {
 				color.Red(err.Error())
 				os.Exit(1)
 			}
-			fmt.Println(service.Definition)
+			fmt.Println(env.Definition)
 		} else {
-			service, err := m.ServiceStatus(cfg.Token, serviceName)
+			env, err := m.EnvStatus(cfg.Token, envName)
 			if err != nil {
 				color.Red(err.Error())
 				os.Exit(1)
 			}
 
-			fmt.Println(service.Definition)
+			fmt.Println(env.Definition)
 		}
 		return nil
 	},
 }
 
-// InfoService : Shows detailed information of a service by its name
-var InfoService = cli.Command{
+// InfoEnv : Shows detailed information of a env by its name
+var InfoEnv = cli.Command{
 	Name:      "info",
 	Aliases:   []string{"i"},
-	ArgsUsage: "<service_name>",
+	ArgsUsage: "<env_name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "build",
@@ -331,17 +331,17 @@ var InfoService = cli.Command{
 			Usage: "Build ID",
 		},
 	},
-	Usage: "$ ernest service info <my_service> --build <specific build>",
+	Usage: "$ ernest env info <my_env> --build <specific build>",
 	Description: `Will show detailed information of the last build of a specified service.
 	In case you specify --build option you will be able to output the detailed information of specific build of a service.
 
    Examples:
-    $ ernest service definition myservice
-    $ ernest service definition myservice --build build1
+    $ ernest env definition <my_env>
+    $ ernest env definition <my_env> --build build1
 	`,
 	Action: func(c *cli.Context) error {
 		var err error
-		var service model.Service
+		var env model.Service
 
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -350,37 +350,37 @@ var InfoService = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify an existing service name")
+			color.Red("You should specify an existing env name")
 			return nil
 		}
 
 		name := c.Args()[0]
 		if c.String("build") != "" {
 			build := c.String("build")
-			service, err = m.ServiceBuildStatus(cfg.Token, name, build)
+			env, err = m.EnvBuildStatus(cfg.Token, name, build)
 		} else {
-			service, err = m.ServiceStatus(cfg.Token, name)
+			env, err = m.EnvStatus(cfg.Token, name)
 		}
 
 		if err != nil {
 			color.Red(err.Error())
 			os.Exit(1)
 		}
-		view.PrintServiceInfo(&service)
+		view.PrintEnvInfo(&env)
 		return nil
 	},
 }
 
-// DiffService : Shows detailed information of a service by its name
-var DiffService = cli.Command{
+// DiffEnv : Shows detailed information of an env by its name
+var DiffEnv = cli.Command{
 	Name:      "diff",
 	Aliases:   []string{"i"},
-	ArgsUsage: "<service_name> <build_a> <build_b>",
-	Usage:     "$ ernest service diff <service_name> <build_a> <build_b>",
+	ArgsUsage: "<env_aname> <build_a> <build_b>",
+	Usage:     "$ ernest env diff <env_name> <build_a> <build_b>",
 	Description: `Will display the diff between two different builds
 
    Examples:
-    $ ernest service diff my_service 1 2
+    $ ernest env diff my_env 1 2
 	`,
 	Action: func(c *cli.Context) error {
 		var err error
@@ -392,20 +392,20 @@ var DiffService = cli.Command{
 		}
 
 		if len(c.Args()) < 2 {
-			color.Red("You should specify the service name and two build ids to compare them")
+			color.Red("You should specify the env name and two build ids to compare them")
 			return nil
 		}
 
-		serviceName := c.Args()[0]
+		envName := c.Args()[0]
 		b1 := c.Args()[1]
 		b2 := c.Args()[2]
 
-		build1, err := m.ServiceBuildStatus(cfg.Token, serviceName, b1)
+		build1, err := m.EnvBuildStatus(cfg.Token, envName, b1)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
-		build2, err := m.ServiceBuildStatus(cfg.Token, serviceName, b2)
+		build2, err := m.EnvBuildStatus(cfg.Token, envName, b2)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
@@ -415,16 +415,16 @@ var DiffService = cli.Command{
 			color.Red(err.Error())
 			os.Exit(1)
 		}
-		view.PrintServiceDiff(build1, build2)
+		view.PrintEnvDiff(build1, build2)
 		return nil
 	},
 }
 
-// ImportService : Shows detailed information of a service by its name
-var ImportService = cli.Command{
+// ImportEnv : Shows detailed information of an env by its name
+var ImportEnv = cli.Command{
 	Name:      "import",
 	Aliases:   []string{"i"},
-	ArgsUsage: "<service_name>",
+	ArgsUsage: "<env_name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "project",
@@ -437,11 +437,11 @@ var ImportService = cli.Command{
 			Usage: "Import filters comma delimited list",
 		},
 	},
-	Usage: "$ ernest service import <my_project> <my_service>",
-	Description: `Will import te service <my_service> from project <project_name>
+	Usage: "$ ernest env import <my_project> <my_env>",
+	Description: `Will import the environment <my_env> from project <project_name>
 
    Examples:
-    $ ernest service import my_project my_service
+    $ ernest env import my_project my_env
 	`,
 	Action: func(c *cli.Context) error {
 		var err error
@@ -458,7 +458,7 @@ var ImportService = cli.Command{
 			return nil
 		}
 		if len(c.Args()) == 1 {
-			color.Red("You should specify a valid service name")
+			color.Red("You should specify a valid environment name")
 			return nil
 		}
 
@@ -478,15 +478,15 @@ var ImportService = cli.Command{
 	},
 }
 
-func getServiceUUID(output []byte) (string, error) {
-	var service struct {
+func getEnvUUID(output []byte) (string, error) {
+	var env struct {
 		ID string `json:"id"`
 	}
-	err := json.Unmarshal(output, &service)
+	err := json.Unmarshal(output, &env)
 	if err != nil {
 		return "", err
 	}
-	return service.ID, nil
+	return env.ID, nil
 }
 
 // posString returns the first index of element in slice.
@@ -505,21 +505,22 @@ func containsString(slice []string, element string) bool {
 	return !(posString(slice, element) == -1)
 }
 
-// CmdService ...
-var CmdService = cli.Command{
-	Name:  "service",
-	Usage: "Service related subcommands",
+// CmdEnv ...
+var CmdEnv = cli.Command{
+	Name:    "environment",
+	Aliases: []string{"env"},
+	Usage:   "Environment related subcommands",
 	Subcommands: []cli.Command{
-		ListServices,
-		ApplyService,
-		DestroyService,
-		HistoryService,
-		ResetService,
-		RevertService,
-		DefinitionService,
-		InfoService,
-		MonitorService,
-		DiffService,
-		ImportService,
+		ListEnvs,
+		ApplyEnv,
+		DestroyEnv,
+		HistoryEnv,
+		ResetEnv,
+		RevertEnv,
+		DefinitionEnv,
+		InfoEnv,
+		MonitorEnv,
+		DiffEnv,
+		ImportEnv,
 	},
 }
