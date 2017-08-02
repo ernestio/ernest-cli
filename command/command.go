@@ -23,7 +23,7 @@ func setup(c *cli.Context) (*manager.Manager, *model.Config) {
 			color.Red("Environment not configured, please use target command")
 		}
 	}
-	m := manager.Manager{URL: config.URL}
+	m := manager.Manager{URL: config.URL, Version: c.App.Version}
 	return &m, config
 }
 

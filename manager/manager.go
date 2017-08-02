@@ -19,7 +19,8 @@ import (
 
 // Manager manages all api communications
 type Manager struct {
-	URL string `json:"url"`
+	URL     string `json:"url"`
+	Version string `json:"version"`
 }
 
 // Token holds the JWT token that is received when authenticating
@@ -57,6 +58,8 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}
+	req.Header.Add("User-Agent", "Ernest/"+m.Version)
+
 	resp, err := m.client().Do(req)
 
 	if err != nil {
