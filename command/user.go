@@ -47,7 +47,7 @@ var ListUsers = cli.Command{
 		for _, u := range users {
 			id := strconv.Itoa(u.ID)
 			admin := "no"
-			if u.IsAdmin == true {
+			if u.IsAdmin {
 				admin = "yes"
 			}
 			table.Append([]string{id, u.Username, u.GroupName, admin})
@@ -147,7 +147,7 @@ var PasswordUser = cli.Command{
 			return nil
 		}
 
-		if session.IsAdmin == false && username != "" {
+		if !session.IsAdmin && username != "" {
 			color.Red("You don’t have permissions to perform this action")
 			return nil
 		}
@@ -246,7 +246,7 @@ var DisableUser = cli.Command{
 			return nil
 		}
 
-		if session.IsAdmin == false {
+		if !session.IsAdmin {
 			color.Red("You don’t have permissions to perform this action")
 			return nil
 		}

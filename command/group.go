@@ -43,7 +43,7 @@ var DeleteGroup = cli.Command{
 			return nil
 		}
 
-		if session.IsAdmin == false {
+		if !session.IsAdmin {
 			color.Red("You don't have permissions to perform this action")
 			return nil
 		}
@@ -92,7 +92,7 @@ var RemoveDatacenter = cli.Command{
 			return nil
 		}
 
-		if session.IsAdmin == false {
+		if !session.IsAdmin {
 			color.Red("You don't have permissions to perform this action")
 			return nil
 		}
@@ -142,7 +142,7 @@ var AddDatacenter = cli.Command{
 			return nil
 		}
 
-		if session.IsAdmin == false {
+		if !session.IsAdmin {
 			color.Red("You don't have permissions to perform this action")
 			return nil
 		}
@@ -192,7 +192,7 @@ var RemoveUser = cli.Command{
 			return nil
 		}
 
-		if session.IsAdmin == false {
+		if !session.IsAdmin {
 			color.Red("You don't have permissions to perform this action")
 			return nil
 		}
@@ -242,7 +242,7 @@ var AddUser = cli.Command{
 			return nil
 		}
 
-		if session.IsAdmin == false {
+		if !session.IsAdmin {
 			color.Red("You don't have permissions to perform this action")
 			return nil
 		}
@@ -286,7 +286,7 @@ var CreateGroup = cli.Command{
 			return nil
 		}
 
-		if session.IsAdmin == false {
+		if !session.IsAdmin {
 			color.Red("You don't have permissions to perform this action")
 			return nil
 		}

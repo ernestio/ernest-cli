@@ -88,7 +88,7 @@ var CmdSetup = cli.Command{
 		fmt.Println("")
 		color.Green("What's next?")
 
-		if datacenterCreation == false {
+		if !datacenterCreation {
 			color.Green("- Create a datacenter with command 'ernest-cli datacenter create --help'")
 		}
 		color.Green("- Apply a service definition with 'ernest-cli service apply your-template.yml'")

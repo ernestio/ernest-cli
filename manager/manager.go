@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	"github.com/fatih/color"
 )
@@ -66,7 +65,11 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 		return err.Error(), resp, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			println(err.Error())
+		}
+	}()
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		color.Red(err.Error())
@@ -79,28 +82,6 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 	return string(body), resp, nil
 }
 
-func (m *Manager) createClient(token string, name string) (string, error) {
-	payload := []byte(`{"name":"` + name + `"}`)
-	body, resp, err := m.doRequest("/api/groups/", "POST", payload, token, "")
-	if err != nil {
-		if resp == nil {
-			return "", ErrConnectionRefused
-		}
-		return body, err
-	}
-
-	color.Green("SUCCESS: Group " + name + " created")
-
-	var group struct {
-		ID int `json:"id"`
-	}
-	err = json.Unmarshal([]byte(body), &group)
-	if err != nil {
-		return "", errors.New("ERROR: Couldn't read response from server")
-	}
-	return strconv.Itoa(group.ID), nil
-}
-
 // GetSession ..
 func (m *Manager) GetSession(token string) (session Session, err error) {
 	body, resp, err := m.doRequest("/api/session/", "GET", nil, token, "application/yaml")
@@ -111,8 +92,6 @@ func (m *Manager) GetSession(token string) (session Session, err error) {
 		return session, err
 	}
 	err = json.Unmarshal([]byte(body), &session)
-	if err != nil {
-		return session, err
-	}
-	return session, nil
+
+	return session, err
 }

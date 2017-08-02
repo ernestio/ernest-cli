@@ -6,7 +6,6 @@ package command
 
 // CmdDatacenter subcommand
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -80,14 +79,14 @@ var ApplyService = cli.Command{
 		var err error
 		dry := c.Bool("dry")
 		monit := true
-		if dry == true {
+		if dry {
 			monit = false
 		}
 		response, err := m.Apply(cfg.Token, file, monit, dry)
 		if err != nil {
 			color.Red(err.Error())
 		}
-		if dry == true {
+		if dry {
 			fmt.Println(string(response))
 		}
 		return nil
@@ -143,7 +142,7 @@ var DestroyService = cli.Command{
 				}
 			} else {
 				fmt.Print("Do you really want to destroy this service? (Y/n) ")
-				if askForConfirmation() == false {
+				if !askForConfirmation() {
 					return nil
 				}
 				err := m.Destroy(cfg.Token, name, true)
@@ -260,7 +259,7 @@ var RevertService = cli.Command{
 			color.Red(err.Error())
 			return nil
 		}
-		if dry == true {
+		if dry {
 			fmt.Println(string(response))
 		}
 
@@ -476,17 +475,6 @@ var ImportService = cli.Command{
 		}
 		return nil
 	},
-}
-
-func getServiceUUID(output []byte) (string, error) {
-	var service struct {
-		ID string `json:"id"`
-	}
-	err := json.Unmarshal(output, &service)
-	if err != nil {
-		return "", err
-	}
-	return service.ID, nil
 }
 
 // posString returns the first index of element in slice.

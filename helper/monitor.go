@@ -15,8 +15,6 @@ import (
 	"github.com/r3labs/sse"
 )
 
-type handler func([]byte) error
-
 const (
 	SERVICECREATE      = "service.create"
 	SERVICEDELETE      = "service.delete"

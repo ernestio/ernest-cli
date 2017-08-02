@@ -97,7 +97,7 @@ var CreateAWSDatacenter = cli.Command{
 		if c.String("region") != "" {
 			region = c.String("region")
 		}
-		if fake == false {
+		if !fake {
 			fake = c.Bool("fake")
 		}
 
