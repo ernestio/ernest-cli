@@ -19,9 +19,9 @@ func PrintEnvsList(services []model.Service) {
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Status", "Endpoint", "Last build", "User"})
+		table.SetHeader([]string{"Name", "Project", "Status", "Endpoint", "Last build", "User"})
 		for _, s := range services {
-			table.Append([]string{s.Name, s.Status, s.Endpoint, s.Version, s.UserName})
+			table.Append([]string{s.Name, s.ProjectName, s.Status, s.Endpoint, s.Version, s.UserName})
 		}
 		table.Render()
 	}
