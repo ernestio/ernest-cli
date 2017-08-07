@@ -23,11 +23,11 @@ var MonitorEnv = cli.Command{
 	Name:      "monitor",
 	Aliases:   []string{"m"},
 	Usage:     "Monitor an environment creation.",
-	ArgsUsage: "<env_name>",
+	ArgsUsage: "<project_name> <env_name>",
 	Description: `Monitors an environment while it is being built by its name.
 
    Example:
-    $ ernest monitor my_env
+    $ ernest monitor <my_project> <my_env>
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -37,12 +37,17 @@ var MonitorEnv = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
+			color.Red("You should specify an existing project name")
+			return nil
+		}
+		if len(c.Args()) == 1 {
 			color.Red("You should specify an existing env name")
 			return nil
 		}
 
-		name := c.Args()[0]
-		service, err := m.EnvStatus(cfg.Token, name)
+		project := c.Args()[0]
+		env := c.Args()[0]
+		service, err := m.EnvStatus(cfg.Token, project, env)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
@@ -50,7 +55,7 @@ var MonitorEnv = cli.Command{
 
 		if service.Status == "done" {
 			color.Yellow("Service has been successfully built")
-			color.Yellow("You can check its information running `ernest-cli env info " + name + "`")
+			color.Yellow("You can check its information running `ernest-cli env info " + project + " / " + env + "`")
 			return nil
 		}
 

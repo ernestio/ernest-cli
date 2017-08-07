@@ -98,12 +98,12 @@ var ApplyEnv = cli.Command{
 var DestroyEnv = cli.Command{
 	Name:      "destroy",
 	Aliases:   []string{"d"},
-	ArgsUsage: "<environment_name>",
+	ArgsUsage: "<project> <environment_name>",
 	Usage:     "Destroy an environment.",
 	Description: `Destroys an environment by name.
 
    Example:
-    $ ernest env destroy myenv
+    $ ernest env destroy <my_project> <my_environment>
   `,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
@@ -123,20 +123,25 @@ var DestroyEnv = cli.Command{
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify an existing environment name")
+			color.Red("You should specify an existing project name")
 			return nil
 		}
-		name := c.Args()[0]
+		if len(c.Args()) < 2 {
+			color.Red("You should specify an existing project environment")
+			return nil
+		}
+		project := c.Args()[0]
+		env := c.Args()[1]
 
 		if c.Bool("force") {
-			err := m.ForceDestroy(cfg.Token, name)
+			err := m.ForceDestroy(cfg.Token, project, env)
 			if err != nil {
 				color.Red(err.Error())
 				return nil
 			}
 		} else {
 			if c.Bool("yes") {
-				err := m.Destroy(cfg.Token, name, true)
+				err := m.Destroy(cfg.Token, project, env, true)
 				if err != nil {
 					color.Red(err.Error())
 					return nil
@@ -146,7 +151,7 @@ var DestroyEnv = cli.Command{
 				if askForConfirmation() == false {
 					return nil
 				}
-				err := m.Destroy(cfg.Token, name, true)
+				err := m.Destroy(cfg.Token, project, env, true)
 				if err != nil {
 					color.Red(err.Error())
 					return nil
@@ -163,11 +168,11 @@ var DestroyEnv = cli.Command{
 var HistoryEnv = cli.Command{
 	Name:      "history",
 	Usage:     "Shows the history of an environment, a list of builds",
-	ArgsUsage: "<env_name>",
+	ArgsUsage: "ernest-cli env history <my_project> <my_env>",
 	Description: `Shows the history of an environment, a list of builds and its status and basic information.
 
    Example:
-    $ ernest env history <my_env>
+    $ ernest env history <my_project> <my_env>
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -177,13 +182,18 @@ var HistoryEnv = cli.Command{
 		}
 
 		if len(c.Args()) < 1 {
+			color.Red("You should specify an existing project name")
+			return nil
+		}
+		if len(c.Args()) < 2 {
 			color.Red("You should specify an existing environment name")
 			return nil
 		}
 
-		envName := c.Args()[0]
+		project := c.Args()[0]
+		env := c.Args()[1]
 
-		envs, _ := m.ListBuilds(envName, cfg.Token)
+		envs, _ := m.ListBuilds(project, env, cfg.Token)
 		view.PrintEnvHistory(envs)
 		return nil
 	},
@@ -207,16 +217,21 @@ var ResetEnv = cli.Command{
 		}
 
 		if len(c.Args()) < 1 {
+			color.Red("You should specify the project name")
+			return nil
+		}
+		if len(c.Args()) < 2 {
 			color.Red("You should specify the environment name")
 			return nil
 		}
-		envName := c.Args()[0]
-		err := m.ResetEnv(envName, cfg.Token)
+		project := c.Args()[0]
+		env := c.Args()[1]
+		err := m.ResetEnv(project, env, cfg.Token)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
-		color.Red("You've successfully resetted the environment '" + envName + "'")
+		color.Red("You've successfully resetted the environment '" + project + " / " + env + "'")
 
 		return nil
 	},
@@ -225,13 +240,13 @@ var ResetEnv = cli.Command{
 // RevertEnv command
 var RevertEnv = cli.Command{
 	Name:      "revert",
-	ArgsUsage: "<env_name> <build_id>",
+	ArgsUsage: "<project> <env_name> <build_id>",
 	Usage:     "Reverts an environment to a previous state",
 	Description: `Reverts an environment to a previous known state using a build ID from 'ernest service history'.
 
    Example:
-    $ ernest env revert <env_name> <build_id>
-    $ ernest env revert --dry <env_name> <build_id>
+    $ ernest env revert <project> <env_name> <build_id>
+    $ ernest env revert --dry <project> <env_name> <build_id>
   `,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
@@ -246,16 +261,16 @@ var RevertEnv = cli.Command{
 			return nil
 		}
 
-		if len(c.Args()) < 2 {
-			color.Red("Please specify an environment name and build ID")
+		if len(c.Args()) < 3 {
+			color.Red("Please specify a project, environment and build ID")
 			return nil
 		}
-		envName := c.Args()[0]
-
+		project := c.Args()[0]
+		env := c.Args()[1]
+		buildID := c.Args()[2]
 		dry := c.Bool("dry")
 
-		buildID := c.Args()[1]
-		response, err := m.RevertEnv(envName, buildID, cfg.Token, dry)
+		response, err := m.RevertEnv(project, env, buildID, cfg.Token, dry)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
@@ -273,7 +288,7 @@ var RevertEnv = cli.Command{
 var DefinitionEnv = cli.Command{
 	Name:      "definition",
 	Aliases:   []string{"s"},
-	ArgsUsage: "<env_name>",
+	ArgsUsage: "<project_name> <env_name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "build",
@@ -285,7 +300,7 @@ var DefinitionEnv = cli.Command{
 	Description: `Show the current definition of an environment by its name getting the definition about the build.
 
    Example:
-    $ ernest environment definition <my_env>
+    $ ernest env definition <my_project> <my_env>
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -295,19 +310,24 @@ var DefinitionEnv = cli.Command{
 		}
 
 		if len(c.Args()) < 1 {
+			color.Red("You should specify the project name")
+			return nil
+		}
+		if len(c.Args()) < 2 {
 			color.Red("You should specify the env name")
 			return nil
 		}
-		envName := c.Args()[0]
+		project := c.Args()[0]
+		env := c.Args()[1]
 		if c.String("build") != "" {
-			env, err := m.EnvBuildStatus(cfg.Token, envName, c.String("build"))
+			env, err := m.EnvBuildStatus(cfg.Token, project, env, c.String("build"))
 			if err != nil {
 				color.Red(err.Error())
 				os.Exit(1)
 			}
 			fmt.Println(env.Definition)
 		} else {
-			env, err := m.EnvStatus(cfg.Token, envName)
+			env, err := m.EnvStatus(cfg.Token, project, env)
 			if err != nil {
 				color.Red(err.Error())
 				os.Exit(1)
@@ -323,7 +343,7 @@ var DefinitionEnv = cli.Command{
 var InfoEnv = cli.Command{
 	Name:      "info",
 	Aliases:   []string{"i"},
-	ArgsUsage: "<env_name>",
+	ArgsUsage: "<project_name> <env_name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "build",
@@ -336,12 +356,12 @@ var InfoEnv = cli.Command{
 	In case you specify --build option you will be able to output the detailed information of specific build of a service.
 
    Examples:
-    $ ernest env definition <my_env>
-    $ ernest env definition <my_env> --build build1
+    $ ernest env definition <my_project> <my_env>
+    $ ernest env definition <my_project> <my_env> --build build1
 	`,
 	Action: func(c *cli.Context) error {
 		var err error
-		var env model.Service
+		var s model.Service
 
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -350,23 +370,28 @@ var InfoEnv = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
+			color.Red("You should specify an existing project name")
+			return nil
+		}
+		if len(c.Args()) == 1 {
 			color.Red("You should specify an existing env name")
 			return nil
 		}
 
-		name := c.Args()[0]
+		project := c.Args()[0]
+		env := c.Args()[1]
 		if c.String("build") != "" {
 			build := c.String("build")
-			env, err = m.EnvBuildStatus(cfg.Token, name, build)
+			s, err = m.EnvBuildStatus(cfg.Token, project, env, build)
 		} else {
-			env, err = m.EnvStatus(cfg.Token, name)
+			s, err = m.EnvStatus(cfg.Token, project, env)
 		}
 
 		if err != nil {
 			color.Red(err.Error())
 			os.Exit(1)
 		}
-		view.PrintEnvInfo(&env)
+		view.PrintEnvInfo(&s)
 		return nil
 	},
 }
@@ -376,11 +401,11 @@ var DiffEnv = cli.Command{
 	Name:      "diff",
 	Aliases:   []string{"i"},
 	ArgsUsage: "<env_aname> <build_a> <build_b>",
-	Usage:     "$ ernest env diff <env_name> <build_a> <build_b>",
+	Usage:     "$ ernest env diff <project_name> <env_name> <build_a> <build_b>",
 	Description: `Will display the diff between two different builds
 
    Examples:
-    $ ernest env diff my_env 1 2
+    $ ernest env diff <my_project> <my_env> 1 2
 	`,
 	Action: func(c *cli.Context) error {
 		var err error
@@ -391,21 +416,22 @@ var DiffEnv = cli.Command{
 			return nil
 		}
 
-		if len(c.Args()) < 2 {
-			color.Red("You should specify the env name and two build ids to compare them")
+		if len(c.Args()) < 4 {
+			color.Red("You should specify the project and env names and two build ids to compare them")
 			return nil
 		}
 
-		envName := c.Args()[0]
-		b1 := c.Args()[1]
-		b2 := c.Args()[2]
+		env := c.Args()[0]
+		project := c.Args()[1]
+		b1 := c.Args()[2]
+		b2 := c.Args()[3]
 
-		build1, err := m.EnvBuildStatus(cfg.Token, envName, b1)
+		build1, err := m.EnvBuildStatus(cfg.Token, project, env, b1)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
-		build2, err := m.EnvBuildStatus(cfg.Token, envName, b2)
+		build2, err := m.EnvBuildStatus(cfg.Token, project, env, b2)
 		if err != nil {
 			color.Red(err.Error())
 			return nil

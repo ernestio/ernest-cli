@@ -18,7 +18,7 @@ import (
 
 // ListEnvs ...
 func (m *Manager) ListEnvs(token string) (services []model.Service, err error) {
-	body, resp, err := m.doRequest("/api/environments/", "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/envs/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
 			return nil, ErrConnectionRefused
@@ -33,8 +33,8 @@ func (m *Manager) ListEnvs(token string) (services []model.Service, err error) {
 }
 
 // ListBuilds ...
-func (m *Manager) ListBuilds(name string, token string) (builds []model.Service, err error) {
-	body, resp, err := m.doRequest("/api/environments/"+name+"/builds/", "GET", []byte(""), token, "")
+func (m *Manager) ListBuilds(project, env, token string) (builds []model.Service, err error) {
+	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
 			return nil, ErrConnectionRefused
@@ -49,8 +49,8 @@ func (m *Manager) ListBuilds(name string, token string) (builds []model.Service,
 }
 
 // EnvStatus ...
-func (m *Manager) EnvStatus(token string, serviceName string) (service model.Service, err error) {
-	body, resp, err := m.doRequest("/api/environments/"+serviceName, "GET", []byte(""), token, "")
+func (m *Manager) EnvStatus(token, project, env string) (service model.Service, err error) {
+	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
 			return service, ErrConnectionRefused
@@ -74,8 +74,8 @@ func (m *Manager) EnvStatus(token string, serviceName string) (service model.Ser
 }
 
 // EnvBuildStatus ...
-func (m *Manager) EnvBuildStatus(token string, serviceName string, serviceID string) (service model.Service, err error) {
-	builds, _ := m.ListBuilds(serviceName, token)
+func (m *Manager) EnvBuildStatus(token, project, env, serviceID string) (service model.Service, err error) {
+	builds, _ := m.ListBuilds(project, env, token)
 	num, _ := strconv.Atoi(serviceID)
 	if num < 1 || num > len(builds) {
 		return service, errors.New("Invalid build ID")
@@ -83,7 +83,7 @@ func (m *Manager) EnvBuildStatus(token string, serviceName string, serviceID str
 	num = len(builds) - num
 	serviceID = builds[num].ID
 
-	body, resp, err := m.doRequest("/api/environments/"+serviceName+"/builds/"+serviceID, "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+serviceID, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
 			return service, ErrConnectionRefused
@@ -107,15 +107,15 @@ func (m *Manager) EnvBuildStatus(token string, serviceName string, serviceID str
 }
 
 // ResetEnv ...
-func (m *Manager) ResetEnv(name string, token string) error {
-	s, err := m.EnvStatus(token, name)
+func (m *Manager) ResetEnv(project, env, token string) error {
+	s, err := m.EnvStatus(token, project, env)
 	if err != nil {
 		return err
 	}
 	if s.Status != "in_progress" {
-		return errors.New("The environment '" + name + "' cannot be reset as its status is '" + s.Status + "'")
+		return errors.New("The environment '" + project + " / " + env + "' cannot be reset as its status is '" + s.Status + "'")
 	}
-	_, resp, err := m.doRequest("/api/environments/"+name+"/reset/", "POST", nil, token, "application/yaml")
+	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/reset/", "POST", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
 			return ErrConnectionRefused
@@ -125,9 +125,9 @@ func (m *Manager) ResetEnv(name string, token string) error {
 }
 
 // RevertEnv reverts a service to a previous known state using a build ID
-func (m *Manager) RevertEnv(name string, buildID string, token string, dry bool) (string, error) {
+func (m *Manager) RevertEnv(project, env, buildID, token string, dry bool) (string, error) {
 	// get requested manifest
-	s, err := m.EnvBuildStatus(token, name, buildID)
+	s, err := m.EnvBuildStatus(token, project, env, buildID)
 	if err != nil {
 		return "", err
 	}
@@ -156,7 +156,7 @@ func (m *Manager) RevertEnv(name string, buildID string, token string, dry bool)
 		Message string `json:"message,omitempty"`
 	}
 
-	body, resp, rerr := m.doRequest("/api/environments/", "POST", payload, token, "application/yaml")
+	body, resp, rerr := m.doRequest("/api/envs/", "POST", payload, token, "application/yaml")
 	if resp == nil {
 		return "", ErrConnectionRefused
 	}
@@ -178,7 +178,7 @@ func (m *Manager) RevertEnv(name string, buildID string, token string, dry bool)
 	fmt.Println("================\nPlatform Details\n================\n ")
 	var srv model.Service
 
-	srv, err = m.EnvStatus(token, name)
+	srv, err = m.EnvStatus(token, project, env)
 	if err != nil {
 		return response.ID, err
 	}
@@ -189,16 +189,16 @@ func (m *Manager) RevertEnv(name string, buildID string, token string, dry bool)
 }
 
 // Destroy : Destroys an existing service
-func (m *Manager) Destroy(token string, name string, monit bool) error {
-	s, err := m.EnvStatus(token, name)
+func (m *Manager) Destroy(token, project, env string, monit bool) error {
+	s, err := m.EnvStatus(token, project, env)
 	if err != nil {
 		return err
 	}
 	if s.Status == "in_progress" {
-		return errors.New("The service " + name + " cannot be destroyed as it is currently '" + s.Status + "'")
+		return errors.New("The service " + env + " cannot be destroyed as it is currently '" + s.Status + "'")
 	}
 
-	body, resp, err := m.doRequest("/api/environments/"+name, "DELETE", nil, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env, "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
 			return ErrConnectionRefused
@@ -228,8 +228,8 @@ func (m *Manager) Destroy(token string, name string, monit bool) error {
 }
 
 // ForceDestroy : Destroys an existing service by forcing it
-func (m *Manager) ForceDestroy(token, name string) error {
-	_, resp, err := m.doRequest("/api/environments/"+name+"/force/", "DELETE", nil, token, "application/yaml")
+func (m *Manager) ForceDestroy(token, project, env string) error {
+	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/force/", "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
 			return ErrConnectionRefused
@@ -275,10 +275,11 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 	var response struct {
 		ID      string `json:"id,omitempty"`
 		Name    string `json:"name,omitempty"`
+		Project string `json:"project,omitempty"`
 		Message string `json:"message,omitempty"`
 	}
 
-	body, resp, rerr := m.doRequest("/api/environments/", "POST", payload, token, "application/yaml")
+	body, resp, rerr := m.doRequest("/api/envs/", "POST", payload, token, "application/yaml")
 	if resp == nil {
 		return "", ErrConnectionRefused
 	}
@@ -300,7 +301,7 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 	fmt.Println("================\nPlatform Details\n================\n ")
 	var srv model.Service
 
-	srv, err = m.EnvStatus(token, response.Name)
+	srv, err = m.EnvStatus(token, response.Project, response.Name)
 	if err != nil {
 		return response.ID, err
 	}
@@ -331,7 +332,7 @@ func (m *Manager) Import(token string, name string, project string, filters []st
 		Message string `json:"message,omitempty"`
 	}
 
-	body, resp, rerr := m.doRequest("/api/environments/import/", "POST", payload, token, "application/yaml")
+	body, resp, rerr := m.doRequest("/api/envs/import/", "POST", payload, token, "application/yaml")
 	if resp == nil {
 		return "", ErrConnectionRefused
 	}
@@ -352,7 +353,7 @@ func (m *Manager) Import(token string, name string, project string, filters []st
 
 func (m *Manager) dryApply(token string, payload []byte) (string, error) {
 	var body string
-	body, resp, err := m.doRequest("/api/environments/?dry=true", "POST", payload, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/envs/?dry=true", "POST", payload, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
 			return "", ErrConnectionRefused
