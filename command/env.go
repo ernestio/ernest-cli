@@ -96,14 +96,14 @@ var ApplyEnv = cli.Command{
 
 // DestroyEnv command
 var DestroyEnv = cli.Command{
-	Name:      "destroy",
-	Aliases:   []string{"d"},
+	Name:      "delete",
+	Aliases:   []string{"destroy", "d"},
 	ArgsUsage: "<project> <environment_name>",
 	Usage:     "Destroy an environment.",
 	Description: `Destroys an environment by name.
 
    Example:
-    $ ernest env destroy <my_project> <my_environment>
+    $ ernest env delete <my_project> <my_environment>
   `,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
