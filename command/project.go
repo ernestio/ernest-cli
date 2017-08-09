@@ -44,6 +44,39 @@ var ListProjects = cli.Command{
 	},
 }
 
+// InfoProject ...
+var InfoProject = cli.Command{
+	Name:      "info",
+	Usage:     "Project information",
+	ArgsUsage: " ",
+	Description: `Display specific project information.
+
+   Example:
+    $ ernest project info <my_project>
+	`,
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+		if len(c.Args()) == 0 {
+			color.Red("You should specify the project name")
+			return nil
+		}
+		project := c.Args()[0]
+		p, err := m.InfoProject(cfg.Token, project)
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+
+		view.PrintProjectInfo(p)
+
+		return nil
+	},
+}
+
 // UpdateProjects : Will update the project specific fields
 var UpdateProjects = cli.Command{
 	Name:        "update",
@@ -77,6 +110,7 @@ var CmdProject = cli.Command{
 		CreateProjects,
 		UpdateProjects,
 		DeleteProject,
+		InfoProject,
 	},
 }
 

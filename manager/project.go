@@ -170,16 +170,19 @@ func (m *Manager) UpdateAzureProject(token, name, subscriptionID, clientID, clie
 	return nil
 }
 
-func (m *Manager) getProjectByName(token string, name string) (d model.Project, err error) {
-	projects, err := m.ListProjects(token)
+func (m *Manager) getProjectByName(token string, name string) (project model.Project, err error) {
+	body, res, err := m.doRequest("/api/projects/"+name, "GET", []byte(""), token, "")
 	if err != nil {
-		return d, err
-	}
-
-	for _, d := range projects {
-		if name == d.Name {
-			return d, nil
+		if res == nil {
+			return project, ErrConnectionRefused
 		}
+		return
 	}
-	return d, errors.New("Datanceter does not exist")
+	err = json.Unmarshal([]byte(body), &project)
+	return
+}
+
+// InfoProject : updates awsproject details
+func (m *Manager) InfoProject(token, name string) (p model.Project, err error) {
+	return m.getProjectByName(token, name)
 }

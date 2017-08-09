@@ -31,10 +31,10 @@ func (m *Manager) UnsetRole(token, user, project, env, role string) (body string
 }
 
 func (m *Manager) roleRequest(token, verb, user, project, env, role string) (body string, err error) {
-	rType := "projects"
+	rType := "project"
 	rID := project
 	if env != "" {
-		rType = "environments"
+		rType = "environment"
 		rID = project + "-" + env
 	}
 	r := roleObj{
@@ -52,7 +52,10 @@ func (m *Manager) roleRequest(token, verb, user, project, env, role string) (bod
 	body, resp, err := m.doRequest("/api/roles/", verb, req, token, "")
 	if err != nil {
 		if resp.StatusCode == 403 {
-			return body, errors.New("You're not allowed to perform this action, please contact the resource owner")
+			return "You're not allowed to perform this action, please contact the resource owner", err
+		}
+		if resp.StatusCode == 400 {
+			return "You're not allowed to perform this action, please log in", err
 		}
 		var rerr respErr
 		err := json.Unmarshal([]byte(body), &rerr)

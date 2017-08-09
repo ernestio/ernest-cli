@@ -25,6 +25,11 @@ func PrintEnvInfo(service *model.Service) {
 		}
 	}
 
+	fmt.Println("Members:")
+	for _, m := range service.Roles {
+		fmt.Println("  " + m)
+	}
+
 	if len(service.VPCs) > 0 {
 		fmt.Println("\nVPCs:")
 		table := tablewriter.NewWriter(os.Stdout)

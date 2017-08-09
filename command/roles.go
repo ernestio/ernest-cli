@@ -71,8 +71,12 @@ var CmdRolesSet = cli.Command{
 		if e != "" {
 			resource = p + " / " + e
 		}
+		verb := "own"
+		if r == "reader" {
+			verb = "read"
+		}
+		color.Green("User '" + u + "' has been authorized to " + verb + " resource " + resource)
 
-		color.Green("User " + u + " authorized as " + r + " to " + resource)
 		return nil
 	},
 }
@@ -139,8 +143,8 @@ var CmdRolesUnset = cli.Command{
 		if e != "" {
 			resource = p + " / " + e
 		}
+		color.Green("User '" + u + "' has been unauthorized as " + resource + " " + r)
 
-		color.Green("User " + u + " unauthorized as " + r + " to " + resource)
 		return nil
 	},
 }
