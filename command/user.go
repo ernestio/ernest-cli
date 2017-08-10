@@ -15,6 +15,7 @@ import (
 	"unicode"
 
 	"github.com/ernestio/ernest-cli/model"
+	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	"github.com/olekukonko/tablewriter"
@@ -267,6 +268,51 @@ var DisableUser = cli.Command{
 	},
 }
 
+// InfoUser :
+var InfoUser = cli.Command{
+	Name:  "info",
+	Usage: "Displays information about the specified user (current user by default).",
+	Description: `
+
+	Example:
+	 $ ernest user info
+	 $ ernest user info --user <user-name>
+ `,
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "user",
+			Value: "",
+			Usage: "Username",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		session, err := m.GetSession(cfg.Token)
+		if err != nil {
+			color.Red("You don’t have permissions to perform this action")
+			return nil
+		}
+
+		username := c.String("user")
+		if username != "" && session.IsAdmin == false {
+			color.Red("You don’t have permissions to access '" + username + "' information")
+			return nil
+		}
+		if username == "" {
+			username = cfg.User
+		}
+
+		user, err := m.GetUser(cfg.Token, username)
+		if err != nil {
+			color.Red(err.Error())
+			return err
+		}
+
+		view.PrintUserInfo(user)
+		return nil
+	},
+}
+
 // generate random string
 func randString(n int) string {
 	g := big.NewInt(0)
@@ -294,5 +340,6 @@ var CmdUser = cli.Command{
 		CreateUser,
 		PasswordUser,
 		DisableUser,
+		InfoUser,
 	},
 }
