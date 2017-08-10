@@ -16,6 +16,14 @@ import (
 func PrintEnvInfo(service *model.Service) {
 	fmt.Println("Name : " + service.Name)
 	fmt.Println("Status : " + service.Status)
+	fmt.Println("Project : " + service.ProjectName)
+	fmt.Println("Provider : ")
+	fmt.Println("  Type : " + service.Provider)
+	fmt.Println("Members:")
+	for _, m := range service.Roles {
+		fmt.Println("  " + m)
+	}
+
 	fmt.Println("Date : " + service.Version)
 	if service.Status == "errored" {
 		if service.LastError == "" {
@@ -23,11 +31,6 @@ func PrintEnvInfo(service *model.Service) {
 		} else {
 			fmt.Println("Last known error : " + service.LastError)
 		}
-	}
-
-	fmt.Println("Members:")
-	for _, m := range service.Roles {
-		fmt.Println("  " + m)
 	}
 
 	if len(service.VPCs) > 0 {

@@ -10,6 +10,7 @@ type Service struct {
 	Name        string   `json:"name"`
 	Project     int      `json:"project_id"`
 	ProjectName string   `json:"project"`
+	Provider    string   `json:"provider"`
 	Version     string   `json:"version"`
 	UserName    string   `json:"user_name"`
 	Status      string   `json:"status"`

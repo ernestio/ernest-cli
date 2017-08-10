@@ -35,7 +35,7 @@ func (m *Manager) roleRequest(token, verb, user, project, env, role string) (bod
 	rID := project
 	if env != "" {
 		rType = "environment"
-		rID = project + "-" + env
+		rID = project + "/" + env
 	}
 	r := roleObj{
 		ID:       rID,
