@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strconv"
 
 	"github.com/ernestio/ernest-cli/helper"
@@ -243,8 +244,32 @@ func (m *Manager) ForceDestroy(token, project, env string) error {
 	return nil
 }
 
+// UpdateEnv : Updates credentials on a specific environment
+func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]string) (string, error) {
+	d := model.NewDefinition(name, project)
+
+	env, err := m.EnvStatus(token, project, name)
+	if err != nil {
+		log.Println(err.Error())
+		return "Error processing your request", errors.New(err.Error())
+	}
+	if err = d.Load([]byte(env.Definition)); err != nil {
+		log.Println(err.Error())
+		return "Error processing your request", errors.New(err.Error())
+	}
+
+	return m.ApplyEnv(d, token, credentials, false, false)
+}
+
+// CreateEnv : Creates a new empty environmnet
+func (m *Manager) CreateEnv(token, name, project string, credentials map[string]string) (string, error) {
+	d := model.NewDefinition(name, project)
+
+	return m.ApplyEnv(d, token, credentials, false, false)
+}
+
 // Apply : Applies a yaml to create / update a new service
-func (m *Manager) Apply(token string, path string, monit, dry bool) (string, error) {
+func (m *Manager) Apply(token, path string, credentials map[string]string, monit, dry bool) (string, error) {
 	var d model.Definition
 
 	payload, err := ioutil.ReadFile(path)
@@ -262,7 +287,17 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 		return "", err
 	}
 
-	payload, err = d.Save()
+	return m.ApplyEnv(d, token, credentials, monit, dry)
+}
+
+// ApplyEnv : Applies a yaml to create / update a new service
+func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[string]string, monit, dry bool) (string, error) {
+
+	if len(credentials) > 0 {
+		d.AttachMap("credentials", credentials)
+	}
+
+	payload, err := d.Save()
 
 	if err != nil {
 		return "", errors.New("Could not finalize definition yaml")
@@ -293,20 +328,22 @@ func (m *Manager) Apply(token string, path string, monit, dry bool) (string, err
 		return "", errors.New(response.Message)
 	}
 
-	err = helper.Monitorize(m.URL, "/events", token, response.ID)
-	if err != nil {
-		return response.ID, err
+	if monit {
+		err = helper.Monitorize(m.URL, "/events", token, response.ID)
+		if err != nil {
+			return response.ID, err
+		}
+
+		fmt.Println("================\nPlatform Details\n================\n ")
+		var srv model.Service
+
+		srv, err = m.EnvStatus(token, response.Project, response.Name)
+		if err != nil {
+			return response.ID, err
+		}
+
+		view.PrintEnvInfo(&srv)
 	}
-
-	fmt.Println("================\nPlatform Details\n================\n ")
-	var srv model.Service
-
-	srv, err = m.EnvStatus(token, response.Project, response.Name)
-	if err != nil {
-		return response.ID, err
-	}
-
-	view.PrintEnvInfo(&srv)
 
 	return response.ID, nil
 }

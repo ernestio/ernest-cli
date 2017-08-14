@@ -44,6 +44,93 @@ var ListEnvs = cli.Command{
 	},
 }
 
+// UpdateEnv :  Creates an empty environment based on a name and a project name
+var UpdateEnv = cli.Command{
+	Name:      "update",
+	Aliases:   []string{"a"},
+	ArgsUsage: "<project> <environment>",
+	Usage:     "Creates an empty environment based on a specific project",
+	Flags:     AllProviderFlags,
+	Description: `You must be logged in to execute this command.
+
+   Examples:
+    $ ernest env update --credentials project.yml my_project my_environment
+	`,
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
+		if len(c.Args()) < 1 {
+			color.Red("You must provide the project name")
+			return nil
+		}
+		if len(c.Args()) < 2 {
+			color.Red("You must provide the new environment name")
+			return nil
+		}
+		project := c.Args()[0]
+		env := c.Args()[1]
+
+		_, err := m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
+		if err != nil {
+			color.Red(err.Error())
+		}
+		fmt.Println("Environment successfully updated")
+
+		return nil
+	},
+}
+
+// CreateEnv :  Creates an empty environment based on a name and a project name
+var CreateEnv = cli.Command{
+	Name:      "create",
+	Aliases:   []string{"a"},
+	ArgsUsage: "<project> <environment>",
+	Usage:     "Creates an empty environment based on a specific project",
+	Flags: append([]cli.Flag{
+		cli.StringFlag{
+			Name:  "credentials",
+			Usage: "will override project information",
+		},
+	}, AllProviderFlags...),
+	Description: `You must be logged in to execute this command.
+
+   Examples:
+    $ ernest env create my_project my_environment
+    $ ernest env create --credentials project.yml my_project my_environment
+	`,
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			color.Red("You're not allowed to perform this action, please log in")
+			return nil
+		}
+
+		if len(c.Args()) < 1 {
+			color.Red("You must provide the project name")
+			return nil
+		}
+		if len(c.Args()) < 2 {
+			color.Red("You must provide the new environment name")
+			return nil
+		}
+		project := c.Args()[0]
+		env := c.Args()[1]
+
+		_, err := m.CreateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
+		if err != nil {
+			color.Red(err.Error())
+			return nil
+		}
+		fmt.Println("Environment successfully created")
+
+		return nil
+	},
+}
+
 // ApplyEnv command
 // Applies changes described on a YAML file to an env
 var ApplyEnv = cli.Command{
@@ -51,12 +138,16 @@ var ApplyEnv = cli.Command{
 	Aliases:   []string{"a"},
 	ArgsUsage: "<file.yml>",
 	Usage:     "Builds or changes infrastructure.",
-	Flags: []cli.Flag{
+	Flags: append([]cli.Flag{
 		cli.BoolFlag{
 			Name:  "dry",
 			Usage: "print the changes to be applied on an environment intead of applying them",
 		},
-	},
+		cli.StringFlag{
+			Name:  "credentials",
+			Usage: "will override project information",
+		},
+	}, AllProviderFlags...),
 	Description: `Sends an environment YAML description file to Ernest to be executed.
    You must be logged in to execute this command.
 
@@ -83,7 +174,7 @@ var ApplyEnv = cli.Command{
 		if dry == true {
 			monit = false
 		}
-		response, err := m.Apply(cfg.Token, file, monit, dry)
+		response, err := m.Apply(cfg.Token, file, ProviderFlagsToSlice(c), monit, dry)
 		if err != nil {
 			color.Red(err.Error())
 		}
@@ -538,6 +629,8 @@ var CmdEnv = cli.Command{
 	Usage:   "Environment related subcommands",
 	Subcommands: []cli.Command{
 		ListEnvs,
+		CreateEnv,
+		UpdateEnv,
 		ApplyEnv,
 		DestroyEnv,
 		HistoryEnv,
