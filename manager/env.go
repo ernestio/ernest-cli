@@ -68,10 +68,8 @@ func (m *Manager) EnvStatus(token, project, env string) (service model.Service, 
 		return service, errors.New("Unexpected endpoint response : " + string(body))
 	}
 	err = json.Unmarshal([]byte(body), &service)
-	if err != nil {
-		return service, err
-	}
-	return service, nil
+
+	return service, err
 }
 
 // EnvBuildStatus ...
@@ -101,10 +99,7 @@ func (m *Manager) EnvBuildStatus(token, project, env, serviceID string) (service
 		return service, errors.New("Unexpected endpoint response : " + string(body))
 	}
 	err = json.Unmarshal([]byte(body), &service)
-	if err != nil {
-		return service, err
-	}
-	return service, nil
+	return service, err
 }
 
 // ResetEnv ...

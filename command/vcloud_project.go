@@ -123,7 +123,7 @@ var CreateVcloudProject = cli.Command{
 		if c.String("password") != "" {
 			password = c.String("password")
 		}
-		if fake == false {
+		if !fake {
 			fake = c.Bool("fake")
 		}
 		username = user + "@" + org
