@@ -26,9 +26,8 @@ func main() {
 		command.Login,
 		command.Logout,
 		command.CmdUser,
-		command.CmdGroup,
-		command.CmdDatacenter,
-		command.CmdService,
+		command.CmdProject,
+		command.CmdEnv,
 		command.CmdPreferences,
 		command.CmdDocs,
 		command.CmdSetup,
@@ -36,6 +35,7 @@ func main() {
 		command.CmdLog,
 		command.CmdUsage,
 		command.CmdNotification,
+		command.CmdRoles,
 	}
 	if err := app.Run(os.Args); err != nil {
 		log.Println("Oops, something is broken")

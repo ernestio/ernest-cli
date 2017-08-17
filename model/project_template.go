@@ -4,8 +4,8 @@
 
 package model
 
-// DatacenterTemplate ...
-type DatacenterTemplate struct {
+// ProjectTemplate ...
+type ProjectTemplate struct {
 	URL      string `yaml:"vcloud-url"`
 	Network  string `yaml:"public-network"`
 	Org      string `yaml:"org"`

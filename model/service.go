@@ -6,17 +6,20 @@ package model
 
 // Service : Model representing ernest.io service json responses
 type Service struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Datacenter int    `json:"datacenter_id"`
-	Version    string `json:"version"`
-	UserName   string `json:"user_name"`
-	Status     string `json:"status"`
-	Definition string `json:"definition"`
-	Result     string `json:"result"`
-	LastError  string `json:"last_known_error"`
-	Endpoint   string `json:"endpoint"`
-	VPCs       []struct {
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Project     int      `json:"project_id"`
+	ProjectName string   `json:"project"`
+	Provider    string   `json:"provider"`
+	Version     string   `json:"version"`
+	UserName    string   `json:"user_name"`
+	Status      string   `json:"status"`
+	Definition  string   `json:"definition"`
+	Result      string   `json:"result"`
+	LastError   string   `json:"last_known_error"`
+	Endpoint    string   `json:"endpoint"`
+	Roles       []string `json:"roles"`
+	VPCs        []struct {
 		Name   string `json:"name"`
 		ID     string `json:"vpc_id"`
 		Subnet string `json:"vpc_subnet"`

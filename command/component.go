@@ -14,12 +14,12 @@ import (
 // FindComponents ...
 var FindComponents = cli.Command{
 	Name:      "list",
-	Usage:     "List components on your datacenter.",
+	Usage:     "List components on your project.",
 	ArgsUsage: " ",
-	Description: `List all components on your datacenter.
+	Description: `List all components on your project.
 
    Example:
-    $ ernest component list my_datacenter ebs --service=my_service
+    $ ernest component list my_project ebs --service=my_service
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -36,7 +36,7 @@ var FindComponents = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify an existing datacenter name")
+			color.Red("You should specify an existing project name")
 			return nil
 		}
 
@@ -45,10 +45,10 @@ var FindComponents = cli.Command{
 			return nil
 		}
 
-		datacenter := c.Args()[0]
+		project := c.Args()[0]
 		component := c.Args()[1]
 		service := c.String("service")
-		components, err := m.FindComponents(cfg.Token, datacenter, component, service)
+		components, err := m.FindComponents(cfg.Token, project, component, service)
 		if err != nil {
 			color.Red(err.Error())
 			return nil

@@ -4,7 +4,7 @@
 
 package command
 
-// CmdDatacenter subcommand
+// CmdProject subcommand
 import (
 	"fmt"
 
@@ -13,18 +13,18 @@ import (
 	"github.com/urfave/cli"
 )
 
-// CreateVcloudDatacenter : Creates a VCloud Datacenter
-var CreateVcloudDatacenter = cli.Command{
+// CreateVcloudProject : Creates a VCloud Project
+var CreateVcloudProject = cli.Command{
 	Name:  "vcloud",
-	Usage: "Create a new vcloud datacenter.",
-	Description: `Create a new vcloud datacenter on the targeted instance of Ernest.
+	Usage: "Create a new vcloud project.",
+	Description: `Create a new vcloud project on the targeted instance of Ernest.
 
    Example:
-    $ ernest datacenter create vcloud --user username --password xxxx --org MY-ORG-NAME --vse-url http://vse.url --vcloud-url https://myernest.com --public-network MY-PUBLIC-NETWORK mydatacenter
+    $ ernest project create vcloud --user username --password xxxx --org MY-ORG-NAME --vse-url http://vse.url --vcloud-url https://myernest.com --public-network MY-PUBLIC-NETWORK myproject
 
    Template example:
-    $ ernest datacenter create vcloud --template mydatacenter.yml mydatacenter
-    Where mydatacenter.yaml will look like:
+    $ ernest project create vcloud --template myproject.yml myproject
+    Where myproject.yaml will look like:
       ---
       fake: true
       org: org
@@ -35,7 +35,7 @@ var CreateVcloudDatacenter = cli.Command{
       vse-url: "http://ss.com"
 
 	`,
-	ArgsUsage: "<datacenter-name>",
+	ArgsUsage: "<project-name>",
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user",
@@ -70,18 +70,18 @@ var CreateVcloudDatacenter = cli.Command{
 		cli.StringFlag{
 			Name:  "template",
 			Value: "",
-			Usage: "Datacenter template",
+			Usage: "Project template",
 		},
 		cli.BoolFlag{
 			Name:  "fake",
-			Usage: "Fake datacenter",
+			Usage: "Fake project",
 		},
 	},
 	Action: func(c *cli.Context) error {
 		var errs []string
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the datacenter name")
+			color.Red("You should specify the project name")
 			return nil
 		}
 		m, cfg := setup(c)
@@ -96,8 +96,8 @@ var CreateVcloudDatacenter = cli.Command{
 
 		template := c.String("template")
 		if template != "" {
-			var t model.DatacenterTemplate
-			if err := getDatacenterTemplate(template, &t); err != nil {
+			var t model.ProjectTemplate
+			if err := getProjectTemplate(template, &t); err != nil {
 				color.Red(err.Error())
 				return nil
 			}
@@ -155,25 +155,25 @@ var CreateVcloudDatacenter = cli.Command{
 			return nil
 		}
 
-		body, err := m.CreateVcloudDatacenter(cfg.Token, name, rtype, username, password, url, network, c.String("vse-url"))
+		body, err := m.CreateVcloudProject(cfg.Token, name, rtype, username, password, url, network, c.String("vse-url"))
 		if err != nil {
 			color.Red(body)
 		} else {
-			color.Green("Datacenter '" + name + "' successfully created ")
+			color.Green("Project '" + name + "' successfully created ")
 		}
 		return nil
 	},
 }
 
-// DeleteDatacenter : Datacenter deletion command definition
-var DeleteDatacenter = cli.Command{
+// DeleteProject : Project deletion command definition
+var DeleteProject = cli.Command{
 	Name:      "delete",
-	Usage:     "Deletes the specified datacenter.",
-	ArgsUsage: "<datacenter-name>",
-	Description: `Deletes the name specified datacenter.
+	Usage:     "Deletes the specified project.",
+	ArgsUsage: "<project-name>",
+	Description: `Deletes the name specified project.
 
    Example:
-    $ ernest datacenter delete my_datacenter
+    $ ernest project delete my_project
 	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -183,31 +183,31 @@ var DeleteDatacenter = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the datacenter name")
+			color.Red("You should specify the project name")
 			return nil
 		}
 		name := c.Args()[0]
 
-		err := m.DeleteDatacenter(cfg.Token, name)
+		err := m.DeleteProject(cfg.Token, name)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
-		color.Green("Datacenter " + name + " successfully removed")
+		color.Green("Project " + name + " successfully removed")
 
 		return nil
 	},
 }
 
-// UpdateVCloudDatacenter : Updates the specified VCloud datacenter
-var UpdateVCloudDatacenter = cli.Command{
+// UpdateVCloudProject : Updates the specified VCloud project
+var UpdateVCloudProject = cli.Command{
 	Name:      "vcloud",
-	Usage:     "Updates the specified VCloud datacenter.",
-	ArgsUsage: "<datacenter-name>",
-	Description: `Updates the specified VCloud datacenter.
+	Usage:     "Updates the specified VCloud project.",
+	ArgsUsage: "<project-name>",
+	Description: `Updates the specified VCloud project.
 
    Example:
-    $ ernest datacenter update vcloud --user <me> --org <org> --password <secret> my_datacenter
+    $ ernest project update vcloud --user <me> --org <org> --password <secret> my_project
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
@@ -234,7 +234,7 @@ var UpdateVCloudDatacenter = cli.Command{
 			return nil
 		}
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the datacenter name")
+			color.Red("You should specify the project name")
 			return nil
 		}
 		name := c.Args()[0]
@@ -255,12 +255,12 @@ var UpdateVCloudDatacenter = cli.Command{
 			return nil
 		}
 
-		err := m.UpdateVCloudDatacenter(cfg.Token, name, user+"@"+org, password)
+		err := m.UpdateVCloudProject(cfg.Token, name, user+"@"+org, password)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
-		color.Green("Datacenter " + name + " successfully updated")
+		color.Green("Project " + name + " successfully updated")
 
 		return nil
 	},

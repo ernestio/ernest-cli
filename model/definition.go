@@ -18,6 +18,19 @@ type Definition struct {
 	data yaml.MapSlice
 }
 
+// NewDefinition : creates a new definition from a name and project
+func NewDefinition(name, project string) (d Definition) {
+	d.data = append(d.data, yaml.MapItem{
+		Key:   "name",
+		Value: name,
+	})
+	d.data = append(d.data, yaml.MapItem{
+		Key:   "datacenter",
+		Value: project,
+	})
+	return
+}
+
 // Load the yaml
 func (d *Definition) Load(data []byte) error {
 	return yaml.Unmarshal(data, &d.data)
@@ -33,6 +46,34 @@ func (d *Definition) LoadFileImports() error {
 	var err error
 	d.data, err = LoadMapSlice(d.data)
 	return err
+}
+
+// AttachMap : will attach the contents of a map to the end of the definition
+func (d *Definition) AttachMap(key string, m map[string]string) {
+	x := yaml.MapSlice{}
+	for k, v := range m {
+		x = append(x, yaml.MapItem{
+			Key:   k,
+			Value: v,
+		})
+	}
+	d.data = append(d.data, yaml.MapItem{
+		Key:   key,
+		Value: x,
+	})
+}
+
+// AttachFile : will attach the contents of a file to the end of the definition
+func (d *Definition) AttachFile(key, path string) (err error) {
+	var str string
+	path = "@{" + path + "}"
+	if str, err = LoadFile(path); err == nil {
+		d.data = append(d.data, yaml.MapItem{
+			Key:   key,
+			Value: str,
+		})
+	}
+	return
 }
 
 // LoadMapSlice : loads all values into a slice

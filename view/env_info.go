@@ -12,10 +12,18 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-// PrintServiceInfo : Pretty print for service info
-func PrintServiceInfo(service *model.Service) {
+// PrintEnvInfo : Pretty print for service info
+func PrintEnvInfo(service *model.Service) {
 	fmt.Println("Name : " + service.Name)
 	fmt.Println("Status : " + service.Status)
+	fmt.Println("Project : " + service.ProjectName)
+	fmt.Println("Provider : ")
+	fmt.Println("  Type : " + service.Provider)
+	fmt.Println("Members:")
+	for _, m := range service.Roles {
+		fmt.Println("  " + m)
+	}
+
 	fmt.Println("Date : " + service.Version)
 	if service.Status == "errored" {
 		if service.LastError == "" {

@@ -14,18 +14,18 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-// PrintDatacenterList : Pretty print for a datacenter list
-func PrintDatacenterList(datacenters []model.Datacenter) {
-	if len(datacenters) == 0 {
-		fmt.Println("There are no datacenters created yet.")
+// PrintProjectList : Pretty print for a project list
+func PrintProjectList(projects []model.Project) {
+	if len(projects) == 0 {
+		fmt.Println("There are no projects created yet.")
 		return
 	}
 
-	var aws []model.Datacenter
-	var vcloud []model.Datacenter
-	var azure []model.Datacenter
+	var aws []model.Project
+	var vcloud []model.Project
+	var azure []model.Project
 
-	for _, d := range datacenters {
+	for _, d := range projects {
 		switch d.Type {
 		case "aws", "aws-fake":
 			aws = append(aws, d)
@@ -38,21 +38,21 @@ func PrintDatacenterList(datacenters []model.Datacenter) {
 
 	if len(aws) > 0 {
 		fmt.Println("")
-		fmt.Println("AWS Datacenters")
+		fmt.Println("AWS Projects")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Group", "Type", "Region", "Url"})
+		table.SetHeader([]string{"ID", "Name", "Type", "Region", "Url"})
 		for _, d := range aws {
 			id := strconv.Itoa(d.ID)
-			table.Append([]string{id, d.Name, d.GroupName, d.Type, d.Region, d.VseURL})
+			table.Append([]string{id, d.Name, d.Type, d.Region, d.VseURL})
 		}
 		table.Render()
 	}
 
 	if len(vcloud) > 0 {
 		fmt.Println("")
-		fmt.Println("VCloud Datacenters")
+		fmt.Println("VCloud Projects")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Group", "Type", "Url", "External Network", "Org"})
+		table.SetHeader([]string{"ID", "Name", "Type", "Url", "External Network", "Org"})
 		for _, d := range vcloud {
 			id := strconv.Itoa(d.ID)
 			parts := strings.Split(d.Username, "@")
@@ -60,19 +60,19 @@ func PrintDatacenterList(datacenters []model.Datacenter) {
 			if len(parts) == 2 {
 				org = parts[1]
 			}
-			table.Append([]string{id, d.Name, d.GroupName, d.Type, d.VCloudURL, d.ExternalNetwork, org})
+			table.Append([]string{id, d.Name, d.Type, d.VCloudURL, d.ExternalNetwork, org})
 		}
 		table.Render()
 	}
 
 	if len(azure) > 0 {
 		fmt.Println("")
-		fmt.Println("Azure Datacenters")
+		fmt.Println("Azure Projects")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Group", "Type", "Region"})
+		table.SetHeader([]string{"ID", "Name", "Type", "Region"})
 		for _, d := range azure {
 			id := strconv.Itoa(d.ID)
-			table.Append([]string{id, d.Name, d.GroupName, d.Type, d.Region})
+			table.Append([]string{id, d.Name, d.Type, d.Region})
 		}
 		table.Render()
 	}

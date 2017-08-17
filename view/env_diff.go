@@ -11,8 +11,8 @@ import (
 	"github.com/pmezard/go-difflib/difflib"
 )
 
-// PrintServiceDiff : Pretty print for a services diff
-func PrintServiceDiff(build1 model.Service, build2 model.Service) {
+// PrintEnvDiff : Pretty print for an envs diff
+func PrintEnvDiff(build1 model.Service, build2 model.Service) {
 
 	diff := difflib.UnifiedDiff{
 		A:        difflib.SplitLines(build1.Definition),
