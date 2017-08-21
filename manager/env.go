@@ -347,7 +347,7 @@ func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[str
 func (m *Manager) Import(token string, name string, project string, filters []string) (streamID string, err error) {
 	var s struct {
 		Name          string   `json:"name"`
-		Project       string   `json:"datacenter"`
+		Project       string   `json:"project"`
 		ImportFilters []string `json:"import_filters,omitempty"`
 	}
 	s.Name = name
