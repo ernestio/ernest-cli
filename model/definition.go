@@ -25,7 +25,7 @@ func NewDefinition(name, project string) (d Definition) {
 		Value: name,
 	})
 	d.data = append(d.data, yaml.MapItem{
-		Key:   "datacenter",
+		Key:   "project",
 		Value: project,
 	})
 	return
