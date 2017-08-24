@@ -111,7 +111,7 @@ func (m *Manager) ResetEnv(project, env, token string) error {
 	if s.Status != "in_progress" {
 		return errors.New("The environment '" + project + " / " + env + "' cannot be reset as its status is '" + s.Status + "'")
 	}
-	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/reset/", "POST", nil, token, "application/yaml")
+	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/actions/reset/", "POST", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
 			return ErrConnectionRefused
@@ -143,7 +143,7 @@ func (m *Manager) RevertEnv(project, env, buildID, token string, dry bool) (stri
 	}
 
 	if dry {
-		return m.dryApply(token, payload)
+		return m.dryApply(token, payload, d)
 	}
 
 	var response struct {
@@ -225,7 +225,7 @@ func (m *Manager) Destroy(token, project, env string, monit bool) error {
 
 // ForceDestroy : Destroys an existing service by forcing it
 func (m *Manager) ForceDestroy(token, project, env string) error {
-	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/force/", "DELETE", nil, token, "application/yaml")
+	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/actions/force/", "DELETE", nil, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
 			return ErrConnectionRefused
@@ -299,7 +299,7 @@ func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[str
 	}
 
 	if dry {
-		return m.dryApply(token, payload)
+		return m.dryApply(token, payload, d)
 	}
 
 	var response struct {
@@ -309,7 +309,7 @@ func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[str
 		Message string `json:"message,omitempty"`
 	}
 
-	body, resp, rerr := m.doRequest("/api/envs/", "POST", payload, token, "application/yaml")
+	body, resp, rerr := m.doRequest("/api/projects/"+d.Project+"/envs/"+d.Name+"/builds/", "POST", payload, token, "application/yaml")
 	if resp == nil {
 		return "", ErrConnectionRefused
 	}
@@ -364,7 +364,7 @@ func (m *Manager) Import(token string, name string, project string, filters []st
 		Message string `json:"message,omitempty"`
 	}
 
-	body, resp, rerr := m.doRequest("/api/envs/import/", "POST", payload, token, "application/yaml")
+	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/import/", "POST", payload, token, "application/yaml")
 	if resp == nil {
 		return "", ErrConnectionRefused
 	}
@@ -383,9 +383,9 @@ func (m *Manager) Import(token string, name string, project string, filters []st
 	return response.ID, err
 }
 
-func (m *Manager) dryApply(token string, payload []byte) (string, error) {
+func (m *Manager) dryApply(token string, payload []byte, d model.Definition) (string, error) {
 	var body string
-	body, resp, err := m.doRequest("/api/envs/?dry=true", "POST", payload, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/projects/"+d.Project+"/envs/"+d.Name+"/builds/?dry=true", "POST", payload, token, "application/yaml")
 	if err != nil {
 		if resp == nil {
 			return "", ErrConnectionRefused
