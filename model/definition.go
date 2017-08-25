@@ -15,7 +15,9 @@ import (
 // Definition ...
 type Definition struct {
 	// data map[interface{}]interface{}
-	data yaml.MapSlice
+	data    yaml.MapSlice
+	Name    string
+	Project string
 }
 
 // NewDefinition : creates a new definition from a name and project
@@ -28,12 +30,25 @@ func NewDefinition(name, project string) (d Definition) {
 		Key:   "project",
 		Value: project,
 	})
+	d.Name = name
+	d.Project = project
+
 	return
 }
 
 // Load the yaml
-func (d *Definition) Load(data []byte) error {
-	return yaml.Unmarshal(data, &d.data)
+func (d *Definition) Load(data []byte) (err error) {
+	err = yaml.Unmarshal(data, &d.data)
+	for _, item := range d.data {
+		if item.Key == "name" {
+			d.Name = item.Value.(string)
+		}
+		if item.Key == "project" {
+			d.Project = item.Value.(string)
+		}
+	}
+
+	return
 }
 
 // Save the definition as a byte slice
