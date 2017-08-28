@@ -15,7 +15,7 @@ import (
 // PrintEnvsList : Pretty print for a services list
 func PrintEnvsList(services []model.Service) {
 	if len(services) == 0 {
-		fmt.Println("\nThere are no services created yet")
+		fmt.Println("\nThere are no environments created yet")
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
