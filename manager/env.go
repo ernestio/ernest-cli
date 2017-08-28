@@ -152,7 +152,7 @@ func (m *Manager) RevertEnv(project, env, buildID, token string, dry bool) (stri
 		Message string `json:"message,omitempty"`
 	}
 
-	body, resp, rerr := m.doRequest("/api/envs/", "POST", payload, token, "application/yaml")
+	body, resp, rerr := m.doRequest("/api/projects/"+d.Project+"/envs/", "POST", payload, token, "application/yaml")
 	if resp == nil {
 		return "", ErrConnectionRefused
 	}
