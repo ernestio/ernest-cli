@@ -46,7 +46,7 @@ var MonitorEnv = cli.Command{
 		}
 
 		project := c.Args()[0]
-		env := c.Args()[0]
+		env := c.Args()[1]
 		service, err := m.EnvStatus(cfg.Token, project, env)
 		if err != nil {
 			color.Red(err.Error())
