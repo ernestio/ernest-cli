@@ -512,8 +512,8 @@ var DiffEnv = cli.Command{
 			return nil
 		}
 
-		env := c.Args()[0]
-		project := c.Args()[1]
+		project := c.Args()[0]
+		env := c.Args()[1]
 		b1 := c.Args()[2]
 		b2 := c.Args()[3]
 
