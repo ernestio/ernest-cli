@@ -106,7 +106,7 @@ func (m *Manager) UpdateVCloudProject(token, name, user, password string) (err e
 	}
 	id := strconv.Itoa(g.ID)
 
-	payload := []byte(`{"username":"` + user + `", "password":"` + password + `"}`)
+	payload := []byte(`{"credentials": {"username":"` + user + `", "password":"` + password + `"}}`)
 	body, res, err := m.doRequest("/api/projects/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
@@ -130,7 +130,7 @@ func (m *Manager) UpdateAWSProject(token, name, awsAccessKeyID, awsSecretAccessK
 	}
 	id := strconv.Itoa(g.ID)
 
-	payload := []byte(`{"aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}`)
+	payload := []byte(`{"credentials": {"aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}}`)
 	body, res, err := m.doRequest("/api/projects/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
@@ -154,7 +154,7 @@ func (m *Manager) UpdateAzureProject(token, name, subscriptionID, clientID, clie
 	}
 	id := strconv.Itoa(g.ID)
 
-	payload := []byte(`{"azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}`)
+	payload := []byte(`{"credentials": {"azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}}`)
 	body, res, err := m.doRequest("/api/projects/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
