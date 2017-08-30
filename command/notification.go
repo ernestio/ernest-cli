@@ -141,7 +141,7 @@ var AddServiceToNotification = cli.Command{
 			color.Red(err.Error())
 			return nil
 		}
-		color.Green("Service " + service + " successfully attached to " + notify + " notify")
+		color.Green("Environment " + service + " successfully attached to " + notify + " notify")
 		return nil
 	},
 }
@@ -178,7 +178,7 @@ var RmServiceToNotification = cli.Command{
 			color.Red(err.Error())
 			return nil
 		}
-		color.Green("Service " + service + " successfully removed from " + notify + " notify")
+		color.Green("Environment " + service + " successfully removed from " + notify + " notify")
 		return nil
 	},
 }

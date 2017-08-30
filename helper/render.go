@@ -80,9 +80,9 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 	var blue = color.New(color.FgBlue).SprintFunc()
 
-	f := "\nService Name: %s\n"
+	f := "\nEnvironment Name: %s\n"
 	a := []interface{}{blue(s.Name)}
-	f = f + "Service ID: %s\n\n"
+	f = f + "Environment ID: %s\n\n"
 	a = append(a, blue(s.ID))
 
 	if len(s.Changes) == 0 {
