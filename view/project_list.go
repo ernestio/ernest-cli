@@ -40,10 +40,11 @@ func PrintProjectList(projects []model.Project) {
 		fmt.Println("")
 		fmt.Println("AWS Projects")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Type", "Region", "Url"})
+		table.SetHeader([]string{"ID", "Name", "Type", "Region"})
 		for _, d := range aws {
 			id := strconv.Itoa(d.ID)
-			table.Append([]string{id, d.Name, d.Type, d.Region, d.VseURL})
+			region, _ := d.Credentials["region"].(string)
+			table.Append([]string{id, d.Name, d.Type, region})
 		}
 		table.Render()
 	}
@@ -55,12 +56,15 @@ func PrintProjectList(projects []model.Project) {
 		table.SetHeader([]string{"ID", "Name", "Type", "Url", "External Network", "Org"})
 		for _, d := range vcloud {
 			id := strconv.Itoa(d.ID)
-			parts := strings.Split(d.Username, "@")
+			vcloudURL, _ := d.Credentials["vcloud_url"].(string)
+			extNetwork, _ := d.Credentials["external_network"].(string)
+			username, _ := d.Credentials["username"].(string)
+			parts := strings.Split(username, "@")
 			org := ""
 			if len(parts) == 2 {
 				org = parts[1]
 			}
-			table.Append([]string{id, d.Name, d.Type, d.VCloudURL, d.ExternalNetwork, org})
+			table.Append([]string{id, d.Name, d.Type, vcloudURL, extNetwork, org})
 		}
 		table.Render()
 	}
@@ -72,7 +76,8 @@ func PrintProjectList(projects []model.Project) {
 		table.SetHeader([]string{"ID", "Name", "Type", "Region"})
 		for _, d := range azure {
 			id := strconv.Itoa(d.ID)
-			table.Append([]string{id, d.Name, d.Type, d.Region})
+			region, _ := d.Credentials["region"].(string)
+			table.Append([]string{id, d.Name, d.Type, region})
 		}
 		table.Render()
 	}

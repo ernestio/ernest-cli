@@ -18,10 +18,10 @@ func TestEvent(t *testing.T) {
 
 	Convey("When loading a definition with supporting files", t, func() {
 		p, err := ioutil.ReadFile("../internal/definitions/aws-template1.yml")
-		So(err, ShouldEqual, nil)
+		So(err, ShouldBeNil)
 
 		err = d.Load(p)
-		So(err, ShouldEqual, nil)
+		So(err, ShouldBeNil)
 
 		Convey("And I load file imports", func() {
 			errimports := d.LoadFileImports()
