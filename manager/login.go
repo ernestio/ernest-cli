@@ -5,12 +5,11 @@
 package manager
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/fatih/color"
@@ -22,15 +21,10 @@ import (
 func (m *Manager) Login(username string, password string) (token string, err error) {
 	var t Token
 
-	f := url.Values{}
-	f.Add("username", username)
-	f.Add("password", password)
-
 	url := m.URL + "/auth"
-	req, err := http.NewRequest("POST", url, strings.NewReader(f.Encode()))
-	req.Form = f
-	req.PostForm = f
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	body := []byte(`{"username": "` + username + `", "password": "` + password + `"}`)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", "Ernest/"+m.Version)
 
 	resp, err := m.client().Do(req)
@@ -39,7 +33,7 @@ func (m *Manager) Login(username string, password string) (token string, err err
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
 		color.Red(err.Error())
 	}
