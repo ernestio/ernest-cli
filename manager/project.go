@@ -14,7 +14,7 @@ import (
 
 // CreateVcloudProject : Creates a VCloud project
 func (m *Manager) CreateVcloudProject(token string, name string, rtype string, user string, password string, url string, network string, vseURL string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region": "", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}`)
+	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "credentials":{"region": "", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}}`)
 	body, res, err := m.doRequest("/api/projects/", "POST", payload, token, "")
 	if err != nil {
 		if res == nil {
@@ -30,7 +30,7 @@ func (m *Manager) CreateVcloudProject(token string, name string, rtype string, u
 
 // CreateAWSProject : Creates an AWS project
 func (m *Manager) CreateAWSProject(token string, name string, rtype string, region string, awsAccessKeyID string, awsSecretAccessKey string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region":"` + region + `", "username":"` + name + `", "aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}`)
+	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "credentials":{"region":"` + region + `", "username":"` + name + `", "aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}}`)
 	body, res, err := m.doRequest("/api/projects/", "POST", payload, token, "")
 	if err != nil {
 		if res == nil {
@@ -46,7 +46,7 @@ func (m *Manager) CreateAWSProject(token string, name string, rtype string, regi
 
 // CreateAzureProject : Creates an Azure project
 func (m *Manager) CreateAzureProject(token, name, rtype, region, subscriptionID, clientID, clientSecret, tenantID, environment string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "region":"` + region + `", "username":"` + name + `", "azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}`)
+	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "credentials": {"region":"` + region + `", "username":"` + name + `", "azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}}`)
 	body, res, err := m.doRequest("/api/projects/", "POST", payload, token, "")
 	if err != nil {
 		if res == nil {
@@ -106,7 +106,7 @@ func (m *Manager) UpdateVCloudProject(token, name, user, password string) (err e
 	}
 	id := strconv.Itoa(g.ID)
 
-	payload := []byte(`{"username":"` + user + `", "password":"` + password + `"}`)
+	payload := []byte(`{"credentials": {"username":"` + user + `", "password":"` + password + `"}}`)
 	body, res, err := m.doRequest("/api/projects/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
@@ -130,7 +130,7 @@ func (m *Manager) UpdateAWSProject(token, name, awsAccessKeyID, awsSecretAccessK
 	}
 	id := strconv.Itoa(g.ID)
 
-	payload := []byte(`{"aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}`)
+	payload := []byte(`{"credentials": {"aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}}`)
 	body, res, err := m.doRequest("/api/projects/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
@@ -154,7 +154,7 @@ func (m *Manager) UpdateAzureProject(token, name, subscriptionID, clientID, clie
 	}
 	id := strconv.Itoa(g.ID)
 
-	payload := []byte(`{"azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}`)
+	payload := []byte(`{"credentials": {"azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}}`)
 	body, res, err := m.doRequest("/api/projects/"+id, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
