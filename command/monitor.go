@@ -18,7 +18,7 @@ type NullWriter int
 func (NullWriter) Write([]byte) (int, error) { return 0, nil }
 
 // MonitorEnv command
-// Monitorizes an service and shows the actions being performed on it
+// Monitorizes an environment and shows the actions being performed on it
 var MonitorEnv = cli.Command{
 	Name:      "monitor",
 	Aliases:   []string{"m"},
@@ -54,7 +54,7 @@ var MonitorEnv = cli.Command{
 		}
 
 		if service.Status == "done" {
-			color.Yellow("Service has been successfully built")
+			color.Yellow("Environment has been successfully built")
 			color.Yellow("You can check its information running `ernest-cli env info " + project + " / " + env + "`")
 			return nil
 		}

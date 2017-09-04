@@ -87,7 +87,7 @@ var CmdSetup = cli.Command{
 		if !projectCreation {
 			color.Green("- Create a project with command 'ernest-cli project create --help'")
 		}
-		color.Green("- Apply a service definition with 'ernest-cli service apply your-template.yml'")
+		color.Green("- Apply an env definition with 'ernest-cli env apply your-template.yml'")
 		color.Green("- Need some extra documentation? Run 'ernest-cli docs'")
 
 		return nil

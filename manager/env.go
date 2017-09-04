@@ -191,7 +191,7 @@ func (m *Manager) Destroy(token, project, env string, monit bool) error {
 		return err
 	}
 	if s.Status == "in_progress" {
-		return errors.New("The service " + env + " cannot be destroyed as it is currently '" + s.Status + "'")
+		return errors.New("The environment " + env + " cannot be destroyed as it is currently '" + s.Status + "'")
 	}
 
 	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env, "DELETE", nil, token, "application/yaml")
@@ -223,7 +223,7 @@ func (m *Manager) Destroy(token, project, env string, monit bool) error {
 	return nil
 }
 
-// ForceDestroy : Destroys an existing service by forcing it
+// ForceDestroy : Destroys an existing env by forcing it
 func (m *Manager) ForceDestroy(token, project, env string) error {
 	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/actions/force/", "DELETE", nil, token, "application/yaml")
 	if err != nil {
@@ -263,7 +263,7 @@ func (m *Manager) CreateEnv(token, name, project string, credentials map[string]
 	return m.ApplyEnv(d, token, credentials, false, false)
 }
 
-// Apply : Applies a yaml to create / update a new service
+// Apply : Applies a yaml to create / update a new env
 func (m *Manager) Apply(token, path string, credentials map[string]string, monit, dry bool) (string, error) {
 	var d model.Definition
 
@@ -285,7 +285,7 @@ func (m *Manager) Apply(token, path string, credentials map[string]string, monit
 	return m.ApplyEnv(d, token, credentials, monit, dry)
 }
 
-// ApplyEnv : Applies a yaml to create / update a new service
+// ApplyEnv : Applies a yaml to create / update a new env
 func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[string]string, monit, dry bool) (string, error) {
 
 	if len(credentials) > 0 {
@@ -343,7 +343,7 @@ func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[str
 	return response.ID, nil
 }
 
-// Import : Imports an existing service
+// Import : Imports an existing env
 func (m *Manager) Import(token string, name string, project string, filters []string) (streamID string, err error) {
 	var s struct {
 		Name          string   `json:"name"`

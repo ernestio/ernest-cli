@@ -19,13 +19,13 @@ var FindComponents = cli.Command{
 	Description: `List all components on your project.
 
    Example:
-    $ ernest component list my_project ebs --service=my_service
+    $ ernest component list my_project ebs --environment=my_env
 	`,
 	Flags: []cli.Flag{
 		cli.StringFlag{
-			Name:  "service",
+			Name:  "environment",
 			Value: "",
-			Usage: "You can filter by service",
+			Usage: "You can filter by environment",
 		},
 	},
 	Action: func(c *cli.Context) error {
@@ -47,7 +47,7 @@ var FindComponents = cli.Command{
 
 		project := c.Args()[0]
 		component := c.Args()[1]
-		service := c.String("service")
+		service := c.String("environment")
 		components, err := m.FindComponents(cfg.Token, project, component, service)
 		if err != nil {
 			color.Red(err.Error())

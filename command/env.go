@@ -333,7 +333,7 @@ var RevertEnv = cli.Command{
 	Name:      "revert",
 	ArgsUsage: "<project> <env_name> <build_id>",
 	Usage:     "Reverts an environment to a previous state",
-	Description: `Reverts an environment to a previous known state using a build ID from 'ernest service history'.
+	Description: `Reverts an environment to a previous known state using a build ID from 'ernest env history'.
 
    Example:
     $ ernest env revert <project> <env_name> <build_id>
@@ -443,8 +443,8 @@ var InfoEnv = cli.Command{
 		},
 	},
 	Usage: "$ ernest env info <my_env> --build <specific build>",
-	Description: `Will show detailed information of the last build of a specified service.
-	In case you specify --build option you will be able to output the detailed information of specific build of a service.
+	Description: `Will show detailed information of the last build of a specified environment.
+	In case you specify --build option you will be able to output the detailed information of specific build of an environment.
 
    Examples:
     $ ernest env definition <my_project> <my_env>

@@ -112,20 +112,20 @@ var UpdateNotification = cli.Command{
 // AddServiceToNotification : Creates a new user
 var AddServiceToNotification = cli.Command{
 	Name:  "add",
-	Usage: "Add service to an existing notify.",
-	Description: `Adds a service to an existing notify.
+	Usage: "Add environment to an existing notify.",
+	Description: `Adds a environment to an existing notify.
 
    Example:
-    $ ernest notify add <service_name> <notify_name>
+    $ ernest notify add <environment_name> <notify_name>
 
 
    Example:
-	 $ ernest notify add my_service my_notify 
+	 $ ernest notify add my_env my_notify 
 	`,
-	ArgsUsage: "<service_name> <notify_name>",
+	ArgsUsage: "<env_name> <notify_name>",
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify a valid service name")
+			color.Red("You should specify a valid environment name")
 			return nil
 		}
 		if len(c.Args()) < 2 {
@@ -149,20 +149,20 @@ var AddServiceToNotification = cli.Command{
 // RmServiceToNotification : Creates a new user
 var RmServiceToNotification = cli.Command{
 	Name:  "remove",
-	Usage: "Removes service to an existing notify.",
-	Description: `Removes a service to an existing notify.
+	Usage: "Removes an environment to an existing notify.",
+	Description: `Removes an environment to an existing notify.
 
    Example:
-    $ ernest notify remove <service_name> <notify_name>
+    $ ernest notify remove <env_name> <notify_name>
 
 
    Example:
-	 $ ernest notify remove my_service my_notify 
+	 $ ernest notify remove my_env my_notify 
 	`,
-	ArgsUsage: "<service_name> <notify_name>",
+	ArgsUsage: "<env_name> <notify_name>",
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify a valid service name")
+			color.Red("You should specify a valid environment name")
 			return nil
 		}
 		if len(c.Args()) < 2 {
