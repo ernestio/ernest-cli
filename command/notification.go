@@ -116,25 +116,29 @@ var AddServiceToNotification = cli.Command{
 	Description: `Adds a environment to an existing notify.
 
    Example:
-    $ ernest notify add <environment_name> <notify_name>
+    $ ernest notify add <project_name> <environment_name> <notify_name>
 
 
    Example:
-	 $ ernest notify add my_env my_notify 
+	 $ ernest notify add my_project my_env my_notify 
 	`,
 	ArgsUsage: "<env_name> <notify_name>",
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify a valid environment name")
+			color.Red("You should specify a valid project name")
 			return nil
 		}
 		if len(c.Args()) < 2 {
+			color.Red("You should specify a valid environment name")
+			return nil
+		}
+		if len(c.Args()) < 3 {
 			color.Red("You should specify a valid notify name")
 			return nil
 		}
 
-		service := c.Args()[0]
-		notify := c.Args()[1]
+		service := c.Args()[0] + "/" + c.Args()[1]
+		notify := c.Args()[2]
 		m, cfg := setup(c)
 		err := m.AddServiceToNotification(cfg.Token, service, notify, false)
 		if err != nil {
