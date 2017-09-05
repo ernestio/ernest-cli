@@ -6,6 +6,7 @@ package command
 
 // CmdDatacenter subcommand
 import (
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
@@ -14,14 +15,10 @@ import (
 
 // ListLoggers : Lists all loggers confured on ernest
 var ListLoggers = cli.Command{
-	Name:      "list",
-	Usage:     "Lists active loggers.",
-	ArgsUsage: " ",
-	Description: `List active loggers.
-
-   Example:
-    $ ernest preferences logger list
-	`,
+	Name:        "list",
+	Usage:       h.T("logger.list.usage"),
+	ArgsUsage:   h.T("logger.list.args"),
+	Description: h.T("logger.list.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -42,16 +39,10 @@ var ListLoggers = cli.Command{
 
 // SetLogger : Creates / updates a looger based on it type
 var SetLogger = cli.Command{
-	Name:      "add",
-	Usage:     "Creates / updates a logger based on its type.",
-	ArgsUsage: " ",
-	Description: `Creates / updates a logger based on its types.
-
-   Example:
-    $ ernest preferences logger add basic --logfile /tmp/ernest.log
-    $ ernest preferences logger add logstash --hostname 10.50.1.1 --port 5000 --timeout 50000
-    $ ernest preferences logger add rollbar --token MY_ROLLBAR_TOKEN
-	`,
+	Name:        "add",
+	Usage:       h.T("logger.set.usage"),
+	ArgsUsage:   h.T("logger.set.args"),
+	Description: h.T("logger.set.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "logfile",
@@ -145,14 +136,10 @@ var SetLogger = cli.Command{
 
 // DelLogger : deletes a looger based on it type
 var DelLogger = cli.Command{
-	Name:      "delete",
-	Usage:     "Deletes a logger based on its type.",
-	ArgsUsage: " ",
-	Description: `Deletes a logger based on its types.
-
-   Example:
-    $ ernest preferences logger delete basic
-	`,
+	Name:        "delete",
+	Usage:       h.T("logger.del.usage"),
+	ArgsUsage:   h.T("logger.del.args"),
+	Description: h.T("logger.del.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
 			color.Red("You should specify the logger type (basic | logstash | rollbar)")

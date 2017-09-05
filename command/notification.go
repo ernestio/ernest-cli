@@ -6,6 +6,7 @@ package command
 
 // CmdNotification subcommand
 import (
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -13,14 +14,10 @@ import (
 
 // ListNotifications ...
 var ListNotifications = cli.Command{
-	Name:      "list",
-	Usage:     "List available notifications.",
-	ArgsUsage: " ",
-	Description: `List available notifications.
-
-   Example:
-    $ ernest notification list
-	`,
+	Name:        "list",
+	Usage:       h.T("notification.list.usage"),
+	ArgsUsage:   h.T("notification.list.args"),
+	Description: h.T("notification.list.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -41,18 +38,10 @@ var ListNotifications = cli.Command{
 
 // DeleteNotification : Will delete the specified notification
 var DeleteNotification = cli.Command{
-	Name:  "delete",
-	Usage: "Deletes an existing notify.",
-	Description: `Deletes an existing notify on the targeted instance of Ernest.
-
-   Example:
-    $ ernest notify delete <notify_name>
-
-
-   Example:
-	 $ ernest notify delete my_notify
-	`,
-	ArgsUsage: "<notify_name>",
+	Name:        "delete",
+	Usage:       h.T("notification.delete.usage"),
+	ArgsUsage:   h.T("notification.delete.args"),
+	Description: h.T("notification.delete.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
 			color.Red("You should specify a valid name")
@@ -73,18 +62,10 @@ var DeleteNotification = cli.Command{
 
 // UpdateNotification : Will update the notification specific fields
 var UpdateNotification = cli.Command{
-	Name:  "update",
-	Usage: "Update a new notify.",
-	Description: `Update an existing notify on the targeted instance of Ernest.
-
-   Example:
-    $ ernest notify update <notify_name> <provider-details>
-
-
-   Example:
-	 $ ernest notify update my_notify '{"url":"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"}'
-	`,
-	ArgsUsage: "<notify_name> <notify_config>",
+	Name:        "update",
+	Usage:       h.T("notification.update.usage"),
+	ArgsUsage:   h.T("notification.update.args"),
+	Description: h.T("notification.update.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
 			color.Red("You should specify a valid name")
@@ -111,18 +92,10 @@ var UpdateNotification = cli.Command{
 
 // AddServiceToNotification : Creates a new user
 var AddServiceToNotification = cli.Command{
-	Name:  "add",
-	Usage: "Add environment to an existing notify.",
-	Description: `Adds a environment to an existing notify.
-
-   Example:
-    $ ernest notify add <project_name> <environment_name> <notify_name>
-
-
-   Example:
-	 $ ernest notify add my_project my_env my_notify 
-	`,
-	ArgsUsage: "<env_name> <notify_name>",
+	Name:        "add",
+	Usage:       h.T("notification.service.add.usage"),
+	ArgsUsage:   h.T("notification.service.add.args"),
+	Description: h.T("notification.service.add.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
 			color.Red("You should specify a valid project name")
@@ -152,18 +125,10 @@ var AddServiceToNotification = cli.Command{
 
 // RmServiceToNotification : Creates a new user
 var RmServiceToNotification = cli.Command{
-	Name:  "remove",
-	Usage: "Removes an environment to an existing notify.",
-	Description: `Removes an environment to an existing notify.
-
-   Example:
-    $ ernest notify remove <env_name> <notify_name>
-
-
-   Example:
-	 $ ernest notify remove my_env my_notify 
-	`,
-	ArgsUsage: "<env_name> <notify_name>",
+	Name:        "remove",
+	Usage:       h.T("notification.service.rm.usage"),
+	ArgsUsage:   h.T("notification.service.rm.args"),
+	Description: h.T("notification.service.rm.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
 			color.Red("You should specify a valid environment name")
@@ -189,18 +154,10 @@ var RmServiceToNotification = cli.Command{
 
 // CreateNotification : Creates a new user
 var CreateNotification = cli.Command{
-	Name:  "create",
-	Usage: "Create a new notify.",
-	Description: `Create a new notify on the targeted instance of Ernest.
-
-   Example:
-    $ ernest notify create <notify_name> <provider_type> <provider-details>
-
-
-   Example:
-	 $ ernest notify create my_notify slack '{"url":"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"}'
-	`,
-	ArgsUsage: "<notify_name> <notify_type> <notify_config>",
+	Name:        "create",
+	Usage:       h.T("notification.create.usage"),
+	ArgsUsage:   h.T("notification.create.args"),
+	Description: h.T("notification.create.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
 			color.Red("You should specify a valid name")

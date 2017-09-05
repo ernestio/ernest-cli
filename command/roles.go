@@ -6,15 +6,17 @@ package command
 
 // CmdUser subcommand
 import (
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
 
 // CmdRolesSet :
 var CmdRolesSet = cli.Command{
-	Name:      "set",
-	Usage:     "ernest role set -u john -r owner -p project",
-	ArgsUsage: "",
+	Name:        "set",
+	Usage:       h.T("roles.set.usage"),
+	ArgsUsage:   h.T("roles.set.args"),
+	Description: h.T("roles.set.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user, u",
@@ -37,12 +39,6 @@ var CmdRolesSet = cli.Command{
 			Usage: "Environment to authorize",
 		},
 	},
-	Description: `Set permissions for a user on a specific resource
-
-   Example:
-    $ ernest roles set -u john -r owner -p my_project 
-    $ ernest roles set -u john -r reader -p my_project -e my_environment
-	`,
 	Action: func(c *cli.Context) error {
 		r := c.String("role")
 		u := c.String("user")
@@ -83,9 +79,10 @@ var CmdRolesSet = cli.Command{
 
 // CmdRolesUnset :
 var CmdRolesUnset = cli.Command{
-	Name:      "unset",
-	Usage:     "ernest role unset -u john -r owner -p my_project",
-	ArgsUsage: "",
+	Name:        "unset",
+	Usage:       h.T("roles.unset.usage"),
+	ArgsUsage:   h.T("roles.unset.args"),
+	Description: h.T("roles.unset.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user, u",
@@ -108,12 +105,6 @@ var CmdRolesUnset = cli.Command{
 			Usage: "Environment to authorize",
 		},
 	},
-	Description: `Set permissions for a user on a specific resource
-
-   Example:
-    $ ernest roles set -u john -r owner -p my_project 
-    $ ernest roles set -u john -r reader -p my_project -e my_environment
-	`,
 	Action: func(c *cli.Context) error {
 		r := c.String("role")
 		u := c.String("user")

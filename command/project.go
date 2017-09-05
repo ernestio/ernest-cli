@@ -9,6 +9,7 @@ import (
 	"errors"
 	"io/ioutil"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
@@ -18,14 +19,10 @@ import (
 
 // ListProjects ...
 var ListProjects = cli.Command{
-	Name:      "list",
-	Usage:     "List available projects.",
-	ArgsUsage: " ",
-	Description: `List available projects.
-
-   Example:
-    $ ernest project list
-	`,
+	Name:        "list",
+	Usage:       h.T("project.list.usage"),
+	ArgsUsage:   h.T("project.list.args"),
+	Description: h.T("project.list.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -46,14 +43,10 @@ var ListProjects = cli.Command{
 
 // InfoProject ...
 var InfoProject = cli.Command{
-	Name:      "info",
-	Usage:     "Project information",
-	ArgsUsage: " ",
-	Description: `Display specific project information.
-
-   Example:
-    $ ernest project info <my_project>
-	`,
+	Name:        "info",
+	Usage:       h.T("project.info.usage"),
+	ArgsUsage:   h.T("project.info.args"),
+	Description: h.T("project.info.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {

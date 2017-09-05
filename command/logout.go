@@ -7,23 +7,19 @@ package command
 import (
 	"os"
 
+	h "github.com/ernestio/ernest-cli/helper"
+	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
-
-	"github.com/ernestio/ernest-cli/model"
 )
 
 // Logout command
 // Clear local authentication credentials
 var Logout = cli.Command{
-	Name:      "logout",
-	Usage:     "Clear local authentication credentials.",
-	ArgsUsage: " ",
-	Description: `Logs out an user from Ernest instance.
-
-   Example:
-    $ ernest logout
-  `,
+	Name:        "logout",
+	Usage:       h.T("logout.usage"),
+	ArgsUsage:   h.T("logout.args"),
+	Description: h.T("logout.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {

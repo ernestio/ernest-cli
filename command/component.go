@@ -8,19 +8,16 @@ import (
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/view"
 )
 
 // FindComponents ...
 var FindComponents = cli.Command{
-	Name:      "list",
-	Usage:     "List components on your project.",
-	ArgsUsage: " ",
-	Description: `List all components on your project.
-
-   Example:
-    $ ernest component list my_project ebs --environment=my_env
-	`,
+	Name:        "list",
+	Usage:       h.T("components.find.usage"),
+	Description: h.T("components.find.description"),
+	ArgsUsage:   h.T("components.find.args"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "environment",
