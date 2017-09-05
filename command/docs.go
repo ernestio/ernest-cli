@@ -7,6 +7,8 @@ package command
 // CmdDocs subcommand
 import (
 	"fmt"
+
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/skratchdot/open-golang/open"
 	"github.com/urfave/cli"
 )
@@ -15,14 +17,10 @@ const docURL = "http://docs.ernest.io/documentation/"
 
 // CmdDocs : Open docs in the default browser
 var CmdDocs = cli.Command{
-	Name:      "docs",
-	Usage:     "Open docs in the default browser.",
-	ArgsUsage: " ",
-	Description: `Open docs in the default browser.
-
-   Example:
-    $ ernest docs
-	`,
+	Name:        "docs",
+	Usage:       h.T("docs.usage"),
+	ArgsUsage:   h.T("docs.args"),
+	Description: h.T("docs.description"),
 	Action: func(c *cli.Context) error {
 		err := open.Run(docURL)
 		if err != nil {

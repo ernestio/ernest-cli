@@ -8,24 +8,17 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
 
 // CmdUsage : Exports an usage report to a file on the current folder
 var CmdUsage = cli.Command{
-	Name:      "usage",
-	Usage:     "Exports an usage report to the current folder",
-	ArgsUsage: " ",
-	Description: `
-
-   Example:
-    $ ernest usage --from 2017-01-01 --to 2017-02-01 --output=report.log
-      A file named report.log has been exported to the current folder
-
-    Example 2:
-    $ ernest usage > myreport.log
-	`,
+	Name:        "usage",
+	Usage:       h.T("usage.usage"),
+	ArgsUsage:   h.T("usage.args"),
+	Description: h.T("usage.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "from",

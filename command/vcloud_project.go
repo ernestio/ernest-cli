@@ -8,6 +8,7 @@ package command
 import (
 	"fmt"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -15,27 +16,10 @@ import (
 
 // CreateVcloudProject : Creates a VCloud Project
 var CreateVcloudProject = cli.Command{
-	Name:  "vcloud",
-	Usage: "Create a new vcloud project.",
-	Description: `Create a new vcloud project on the targeted instance of Ernest.
-
-   Example:
-    $ ernest project create vcloud --user username --password xxxx --org MY-ORG-NAME --vse-url http://vse.url --vcloud-url https://myernest.com --public-network MY-PUBLIC-NETWORK myproject
-
-   Template example:
-    $ ernest project create vcloud --template myproject.yml myproject
-    Where myproject.yaml will look like:
-      ---
-      fake: true
-      org: org
-      password: pwd
-      public-network: MY-NETWORK
-      user: bla
-      vcloud-url: "http://ss.com"
-      vse-url: "http://ss.com"
-
-	`,
-	ArgsUsage: "<project-name>",
+	Name:        "vcloud",
+	Usage:       h.T("vcloud.create.usage"),
+	ArgsUsage:   h.T("vcloud.create.args"),
+	Description: h.T("vcloud.create.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user",
@@ -167,14 +151,10 @@ var CreateVcloudProject = cli.Command{
 
 // DeleteProject : Project deletion command definition
 var DeleteProject = cli.Command{
-	Name:      "delete",
-	Usage:     "Deletes the specified project.",
-	ArgsUsage: "<project-name>",
-	Description: `Deletes the name specified project.
-
-   Example:
-    $ ernest project delete my_project
-	`,
+	Name:        "delete",
+	Usage:       h.T("vcloud.delete.usage"),
+	ArgsUsage:   h.T("vcloud.delete.args"),
+	Description: h.T("vcloud.delete.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -201,14 +181,10 @@ var DeleteProject = cli.Command{
 
 // UpdateVCloudProject : Updates the specified VCloud project
 var UpdateVCloudProject = cli.Command{
-	Name:      "vcloud",
-	Usage:     "Updates the specified VCloud project.",
-	ArgsUsage: "<project-name>",
-	Description: `Updates the specified VCloud project.
-
-   Example:
-    $ ernest project update vcloud --user <me> --org <org> --password <secret> my_project
-	`,
+	Name:        "vcloud",
+	Usage:       h.T("vcloud.update.usage"),
+	ArgsUsage:   h.T("vcloud.update.args"),
+	Description: h.T("vcloud.update.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user",

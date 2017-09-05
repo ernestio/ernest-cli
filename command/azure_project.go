@@ -8,32 +8,17 @@ package command
 import (
 	"fmt"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
 
 // CreateAzureProject : Creates an AWS project
 var CreateAzureProject = cli.Command{
-	Name:  "azure",
-	Usage: "Create a new azure project.",
-	Description: `Create a new Azure project on the targeted instance of Ernest.
-
-	Example:
-	 $ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
-
-   Template example:
-    $ ernest project create azure --template myproject.yml myproject
-    Where myproject.yaml will look like:
-      ---
-      fake: true
-      region: westus
-			subscription_id: SUBSCRIPTION
-			client_id: USER
-			client_secret: PASSWORD
-			tenant_id: TENANT
-			environment: public
-	 `,
-	ArgsUsage: "<project-name>",
+	Name:        "azure",
+	Usage:       h.T("azure.project.create.usage"),
+	Description: h.T("azure.project.create.description"),
+	ArgsUsage:   h.T("azure.project.create.args"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "region, r",
@@ -165,14 +150,10 @@ var CreateAzureProject = cli.Command{
 
 // UpdateAzureProject : Updates the specified VCloud project
 var UpdateAzureProject = cli.Command{
-	Name:      "azure",
-	Usage:     "Updates the specified Azure project.",
-	ArgsUsage: "<project-name>",
-	Description: `Updates the specified Azure project.
-
-   Example:
-	 $ ernest project update azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
-	`,
+	Name:        "azure",
+	Usage:       h.T("azure.project.update.usage"),
+	Description: h.T("azure.project.update.description"),
+	ArgsUsage:   h.T("azure.project.update.args"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "subscription_id, s",
