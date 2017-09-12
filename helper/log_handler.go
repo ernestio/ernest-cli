@@ -12,7 +12,8 @@ import (
 )
 
 type loghandler struct {
-	stream chan *sse.Event
+	stream    chan *sse.Event
+	blacklist map[string]string
 }
 
 func (h *loghandler) subscribe() error {
@@ -35,14 +36,15 @@ func (h *loghandler) subscribe() error {
 				return err
 			}
 
-			color.Yellow(m.Subject)
-			if len(m.Body) > 0 {
-				message, _ := prettyjson.Format([]byte(m.Body))
-				fmt.Println(string(message))
-			} else {
-				fmt.Println("-- Empty string --")
+			if subject, ok := h.blacklist[m.Subject]; !ok {
+				color.Yellow(subject)
+				if len(m.Body) > 0 {
+					message, _ := prettyjson.Format([]byte(m.Body))
+					fmt.Println(string(message))
+				} else {
+					fmt.Println("-- Empty string --")
+				}
 			}
-
 		}
 	}
 }
