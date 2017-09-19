@@ -14,6 +14,7 @@ import (
 	"text/tabwriter"
 	"unicode"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
@@ -24,14 +25,10 @@ import (
 
 // ListUsers : Gets a list of accessible users
 var ListUsers = cli.Command{
-	Name:      "list",
-	Usage:     "List available users.",
-	ArgsUsage: " ",
-	Description: `List available users.
-
-   Example:
-    $ ernest user list
-	`,
+	Name:        "list",
+	Usage:       h.T("user.list.usage"),
+	ArgsUsage:   h.T("user.list.args"),
+	Description: h.T("user.list.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		users, err := m.ListUsers(cfg.Token)
@@ -61,19 +58,10 @@ var ListUsers = cli.Command{
 
 // CreateUser : Creates a new user
 var CreateUser = cli.Command{
-	Name:  "create",
-	Usage: "Create a new user.",
-	Description: `Create a new user on the targeted instance of Ernest.
-
-   Example:
-    $ ernest user create <username> <password>
-
-   You can also add an email to the user with the flag --email
-
-   Example:
-    $ ernest user create --email username@example.com <username> <password>
-	`,
-	ArgsUsage: "<username> <password>",
+	Name:        "create",
+	Usage:       h.T("user.create.usage"),
+	ArgsUsage:   h.T("user.create.args"),
+	Description: h.T("user.create.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "email",
@@ -107,17 +95,9 @@ var CreateUser = cli.Command{
 
 // PasswordUser : Allows users or admins to change its passwords
 var PasswordUser = cli.Command{
-	Name:  "change-password",
-	Usage: "Change password of available users.",
-	Description: `Change password of available users.
-
-   Example:
-    $ ernest user change-password
-
-    or changing a change-password by being admin:
-
-    $ ernest user change-password --user <username> --current-password <current-password> --password <new-password>
-	`,
+	Name:        "change-password",
+	Usage:       h.T("user.change_password.usage"),
+	Description: h.T("user.change_password.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user",
@@ -224,14 +204,10 @@ var PasswordUser = cli.Command{
 
 // DisableUser : Will disable a user (change its password)
 var DisableUser = cli.Command{
-	Name:  "disable",
-	Usage: "Disable available users.",
-	Description: `Disable available users.
-
-	Example:
-	 $ ernest user disable <user-name>
- `,
-	ArgsUsage: "<username>",
+	Name:        "disable",
+	Usage:       h.T("user.disable.usage"),
+	ArgsUsage:   h.T("user.disable.args"),
+	Description: h.T("user.disable.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
 			color.Red("You should specify an username")
@@ -270,14 +246,9 @@ var DisableUser = cli.Command{
 
 // InfoUser :
 var InfoUser = cli.Command{
-	Name:  "info",
-	Usage: "Displays information about the specified user (current user by default).",
-	Description: `
-
-	Example:
-	 $ ernest user info
-	 $ ernest user info --user <user-name>
- `,
+	Name:        "info",
+	Usage:       h.T("user.info.usage"),
+	Description: h.T("user.info.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user",
@@ -334,7 +305,7 @@ func randString(n int) string {
 // CmdUser ...
 var CmdUser = cli.Command{
 	Name:  "user",
-	Usage: "User related subcommands",
+	Usage: h.T("user.usage"),
 	Subcommands: []cli.Command{
 		ListUsers,
 		CreateUser,

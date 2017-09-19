@@ -9,19 +9,21 @@ import (
 	"os"
 	"runtime"
 
+	h "github.com/ernestio/ernest-cli/helper"
+	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	"github.com/urfave/cli"
-
-	"github.com/ernestio/ernest-cli/model"
 )
 
 // Login command
 // Login with your Ernest credentials
 var Login = cli.Command{
-	Name:      "login",
-	Aliases:   []string{"l"},
-	ArgsUsage: " ",
+	Name:        "login",
+	Aliases:     []string{"l"},
+	Usage:       h.T("login.usage"),
+	ArgsUsage:   h.T("login.args"),
+	Description: h.T("login.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user",
@@ -34,17 +36,6 @@ var Login = cli.Command{
 			Usage: "Password credentials",
 		},
 	},
-	Usage: "Login with your Ernest credentials.",
-	Description: `Logs an user into Ernest instance.
-
-   Example:
-    $ ernest login
-
-   It can also be used without asking the username and password.
-
-   Example:
-    $ ernest login --user <user> --password <password>
-	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if m == nil {

@@ -7,26 +7,19 @@ package command
 import (
 	"fmt"
 
+	h "github.com/ernestio/ernest-cli/helper"
+	"github.com/ernestio/ernest-cli/manager"
+	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	"github.com/urfave/cli"
-
-	"github.com/ernestio/ernest-cli/manager"
-	"github.com/ernestio/ernest-cli/model"
 )
 
 // CmdSetup : Setup an ernest instance
 var CmdSetup = cli.Command{
-	Name:  "setup",
-	Usage: "Use it to setup your ernest instance",
-	Description: `This command will help you to setup your ernest instance by:
-- [ ] configure ernest-cli target
-- [ ] create a plain user
-- [ ] create a group
-- [ ] link the user to the group
-- [ ] login as the newly created user.
-- [ ] create a new project (optional)
-	`,
+	Name:        "setup",
+	Usage:       h.T("setup.usage"),
+	Description: h.T("setup.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "user, u",

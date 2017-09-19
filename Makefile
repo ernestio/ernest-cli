@@ -28,6 +28,8 @@ deps:
 	go get github.com/nu7hatch/gouuid
 	go get github.com/mitchellh/mapstructure
 	go get github.com/gosuri/uilive
+	go get github.com/spf13/viper
+	go get github.com/jteeuwen/go-bindata/...
 
 dev-deps: deps
 	go get -u github.com/golang/lint/golint
@@ -60,6 +62,9 @@ dist-windows:
 	zip ernest-${VERSION}-windows-amd64.zip ernest-${VERSION}-windows-amd64.exe README.md LICENSE
 	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o ernest-${VERSION}-windows-386.exe
 	zip ernest-${VERSION}-windows-386.zip ernest-${VERSION}-windows-386.exe README.md LICENSE
+
+assets:
+	cd helper && go-bindata -pkg helper -nocompress lang
 
 clean:
 	go clean

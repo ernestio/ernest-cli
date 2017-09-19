@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
-	"github.com/ernestio/ernest-cli/helper"
+	h "github.com/ernestio/ernest-cli/helper"
 )
 
 // NullWriter to disable logging
@@ -20,15 +20,11 @@ func (NullWriter) Write([]byte) (int, error) { return 0, nil }
 // MonitorEnv command
 // Monitorizes an environment and shows the actions being performed on it
 var MonitorEnv = cli.Command{
-	Name:      "monitor",
-	Aliases:   []string{"m"},
-	Usage:     "Monitor an environment creation.",
-	ArgsUsage: "<project_name> <env_name>",
-	Description: `Monitors an environment while it is being built by its name.
-
-   Example:
-    $ ernest monitor <my_project> <my_env>
-	`,
+	Name:        "monitor",
+	Aliases:     []string{"m"},
+	Usage:       h.T("monitor.usage"),
+	ArgsUsage:   h.T("monitor.args"),
+	Description: h.T("monitor.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -59,6 +55,6 @@ var MonitorEnv = cli.Command{
 			return nil
 		}
 
-		return helper.Monitorize(cfg.URL, "/events", cfg.Token, service.ID)
+		return h.Monitorize(cfg.URL, "/events", cfg.Token, service.ID)
 	},
 }

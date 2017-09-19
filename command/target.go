@@ -7,6 +7,7 @@ package command
 import (
 	"net/url"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -15,15 +16,11 @@ import (
 // Target command
 // Configures the ernest target instance
 var Target = cli.Command{
-	Name:      "target",
-	Aliases:   []string{"t"},
-	ArgsUsage: "<ernest_url>",
-	Usage:     "Configure Ernest target instance.",
-	Description: `Sets up ernest instance target.
-
-   Example:
-    $ ernest target https://myernest.com
-	`,
+	Name:        "target",
+	Aliases:     []string{"t"},
+	Usage:       h.T("target.usage"),
+	ArgsUsage:   h.T("target.args"),
+	Description: h.T("target.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
 			color.Red("You should specify the target url")

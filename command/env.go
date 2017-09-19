@@ -11,6 +11,7 @@ import (
 	"os"
 	"strings"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
@@ -19,14 +20,10 @@ import (
 
 // ListEnvs ...
 var ListEnvs = cli.Command{
-	Name:      "list",
-	Usage:     "List available environments.",
-	ArgsUsage: " ",
-	Description: `List available environments and shows its most relevant information.
-
-   Example:
-    $ ernest environment list
-	`,
+	Name:        "list",
+	Usage:       h.T("envs.list.usage"),
+	ArgsUsage:   h.T("envs.list.args"),
+	Description: h.T("envs.list.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -46,16 +43,12 @@ var ListEnvs = cli.Command{
 
 // UpdateEnv :  Creates an empty environment based on a name and a project name
 var UpdateEnv = cli.Command{
-	Name:      "update",
-	Aliases:   []string{"a"},
-	ArgsUsage: "<project> <environment>",
-	Usage:     "Creates an empty environment based on a specific project",
-	Flags:     AllProviderFlags,
-	Description: `You must be logged in to execute this command.
-
-   Examples:
-    $ ernest env update --credentials project.yml my_project my_environment
-	`,
+	Name:        "update",
+	Aliases:     []string{"a"},
+	Usage:       h.T("envs.update.usage"),
+	ArgsUsage:   h.T("envs.update.args"),
+	Description: h.T("envs.update.description"),
+	Flags:       AllProviderFlags,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -86,22 +79,17 @@ var UpdateEnv = cli.Command{
 
 // CreateEnv :  Creates an empty environment based on a name and a project name
 var CreateEnv = cli.Command{
-	Name:      "create",
-	Aliases:   []string{"a"},
-	ArgsUsage: "<project> <environment>",
-	Usage:     "Creates an empty environment based on a specific project",
+	Name:        "create",
+	Aliases:     []string{"a"},
+	Usage:       h.T("envs.create.usage"),
+	ArgsUsage:   h.T("envs.create.args"),
+	Description: h.T("envs.create.description"),
 	Flags: append([]cli.Flag{
 		cli.StringFlag{
 			Name:  "credentials",
 			Usage: "will override project information",
 		},
 	}, AllProviderFlags...),
-	Description: `You must be logged in to execute this command.
-
-   Examples:
-    $ ernest env create my_project my_environment
-    $ ernest env create --credentials project.yml my_project my_environment
-	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -134,10 +122,11 @@ var CreateEnv = cli.Command{
 // ApplyEnv command
 // Applies changes described on a YAML file to an env
 var ApplyEnv = cli.Command{
-	Name:      "apply",
-	Aliases:   []string{"a"},
-	ArgsUsage: "<file.yml>",
-	Usage:     "Builds or changes infrastructure.",
+	Name:        "apply",
+	Aliases:     []string{"a"},
+	Usage:       h.T("envs.apply.usage"),
+	ArgsUsage:   h.T("envs.apply.args"),
+	Description: h.T("envs.apply.description"),
 	Flags: append([]cli.Flag{
 		cli.BoolFlag{
 			Name:  "dry",
@@ -148,15 +137,6 @@ var ApplyEnv = cli.Command{
 			Usage: "will override project information",
 		},
 	}, AllProviderFlags...),
-	Description: `Sends an environment YAML description file to Ernest to be executed.
-   You must be logged in to execute this command.
-
-   If the file is not provided, ernest.yml will be used by default.
-
-   Examples:
-    $ ernest env apply myenvironment.yml
-    $ ernest env apply --dry myenvironment.yml
-	`,
 	Action: func(c *cli.Context) error {
 		file := "ernest.yml"
 		if len(c.Args()) == 1 {
@@ -187,15 +167,11 @@ var ApplyEnv = cli.Command{
 
 // DestroyEnv command
 var DestroyEnv = cli.Command{
-	Name:      "delete",
-	Aliases:   []string{"destroy", "d"},
-	ArgsUsage: "<project> <environment_name>",
-	Usage:     "Destroy an environment.",
-	Description: `Destroys an environment by name.
-
-   Example:
-    $ ernest env delete <my_project> <my_environment>
-  `,
+	Name:        "delete",
+	Aliases:     []string{"destroy", "d"},
+	Usage:       h.T("envs.destroy.usage"),
+	ArgsUsage:   h.T("envs.destroy.args"),
+	Description: h.T("envs.destroy.description"),
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "force,f",
@@ -257,14 +233,10 @@ var DestroyEnv = cli.Command{
 // HistoryEnv command
 // Shows the history of an env, a list of builds
 var HistoryEnv = cli.Command{
-	Name:      "history",
-	Usage:     "Shows the history of an environment, a list of builds",
-	ArgsUsage: "ernest-cli env history <my_project> <my_env>",
-	Description: `Shows the history of an environment, a list of builds and its status and basic information.
-
-   Example:
-    $ ernest env history <my_project> <my_env>
-	`,
+	Name:        "history",
+	Usage:       h.T("envs.history.usage"),
+	ArgsUsage:   h.T("envs.history.args"),
+	Description: h.T("envs.history.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -292,14 +264,10 @@ var HistoryEnv = cli.Command{
 
 // ResetEnv command
 var ResetEnv = cli.Command{
-	Name:      "reset",
-	ArgsUsage: "<env_name>",
-	Usage:     "Reset an in progress environment.",
-	Description: `Reseting an environment creation may cause problems, please make sure you know what are you doing.
-
-   Example:
-    $ ernest env reset <my_env>
-  `,
+	Name:        "reset",
+	Usage:       h.T("envs.reset.usage"),
+	ArgsUsage:   h.T("envs.reset.args"),
+	Description: h.T("envs.reset.description"),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -330,15 +298,10 @@ var ResetEnv = cli.Command{
 
 // RevertEnv command
 var RevertEnv = cli.Command{
-	Name:      "revert",
-	ArgsUsage: "<project> <env_name> <build_id>",
-	Usage:     "Reverts an environment to a previous state",
-	Description: `Reverts an environment to a previous known state using a build ID from 'ernest env history'.
-
-   Example:
-    $ ernest env revert <project> <env_name> <build_id>
-    $ ernest env revert --dry <project> <env_name> <build_id>
-  `,
+	Name:        "revert",
+	Usage:       h.T("envs.revert.usage"),
+	ArgsUsage:   h.T("envs.revert.args"),
+	Description: h.T("envs.revert.description"),
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "dry",
@@ -377,9 +340,11 @@ var RevertEnv = cli.Command{
 // DefinitionEnv command
 // Shows the current definition of an environment by its name
 var DefinitionEnv = cli.Command{
-	Name:      "definition",
-	Aliases:   []string{"s"},
-	ArgsUsage: "<project_name> <env_name>",
+	Name:        "definition",
+	Aliases:     []string{"s"},
+	Usage:       h.T("envs.definition.usage"),
+	ArgsUsage:   h.T("envs.definition.args"),
+	Description: h.T("envs.definition.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "build",
@@ -387,12 +352,6 @@ var DefinitionEnv = cli.Command{
 			Usage: "Build ID",
 		},
 	},
-	Usage: "Show the current definition of an environment by its name",
-	Description: `Show the current definition of an environment by its name getting the definition about the build.
-
-   Example:
-    $ ernest env definition <my_project> <my_env>
-	`,
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -432,9 +391,11 @@ var DefinitionEnv = cli.Command{
 
 // InfoEnv : Shows detailed information of a env by its name
 var InfoEnv = cli.Command{
-	Name:      "info",
-	Aliases:   []string{"i"},
-	ArgsUsage: "<project_name> <env_name>",
+	Name:        "info",
+	Aliases:     []string{"i"},
+	Usage:       h.T("envs.info.usage"),
+	ArgsUsage:   h.T("envs.info.args"),
+	Description: h.T("envs.info.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "build",
@@ -442,14 +403,6 @@ var InfoEnv = cli.Command{
 			Usage: "Build ID",
 		},
 	},
-	Usage: "$ ernest env info <my_env> --build <specific build>",
-	Description: `Will show detailed information of the last build of a specified environment.
-	In case you specify --build option you will be able to output the detailed information of specific build of an environment.
-
-   Examples:
-    $ ernest env definition <my_project> <my_env>
-    $ ernest env definition <my_project> <my_env> --build build1
-	`,
 	Action: func(c *cli.Context) error {
 		var err error
 		var s model.Service
@@ -489,15 +442,11 @@ var InfoEnv = cli.Command{
 
 // DiffEnv : Shows detailed information of an env by its name
 var DiffEnv = cli.Command{
-	Name:      "diff",
-	Aliases:   []string{"i"},
-	ArgsUsage: "<env_aname> <build_a> <build_b>",
-	Usage:     "$ ernest env diff <project_name> <env_name> <build_a> <build_b>",
-	Description: `Will display the diff between two different builds
-
-   Examples:
-    $ ernest env diff <my_project> <my_env> 1 2
-	`,
+	Name:        "diff",
+	Aliases:     []string{"i"},
+	Usage:       h.T("envs.diff.usage"),
+	ArgsUsage:   h.T("envs.diff.args"),
+	Description: h.T("envs.diff.description"),
 	Action: func(c *cli.Context) error {
 		var err error
 
@@ -539,9 +488,11 @@ var DiffEnv = cli.Command{
 
 // ImportEnv : Shows detailed information of an env by its name
 var ImportEnv = cli.Command{
-	Name:      "import",
-	Aliases:   []string{"i"},
-	ArgsUsage: "<env_name>",
+	Name:        "import",
+	Aliases:     []string{"i"},
+	Usage:       h.T("envs.import.usage"),
+	ArgsUsage:   h.T("envs.import.args"),
+	Description: h.T("envs.import.description"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "project",
@@ -554,12 +505,6 @@ var ImportEnv = cli.Command{
 			Usage: "Import filters comma delimited list",
 		},
 	},
-	Usage: "$ ernest env import <my_project> <my_env>",
-	Description: `Will import the environment <my_env> from project <project_name>
-
-   Examples:
-    $ ernest env import my_project my_env
-	`,
 	Action: func(c *cli.Context) error {
 		var err error
 		var filters []string

@@ -8,6 +8,7 @@ package command
 import (
 	"fmt"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -15,23 +16,10 @@ import (
 
 // CreateAWSProject : Creates an AWS project
 var CreateAWSProject = cli.Command{
-	Name:  "aws",
-	Usage: "Create a new aws project.",
-	Description: `Create a new AWS project on the targeted instance of Ernest.
-
-	Example:
-	 $ ernest project create aws --region us-west-2 --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_project
-
-   Template example:
-    $ ernest project create aws --template myproject.yml myproject
-    Where myproject.yaml will look like:
-      ---
-      fake: true
-      access_key_id : AKIAIOSFODNN7EXAMPLE
-      secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-      region: us-west-2
-	 `,
-	ArgsUsage: "<project-name>",
+	Name:        "aws",
+	Usage:       h.T("aws.project.create.usage"),
+	Description: h.T("aws.project.create.description"),
+	ArgsUsage:   h.T("aws.project.create.args"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "region, r",
@@ -138,14 +126,10 @@ var CreateAWSProject = cli.Command{
 
 // UpdateAWSProject : Updates the specified VCloud project
 var UpdateAWSProject = cli.Command{
-	Name:      "aws",
-	Usage:     "Updates the specified AWS project.",
-	ArgsUsage: "<project-name>",
-	Description: `Updates the specified AWS project.
-
-   Example:
-		$ ernest project update aws --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_project
-	`,
+	Name:        "aws",
+	Usage:       h.T("aws.project.create.usage"),
+	ArgsUsage:   h.T("aws.project.create.usage"),
+	Description: h.T("aws.project.create.usage"),
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "access_key_id",

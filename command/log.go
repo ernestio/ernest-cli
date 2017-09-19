@@ -8,6 +8,7 @@ import (
 	"runtime"
 
 	"github.com/ernestio/ernest-cli/helper"
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/nu7hatch/gouuid"
@@ -16,15 +17,10 @@ import (
 
 // CmdLog : Preferences setup
 var CmdLog = cli.Command{
-	Name:      "log",
-	Usage:     "Inline display of ernest logs.",
-	ArgsUsage: " ",
-	Description: `Display ernest server logs inline
-
-   Example:
-    $ ernest log
-    $ ernest log --raw
-	`,
+	Name:        "log",
+	Usage:       h.T("log.usage"),
+	ArgsUsage:   h.T("log.args"),
+	Description: h.T("log.description"),
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "raw",
@@ -50,9 +46,9 @@ var CmdLog = cli.Command{
 		}
 
 		if c.Bool("raw") {
-			helper.PrintRawLogs(cfg.URL, "/logs", cfg.Token, logger.UUID)
+			_ = helper.PrintRawLogs(cfg.URL, "/logs", cfg.Token, logger.UUID)
 		} else {
-			helper.PrintLogs(cfg.URL, "/logs", cfg.Token, logger.UUID)
+			_ = helper.PrintLogs(cfg.URL, "/logs", cfg.Token, logger.UUID)
 		}
 
 		defer func() {
