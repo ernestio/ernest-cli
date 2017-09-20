@@ -12,6 +12,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/ernestio/api-gateway/models"
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
@@ -240,7 +241,7 @@ func (m *Manager) ForceDestroy(token, project, env string) error {
 }
 
 // UpdateEnv : Updates credentials on a specific environment
-func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]string) (string, error) {
+func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]interface{}) (string, error) {
 	d := model.NewDefinition(name, project)
 
 	env, err := m.EnvStatus(token, project, name)
@@ -257,14 +258,27 @@ func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]
 }
 
 // CreateEnv : Creates a new empty environmnet
-func (m *Manager) CreateEnv(token, name, project string, credentials map[string]string) (string, error) {
-	d := model.NewDefinition(name, project)
+func (m *Manager) CreateEnv(token, name, project string, credentials map[string]interface{}) error {
+	e := models.Env{
+		Name:        name,
+		Credentials: credentials,
+	}
 
-	return m.ApplyEnv(d, token, credentials, false, false)
+	payload, err := json.Marshal(e)
+	if err != nil {
+		return err
+	}
+
+	_, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/", "POST", payload, token, "application/json")
+	if resp == nil {
+		return ErrConnectionRefused
+	}
+
+	return rerr
 }
 
 // Apply : Applies a yaml to create / update a new env
-func (m *Manager) Apply(token, path string, credentials map[string]string, monit, dry bool) (string, error) {
+func (m *Manager) Apply(token, path string, credentials map[string]interface{}, monit, dry bool) (string, error) {
 	var d model.Definition
 
 	payload, err := ioutil.ReadFile(path)
@@ -286,12 +300,7 @@ func (m *Manager) Apply(token, path string, credentials map[string]string, monit
 }
 
 // ApplyEnv : Applies a yaml to create / update a new env
-func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[string]string, monit, dry bool) (string, error) {
-
-	if len(credentials) > 0 {
-		d.AttachMap("credentials", credentials)
-	}
-
+func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[string]interface{}, monit, dry bool) (string, error) {
 	payload, err := d.Save()
 
 	if err != nil {

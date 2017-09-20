@@ -98,8 +98,8 @@ var AWSVCloudFlags = append(ProviderVCloudFlags, ProviderAWSFlags...)
 var AllProviderFlags = append(AWSVCloudFlags, ProviderAzureFlags...)
 
 // ProviderFlagsToSlice :
-func ProviderFlagsToSlice(c *cli.Context) map[string]string {
-	keys := make(map[string]string, 0)
+func ProviderFlagsToSlice(c *cli.Context) map[string]interface{} {
+	keys := make(map[string]interface{}, 0)
 	keys["subscription_id"] = "azure_subscription_id"
 	keys["client_id"] = "azure_client_id"
 	keys["client_secret"] = "azure_client_secret"
@@ -114,12 +114,12 @@ func ProviderFlagsToSlice(c *cli.Context) map[string]string {
 	keys["password"] = "password"
 	keys["user"] = "username"
 
-	flags := make(map[string]string, 0)
+	flags := make(map[string]interface{}, 0)
 
 	for key, val := range keys {
 		v := c.String(key)
 		if v != "" {
-			flags[val] = v
+			flags[val.(string)] = v
 		}
 	}
 

@@ -108,7 +108,7 @@ var CreateEnv = cli.Command{
 		project := c.Args()[0]
 		env := c.Args()[1]
 
-		_, err := m.CreateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
+		err := m.CreateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
 		if err != nil {
 			color.Red(err.Error())
 			return nil
