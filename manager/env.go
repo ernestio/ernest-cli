@@ -314,6 +314,13 @@ func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[str
 		return "", ErrConnectionRefused
 	}
 
+	if resp.StatusCode == 403 {
+		return "", errors.New("You don't have permissions to perform this action")
+	}
+	if resp.StatusCode == 401 {
+		return "", errors.New("Invalid session, please log in")
+	}
+
 	err = json.Unmarshal([]byte(body), &response)
 	if err != nil {
 		return "", errors.New(body)
