@@ -16,15 +16,15 @@ import (
 )
 
 const (
-	SERVICECREATE      = "service.create"
-	SERVICEDELETE      = "service.delete"
-	SERVICEIMPORT      = "service.import"
-	SERVICECREATEDONE  = "service.create.done"
-	SERVICEDELETEDONE  = "service.delete.done"
-	SERVICEIMPORTDONE  = "service.import.done"
-	SERVICECREATEERROR = "service.create.error"
-	SERVICEDELETEERROR = "service.delete.error"
-	SERVICEIMPORTERROR = "service.import.error"
+	BUILDCREATE      = "build.create"
+	BUILDDELETE      = "build.delete"
+	BUILDIMPORT      = "build.import"
+	BUILDCREATEDONE  = "build.create.done"
+	BUILDDELETEDONE  = "build.delete.done"
+	BUILDIMPORTDONE  = "build.import.done"
+	BUILDCREATEERROR = "build.create.error"
+	BUILDDELETEERROR = "build.delete.error"
+	BUILDIMPORTERROR = "build.import.error"
 )
 
 var (

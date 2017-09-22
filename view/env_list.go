@@ -12,16 +12,16 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-// PrintEnvsList : Pretty print for a services list
-func PrintEnvsList(services []model.Service) {
-	if len(services) == 0 {
+// PrintEnvList : Pretty print for a build list
+func PrintEnvList(envs []model.Env) {
+	if len(envs) == 0 {
 		fmt.Println("\nThere are no environments created yet")
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name", "Project", "Status", "Endpoint", "Last build", "User"})
-		for _, s := range services {
-			table.Append([]string{s.Name, s.ProjectName, s.Status, s.Endpoint, s.Version, s.UserName})
+		table.SetHeader([]string{"Name", "Project", "Status"})
+		for _, e := range envs {
+			table.Append([]string{e.Name, e.Project, e.Status})
 		}
 		table.Render()
 	}

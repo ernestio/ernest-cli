@@ -6,12 +6,13 @@ package model
 
 // Env : Representation of an environment
 type Env struct {
-	ID          uint                   `json:"id"`
+	ID          *int                   `json:"id"`
+	ProjectID   *int                   `json:"project_id"`
 	Project     string                 `json:"project,omitempty"`
 	Provider    string                 `json:"provider,omitempty"`
 	Name        string                 `json:"name"`
-	Type        string                 `json:"type"`
-	Status      string                 `json:"status"`
+	Type        string                 `json:"type,omitempty"`
+	Status      string                 `json:"status,omitempty"`
 	Options     map[string]interface{} `json:"options,omitempty"`
 	Credentials map[string]interface{} `json:"credentials,omitempty"`
 	Roles       []string               `json:"roles,omitempty"`

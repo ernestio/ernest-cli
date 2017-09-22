@@ -13,8 +13,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-// PrintEnvHistory : Pretty print for service history
-func PrintEnvHistory(services []model.Service) {
+// PrintEnvHistory : Pretty print for build history
+func PrintEnvHistory(services []model.Build) {
 	if len(services) == 0 {
 		fmt.Println("\nThere are no registered builds for this environment")
 		fmt.Println("")

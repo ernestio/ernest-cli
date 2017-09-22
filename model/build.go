@@ -4,8 +4,8 @@
 
 package model
 
-// Service : Model representing ernest.io service json responses
-type Service struct {
+// Build : Model representing  env json responses
+type Build struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
 	Project     int      `json:"project_id"`

@@ -36,7 +36,7 @@ var ListEnvs = cli.Command{
 			return err
 		}
 
-		view.PrintEnvsList(envs)
+		view.PrintEnvList(envs)
 		return nil
 	},
 }
@@ -67,7 +67,7 @@ var UpdateEnv = cli.Command{
 		project := c.Args()[0]
 		env := c.Args()[1]
 
-		_, err := m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
+		err := m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
 		if err != nil {
 			color.Red(err.Error())
 		}
@@ -370,20 +370,21 @@ var DefinitionEnv = cli.Command{
 		project := c.Args()[0]
 		env := c.Args()[1]
 		if c.String("build") != "" {
-			env, err := m.EnvBuildStatus(cfg.Token, project, env, c.String("build"))
+			build, err := m.BuildStatus(cfg.Token, project, env, c.String("build"))
 			if err != nil {
 				color.Red(err.Error())
 				os.Exit(1)
 			}
-			fmt.Println(env.Definition)
+			fmt.Println(build.Definition)
 		} else {
-			env, err := m.EnvStatus(cfg.Token, project, env)
+
+			build, err := m.LatestBuildStatus(cfg.Token, project, env)
 			if err != nil {
 				color.Red(err.Error())
 				os.Exit(1)
 			}
 
-			fmt.Println(env.Definition)
+			fmt.Println(build.Definition)
 		}
 		return nil
 	},
@@ -405,7 +406,7 @@ var InfoEnv = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 		var err error
-		var s model.Service
+		var b model.Build
 
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -426,16 +427,16 @@ var InfoEnv = cli.Command{
 		env := c.Args()[1]
 		if c.String("build") != "" {
 			build := c.String("build")
-			s, err = m.EnvBuildStatus(cfg.Token, project, env, build)
+			b, err = m.BuildStatus(cfg.Token, project, env, build)
 		} else {
-			s, err = m.EnvStatus(cfg.Token, project, env)
+			b, err = m.LatestBuildStatus(cfg.Token, project, env)
 		}
 
 		if err != nil {
 			color.Red(err.Error())
 			os.Exit(1)
 		}
-		view.PrintEnvInfo(&s)
+		view.PrintEnvInfo(&b)
 		return nil
 	},
 }
@@ -466,12 +467,12 @@ var DiffEnv = cli.Command{
 		b1 := c.Args()[2]
 		b2 := c.Args()[3]
 
-		build1, err := m.EnvBuildStatus(cfg.Token, project, env, b1)
+		build1, err := m.BuildStatus(cfg.Token, project, env, b1)
 		if err != nil {
 			color.Red(err.Error())
 			return nil
 		}
-		build2, err := m.EnvBuildStatus(cfg.Token, project, env, b2)
+		build2, err := m.BuildStatus(cfg.Token, project, env, b2)
 		if err != nil {
 			color.Red(err.Error())
 			return nil

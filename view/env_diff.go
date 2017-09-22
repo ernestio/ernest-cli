@@ -12,7 +12,7 @@ import (
 )
 
 // PrintEnvDiff : Pretty print for an envs diff
-func PrintEnvDiff(build1 model.Service, build2 model.Service) {
+func PrintEnvDiff(build1 model.Build, build2 model.Build) {
 
 	diff := difflib.UnifiedDiff{
 		A:        difflib.SplitLines(build1.Definition),

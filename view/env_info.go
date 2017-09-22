@@ -12,8 +12,8 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-// PrintEnvInfo : Pretty print for service info
-func PrintEnvInfo(service *model.Service) {
+// PrintEnvInfo : Pretty print for build info
+func PrintEnvInfo(service *model.Build) {
 	fmt.Println("Name : " + service.Name)
 	fmt.Println("Status : " + service.Status)
 	fmt.Println("Project : " + service.ProjectName)
