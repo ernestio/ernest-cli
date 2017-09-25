@@ -33,15 +33,20 @@ func (m *Manager) ListBuilds(project, env, token string) (builds []model.Build, 
 }
 
 // BuildStatus ...
-func (m *Manager) BuildStatus(token, project, env, buildID string) (build model.Build, err error) {
+func (m *Manager) BuildStatus(token, project, env, index string) (build model.Build, err error) {
 	builds, _ := m.ListBuilds(project, env, token)
-	num, _ := strconv.Atoi(buildID)
+	num, _ := strconv.Atoi(index)
 	if num < 1 || num > len(builds) {
 		return build, errors.New("Invalid build ID")
 	}
 	num = len(builds) - num
-	buildID = builds[num].ID
+	buildID := builds[num].ID
 
+	return m.BuildStatusByID(token, project, env, buildID)
+}
+
+// BuildStatusByID ...
+func (m *Manager) BuildStatusByID(token, project, env, buildID string) (build model.Build, err error) {
 	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+buildID, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
@@ -55,6 +60,7 @@ func (m *Manager) BuildStatus(token, project, env, buildID string) (build model.
 		}
 		return build, err
 	}
+	fmt.Println(body)
 	if body == "null" {
 		return build, errors.New("Unexpected endpoint response : " + string(body))
 	}
@@ -82,6 +88,7 @@ func (m *Manager) LatestBuildStatus(token, project, env string) (build model.Bui
 		}
 		return build, err
 	}
+	fmt.Println(body)
 	if body == "null" {
 		return build, errors.New("Unexpected endpoint response : " + string(body))
 	}
@@ -153,7 +160,7 @@ func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[str
 		fmt.Println("================\nPlatform Details\n================\n ")
 		var build model.Build
 
-		build, err = m.BuildStatus(token, d.Project, d.Name, response.ID)
+		build, err = m.BuildStatusByID(token, d.Project, d.Name, response.ID)
 		if err != nil {
 			return response.ID, err
 		}

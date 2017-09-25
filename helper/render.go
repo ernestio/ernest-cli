@@ -82,7 +82,7 @@ func renderOutput(s model.BuildEvent) (string, []interface{}) {
 
 	f := "\nEnvironment Name: %s\n"
 	a := []interface{}{blue(s.Name)}
-	f = f + "Environment ID: %s\n\n"
+	f = f + "Build ID: %s\n\n"
 	a = append(a, blue(s.ID))
 
 	if len(s.Changes) == 0 {

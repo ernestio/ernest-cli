@@ -71,7 +71,7 @@ var UpdateEnv = cli.Command{
 		if err != nil {
 			color.Red(err.Error())
 		}
-		fmt.Println("Environment successfully updated")
+		color.Green("Environment successfully updated")
 
 		return nil
 	},
@@ -113,7 +113,7 @@ var CreateEnv = cli.Command{
 			color.Red(err.Error())
 			return nil
 		}
-		fmt.Println("Environment successfully created")
+		color.Green("Environment successfully created")
 
 		return nil
 	},
