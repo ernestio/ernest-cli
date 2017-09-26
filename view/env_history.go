@@ -14,18 +14,18 @@ import (
 )
 
 // PrintEnvHistory : Pretty print for build history
-func PrintEnvHistory(services []model.Build) {
-	if len(services) == 0 {
+func PrintEnvHistory(builds []model.Build) {
+	if len(builds) == 0 {
 		fmt.Println("\nThere are no registered builds for this environment")
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"ID", "Name", "Status", "Version", "User"})
-		num := len(services) + 1
-		for _, s := range services {
+		num := len(builds) + 1
+		for _, b := range builds {
 			num = num - 1
 			id := strconv.Itoa(num)
-			table.Append([]string{id, s.Name, s.Status, s.Version, s.UserName})
+			table.Append([]string{id, b.Name, b.Status, b.CreatedAt, b.UserName})
 		}
 		table.Render()
 	}

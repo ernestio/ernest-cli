@@ -47,7 +47,7 @@ func (m *Manager) BuildStatus(token, project, env, index string) (build model.Bu
 
 // BuildStatusByID ...
 func (m *Manager) BuildStatusByID(token, project, env, buildID string) (build model.Build, err error) {
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+buildID, "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+buildID+"/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
 			return build, ErrConnectionRefused
@@ -68,32 +68,28 @@ func (m *Manager) BuildStatusByID(token, project, env, buildID string) (build mo
 	return build, err
 }
 
+// LatestBuildID ...
+func (m *Manager) LatestBuildID(token, project, env string) (string, error) {
+	builds, err := m.ListBuilds(project, env, token)
+	if err != nil {
+		return "", err
+	}
+
+	if len(builds) < 1 {
+		return "", errors.New("Specified build not found")
+	}
+
+	return builds[0].ID, nil
+}
+
 // LatestBuildStatus ...
 func (m *Manager) LatestBuildStatus(token, project, env string) (build model.Build, err error) {
-	builds, err := m.ListBuilds(project, env, token)
+	id, err := m.LatestBuildID(token, project, env)
 	if err != nil {
 		return build, err
 	}
 
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+builds[0].ID, "GET", []byte(""), token, "")
-	if err != nil {
-		if resp == nil {
-			return build, ErrConnectionRefused
-		}
-		if resp.StatusCode == 403 {
-			return build, errors.New("You don't have permissions to perform this action")
-		}
-		if resp.StatusCode == 404 {
-			return build, errors.New("Specified build not found")
-		}
-		return build, err
-	}
-	fmt.Println(body)
-	if body == "null" {
-		return build, errors.New("Unexpected endpoint response : " + string(body))
-	}
-	err = json.Unmarshal([]byte(body), &build)
-	return build, err
+	return m.BuildStatusByID(token, project, env, id)
 }
 
 // Apply : Applies a yaml to create / update a new env
@@ -170,6 +166,7 @@ func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[str
 
 	return response.ID, nil
 }
+
 func (m *Manager) dryApply(token string, payload []byte, d model.Definition) (string, error) {
 	var body string
 	body, resp, err := m.doRequest("/api/projects/"+d.Project+"/envs/"+d.Name+"/builds/?dry=true", "POST", payload, token, "application/yaml")

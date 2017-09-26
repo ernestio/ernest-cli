@@ -11,13 +11,11 @@ type Build struct {
 	Project     int      `json:"project_id"`
 	ProjectName string   `json:"project"`
 	Provider    string   `json:"provider"`
-	Version     string   `json:"version"`
+	CreatedAt   string   `json:"created_at"`
+	UpdatedAt   string   `json:"updated_at"`
 	UserName    string   `json:"user_name"`
 	Status      string   `json:"status"`
 	Definition  string   `json:"definition"`
-	Result      string   `json:"result"`
-	LastError   string   `json:"last_known_error"`
-	Endpoint    string   `json:"endpoint"`
 	Roles       []string `json:"roles"`
 	VPCs        []struct {
 		Name   string `json:"name"`
