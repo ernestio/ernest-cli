@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ernestio/api-gateway/models"
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
@@ -193,7 +192,7 @@ func (m *Manager) ForceDestroy(token, project, env string) error {
 
 // UpdateEnv : Updates credentials on a specific environment
 func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]interface{}) error {
-	e := models.Env{
+	e := model.Env{
 		Name:        name,
 		Credentials: credentials,
 	}
@@ -213,7 +212,7 @@ func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]
 
 // CreateEnv : Creates a new empty environmnet
 func (m *Manager) CreateEnv(token, name, project string, credentials map[string]interface{}) error {
-	e := models.Env{
+	e := model.Env{
 		Name:        name,
 		Credentials: credentials,
 	}
@@ -229,44 +228,4 @@ func (m *Manager) CreateEnv(token, name, project string, credentials map[string]
 	}
 
 	return rerr
-}
-
-// Import : Imports an existing env
-func (m *Manager) Import(token string, name string, project string, filters []string) (streamID string, err error) {
-	var s struct {
-		Name          string   `json:"name"`
-		Project       string   `json:"project"`
-		ImportFilters []string `json:"import_filters,omitempty"`
-	}
-	s.Name = name
-	s.Project = project
-	s.ImportFilters = filters
-	payload, err := json.Marshal(s)
-	if err != nil {
-		return "", errors.New("Invalid name or project")
-	}
-
-	var response struct {
-		ID      string `json:"id,omitempty"`
-		Name    string `json:"name,omitempty"`
-		Message string `json:"message,omitempty"`
-	}
-
-	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/import/", "POST", payload, token, "application/yaml")
-	if resp == nil {
-		return "", ErrConnectionRefused
-	}
-
-	err = json.Unmarshal([]byte(body), &response)
-	if err != nil {
-		return "", errors.New(body)
-	}
-
-	if rerr != nil {
-		return "", errors.New(response.Message)
-	}
-
-	err = helper.Monitorize(m.URL, "/events", token, response.ID)
-
-	return response.ID, err
 }

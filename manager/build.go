@@ -34,20 +34,28 @@ func (m *Manager) ListBuilds(project, env, token string) (builds []model.Build, 
 
 // BuildStatus ...
 func (m *Manager) BuildStatus(token, project, env, index string) (build model.Build, err error) {
-	builds, _ := m.ListBuilds(project, env, token)
-	num, _ := strconv.Atoi(index)
-	if num < 1 || num > len(builds) {
-		return build, errors.New("Invalid build ID")
+	buildID, err := m.BuildIDFromIndex(token, project, env, index)
+	if err != nil {
+		return build, err
 	}
-	num = len(builds) - num
-	buildID := builds[num].ID
 
 	return m.BuildStatusByID(token, project, env, buildID)
 }
 
+// BuildIDFromIndex ...
+func (m *Manager) BuildIDFromIndex(token, project, env, index string) (string, error) {
+	builds, _ := m.ListBuilds(project, env, token)
+	num, _ := strconv.Atoi(index)
+	if num < 1 || num > len(builds) {
+		return "", errors.New("Invalid build ID")
+	}
+	num = len(builds) - num
+	return builds[num].ID, nil
+}
+
 // BuildStatusByID ...
 func (m *Manager) BuildStatusByID(token, project, env, buildID string) (build model.Build, err error) {
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+buildID+"/", "GET", []byte(""), token, "")
+	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+buildID, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
 			return build, ErrConnectionRefused
@@ -60,12 +68,53 @@ func (m *Manager) BuildStatusByID(token, project, env, buildID string) (build mo
 		}
 		return build, err
 	}
-	fmt.Println(body)
 	if body == "null" {
 		return build, errors.New("Unexpected endpoint response : " + string(body))
 	}
 	err = json.Unmarshal([]byte(body), &build)
 	return build, err
+}
+
+// BuildDefinitionByID ...
+func (m *Manager) BuildDefinitionByID(token, project, env, buildID string) ([]byte, error) {
+	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+buildID+"/definition/", "GET", []byte(""), token, "")
+	if err != nil {
+		if resp == nil {
+			return nil, ErrConnectionRefused
+		}
+		if resp.StatusCode == 403 {
+			return nil, errors.New("You don't have permissions to perform this action")
+		}
+		if resp.StatusCode == 404 {
+			return nil, errors.New("Specified build not found")
+		}
+		return nil, err
+	}
+	if body == "null" {
+		return nil, errors.New("Unexpected endpoint response : " + string(body))
+	}
+
+	return []byte(body), err
+}
+
+// LatestBuildDefinition ...
+func (m *Manager) LatestBuildDefinition(token, project, env string) ([]byte, error) {
+	id, err := m.LatestBuildID(token, project, env)
+	if err != nil {
+		return nil, err
+	}
+
+	return m.BuildDefinitionByID(token, project, env, id)
+}
+
+// BuildDefinitionFromIndex ...
+func (m *Manager) BuildDefinitionFromIndex(token, project, env, index string) ([]byte, error) {
+	id, err := m.BuildIDFromIndex(token, project, env, index)
+	if err != nil {
+		return nil, err
+	}
+
+	return m.BuildDefinitionByID(token, project, env, id)
 }
 
 // LatestBuildID ...
@@ -106,12 +155,46 @@ func (m *Manager) Apply(token, path string, credentials map[string]interface{}, 
 		return "", errors.New("Could not process definition yaml")
 	}
 
+	_, err = m.EnvStatus(token, d.Project, d.Name)
+	if err != nil {
+		m.CreateEnv(token, d.Name, d.Project, credentials)
+	}
+
 	// Load any imported files
 	if err := d.LoadFileImports(); err != nil {
 		return "", err
 	}
 
 	return m.ApplyEnv(d, token, credentials, monit, dry)
+}
+
+// Import : Imports an existing env
+func (m *Manager) Import(token string, name string, project string, filters []string) (streamID string, err error) {
+	a := model.Action{
+		Type: "import",
+	}
+
+	a.Options.Filters = filters
+
+	data, err := json.Marshal(a)
+	if err != nil {
+		return "", err
+	}
+
+	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/yaml")
+	if resp == nil {
+		return "", ErrConnectionRefused
+	}
+	if rerr != nil {
+		return "", rerr
+	}
+
+	err = json.Unmarshal([]byte(body), &a)
+	if err != nil {
+		return "", errors.New(body)
+	}
+
+	return a.ResourceID, helper.Monitorize(m.URL, "/events", token, a.ResourceID)
 }
 
 // ApplyEnv : Applies a yaml to create / update a new env
