@@ -370,21 +370,20 @@ var DefinitionEnv = cli.Command{
 		project := c.Args()[0]
 		env := c.Args()[1]
 		if c.String("build") != "" {
-			build, err := m.BuildStatus(cfg.Token, project, env, c.String("build"))
+			definition, err := m.BuildDefinitionFromIndex(cfg.Token, project, env, c.String("build"))
 			if err != nil {
 				color.Red(err.Error())
 				os.Exit(1)
 			}
-			fmt.Println(build.Definition)
+			fmt.Println(string(definition))
 		} else {
-
-			build, err := m.LatestBuildStatus(cfg.Token, project, env)
+			definition, err := m.LatestBuildDefinition(cfg.Token, project, env)
 			if err != nil {
 				color.Red(err.Error())
 				os.Exit(1)
 			}
 
-			fmt.Println(build.Definition)
+			fmt.Println(string(definition))
 		}
 		return nil
 	},
