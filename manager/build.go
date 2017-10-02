@@ -23,6 +23,12 @@ func (m *Manager) ListBuilds(project, env, token string) (builds []model.Build, 
 		if resp == nil {
 			return nil, ErrConnectionRefused
 		}
+		if resp.StatusCode == 403 {
+			return builds, errors.New("You don't have permissions to perform this action")
+		}
+		if resp.StatusCode == 404 {
+			return builds, errors.New("Specified environment name does not exist")
+		}
 		return nil, err
 	}
 	err = json.Unmarshal([]byte(body), &builds)

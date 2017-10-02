@@ -33,6 +33,7 @@ func (m *Manager) ListEnvs(token string) (envs []model.Env, err error) {
 // EnvStatus ...
 func (m *Manager) EnvStatus(token, project, env string) (environment model.Env, err error) {
 	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env, "GET", []byte(""), token, "")
+	fmt.Println(body)
 	if err != nil {
 		if resp == nil {
 			return environment, ErrConnectionRefused
