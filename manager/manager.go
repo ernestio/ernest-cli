@@ -67,12 +67,10 @@ func (m *Manager) doRequestWithQuery(url, method string, payload []byte, token s
 	q := req.URL.Query()
 	for k, vals := range query {
 		q.Add(k, strings.Join(vals, ","))
-
 	}
 	req.URL.RawQuery = q.Encode()
 
 	resp, err := m.client().Do(req)
-
 	if err != nil {
 		return err.Error(), resp, err
 	}
@@ -89,7 +87,6 @@ func (m *Manager) doRequestWithQuery(url, method string, payload []byte, token s
 	body := string(responseBody)
 
 	if resp.StatusCode != 200 {
-		fmt.Println(string(responseBody))
 		return body, resp, errors.New(resp.Status)
 	}
 	return body, resp, nil

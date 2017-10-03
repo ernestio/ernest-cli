@@ -14,7 +14,7 @@ import (
 )
 
 // PrintEnvHistory : Pretty print for build history
-func PrintEnvHistory(builds []model.Build) {
+func PrintEnvHistory(name string, builds []model.Build) {
 	if len(builds) == 0 {
 		fmt.Println("\nThere are no registered builds for this environment")
 		fmt.Println("")
@@ -25,7 +25,7 @@ func PrintEnvHistory(builds []model.Build) {
 		for _, b := range builds {
 			num = num - 1
 			id := strconv.Itoa(num)
-			table.Append([]string{id, b.Name, b.Status, b.CreatedAt, b.UserName})
+			table.Append([]string{id, name, b.Status, b.CreatedAt, b.UserName})
 		}
 		table.Render()
 	}

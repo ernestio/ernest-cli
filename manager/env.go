@@ -63,7 +63,8 @@ func (m *Manager) ResetEnv(project, env, token string) error {
 	if e.Status != "in_progress" {
 		return errors.New("The environment '" + project + " / " + env + "' cannot be reset as its status is '" + e.Status + "'")
 	}
-	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/actions/reset/", "POST", nil, token, "application/yaml")
+	req := []byte(`{"type": "reset"}`)
+	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/actions/", "POST", req, token, "application/json")
 	if err != nil {
 		if resp == nil {
 			return ErrConnectionRefused

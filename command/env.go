@@ -70,7 +70,9 @@ var UpdateEnv = cli.Command{
 		err := m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
 		if err != nil {
 			color.Red(err.Error())
+			os.Exit(1)
 		}
+
 		color.Green("Environment successfully updated")
 
 		return nil
@@ -257,7 +259,7 @@ var HistoryEnv = cli.Command{
 		env := c.Args()[1]
 
 		envs, _ := m.ListBuilds(project, env, cfg.Token)
-		view.PrintEnvHistory(envs)
+		view.PrintEnvHistory(env, envs)
 		return nil
 	},
 }
