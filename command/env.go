@@ -159,6 +159,7 @@ var ApplyEnv = cli.Command{
 		response, err := m.Apply(cfg.Token, file, ProviderFlagsToSlice(c), monit, dry)
 		if err != nil {
 			color.Red(err.Error())
+			os.Exit(1)
 		}
 		if dry == true {
 			fmt.Println(string(response))

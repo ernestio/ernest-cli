@@ -33,7 +33,6 @@ func (m *Manager) ListEnvs(token string) (envs []model.Env, err error) {
 // EnvStatus ...
 func (m *Manager) EnvStatus(token, project, env string) (environment model.Env, err error) {
 	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env, "GET", []byte(""), token, "")
-	fmt.Println(body)
 	if err != nil {
 		if resp == nil {
 			return environment, ErrConnectionRefused
@@ -209,6 +208,13 @@ func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]
 		return ErrConnectionRefused
 	}
 
+	switch resp.StatusCode {
+	case 404:
+		return errors.New("Specified environment does not exist")
+	case 403:
+		return errors.New("You don't have permissions to perform this action, please login as a resource owner")
+	}
+
 	return rerr
 }
 
@@ -227,6 +233,13 @@ func (m *Manager) CreateEnv(token, name, project string, credentials map[string]
 	_, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/", "POST", payload, token, "application/json")
 	if resp == nil {
 		return ErrConnectionRefused
+	}
+
+	switch resp.StatusCode {
+	case 404:
+		return errors.New("Specified project does not exist")
+	case 403:
+		return errors.New("You don't have permissions to perform this action, please login as a resource owner")
 	}
 
 	return rerr

@@ -163,7 +163,10 @@ func (m *Manager) Apply(token, path string, credentials map[string]interface{}, 
 
 	_, err = m.EnvStatus(token, d.Project, d.Name)
 	if err != nil {
-		m.CreateEnv(token, d.Name, d.Project, credentials)
+		err = m.CreateEnv(token, d.Name, d.Project, credentials)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	// Load any imported files
