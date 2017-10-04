@@ -213,6 +213,8 @@ func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]
 		return errors.New("Specified environment does not exist")
 	case 403:
 		return errors.New("You don't have permissions to perform this action, please login as a resource owner")
+	case 401:
+		return errors.New("Invalid session, please log in")
 	}
 
 	return rerr
