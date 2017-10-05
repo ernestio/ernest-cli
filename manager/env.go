@@ -8,9 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"strconv"
 
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
@@ -18,7 +15,7 @@ import (
 )
 
 // ListEnvs ...
-func (m *Manager) ListEnvs(token string) (services []model.Service, err error) {
+func (m *Manager) ListEnvs(token string) (envs []model.Env, err error) {
 	body, resp, err := m.doRequest("/api/envs/", "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
@@ -26,92 +23,47 @@ func (m *Manager) ListEnvs(token string) (services []model.Service, err error) {
 		}
 		return nil, err
 	}
-	err = json.Unmarshal([]byte(body), &services)
+	err = json.Unmarshal([]byte(body), &envs)
 	if err != nil {
 		return nil, err
 	}
-	return services, err
-}
-
-// ListBuilds ...
-func (m *Manager) ListBuilds(project, env, token string) (builds []model.Service, err error) {
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/", "GET", []byte(""), token, "")
-	if err != nil {
-		if resp == nil {
-			return nil, ErrConnectionRefused
-		}
-		return nil, err
-	}
-	err = json.Unmarshal([]byte(body), &builds)
-	if err != nil {
-		return nil, err
-	}
-	return builds, err
+	return envs, err
 }
 
 // EnvStatus ...
-func (m *Manager) EnvStatus(token, project, env string) (service model.Service, err error) {
+func (m *Manager) EnvStatus(token, project, env string) (environment model.Env, err error) {
 	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
-			return service, ErrConnectionRefused
+			return environment, ErrConnectionRefused
 		}
 		if resp.StatusCode == 403 {
-			return service, errors.New("You don't have permissions to perform this action")
+			return environment, errors.New("You don't have permissions to perform this action")
 		}
 		if resp.StatusCode == 404 {
-			return service, errors.New("Specified environment name does not exist")
+			return environment, errors.New("Specified environment name does not exist")
 		}
-		return service, err
+		return environment, err
 	}
 	if body == "null" {
-		return service, errors.New("Unexpected endpoint response : " + string(body))
+		return environment, errors.New("Unexpected endpoint response : " + string(body))
 	}
-	err = json.Unmarshal([]byte(body), &service)
+	err = json.Unmarshal([]byte(body), &environment)
 
-	return service, err
-}
-
-// EnvBuildStatus ...
-func (m *Manager) EnvBuildStatus(token, project, env, serviceID string) (service model.Service, err error) {
-	builds, _ := m.ListBuilds(project, env, token)
-	num, _ := strconv.Atoi(serviceID)
-	if num < 1 || num > len(builds) {
-		return service, errors.New("Invalid build ID")
-	}
-	num = len(builds) - num
-	serviceID = builds[num].ID
-
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+serviceID, "GET", []byte(""), token, "")
-	if err != nil {
-		if resp == nil {
-			return service, ErrConnectionRefused
-		}
-		if resp.StatusCode == 403 {
-			return service, errors.New("You don't have permissions to perform this action")
-		}
-		if resp.StatusCode == 404 {
-			return service, errors.New("Specified build not found")
-		}
-		return service, err
-	}
-	if body == "null" {
-		return service, errors.New("Unexpected endpoint response : " + string(body))
-	}
-	err = json.Unmarshal([]byte(body), &service)
-	return service, err
+	return environment, err
 }
 
 // ResetEnv ...
 func (m *Manager) ResetEnv(project, env, token string) error {
-	s, err := m.EnvStatus(token, project, env)
+	e, err := m.EnvStatus(token, project, env)
 	if err != nil {
 		return err
 	}
-	if s.Status != "in_progress" {
-		return errors.New("The environment '" + project + " / " + env + "' cannot be reset as its status is '" + s.Status + "'")
+	if e.Status != "in_progress" {
+		return errors.New("The environment '" + project + " / " + env + "' cannot be reset as its status is '" + e.Status + "'")
 	}
-	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/actions/reset/", "POST", nil, token, "application/yaml")
+	req := []byte(`{"type": "reset"}`)
+	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/actions/", "POST", req, token, "application/json")
 	if err != nil {
 		if resp == nil {
 			return ErrConnectionRefused
@@ -120,14 +72,14 @@ func (m *Manager) ResetEnv(project, env, token string) error {
 	return err
 }
 
-// RevertEnv reverts a service to a previous known state using a build ID
+// RevertEnv reverts a env to a previous known state using a build ID
 func (m *Manager) RevertEnv(project, env, buildID, token string, dry bool) (string, error) {
 	// get requested manifest
-	s, err := m.EnvBuildStatus(token, project, env, buildID)
+	b, err := m.BuildStatus(token, project, env, buildID)
 	if err != nil {
 		return "", err
 	}
-	payload := []byte(s.Definition)
+	payload := []byte(b.Definition)
 
 	// apply requested manifest
 	var d model.Definition
@@ -172,19 +124,19 @@ func (m *Manager) RevertEnv(project, env, buildID, token string, dry bool) (stri
 	}
 
 	fmt.Println("================\nPlatform Details\n================\n ")
-	var srv model.Service
+	var build model.Build
 
-	srv, err = m.EnvStatus(token, project, env)
+	build, err = m.BuildStatus(token, project, env, response.ID)
 	if err != nil {
 		return response.ID, err
 	}
 
-	view.PrintEnvInfo(&srv)
+	view.PrintEnvInfo(&build)
 
 	return response.ID, nil
 }
 
-// Destroy : Destroys an existing service
+// Destroy : Destroys an existing env
 func (m *Manager) Destroy(token, project, env string, monit bool) error {
 	s, err := m.EnvStatus(token, project, env)
 	if err != nil {
@@ -240,171 +192,57 @@ func (m *Manager) ForceDestroy(token, project, env string) error {
 }
 
 // UpdateEnv : Updates credentials on a specific environment
-func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]string) (string, error) {
-	d := model.NewDefinition(name, project)
+func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]interface{}) error {
+	e := model.Env{
+		Name:        name,
+		Credentials: credentials,
+	}
 
-	env, err := m.EnvStatus(token, project, name)
+	payload, err := json.Marshal(e)
 	if err != nil {
-		log.Println(err.Error())
-		return "Error processing your request", errors.New(err.Error())
-	}
-	if err = d.Load([]byte(env.Definition)); err != nil {
-		log.Println(err.Error())
-		return "Error processing your request", errors.New(err.Error())
+		return err
 	}
 
-	return m.ApplyEnv(d, token, credentials, false, false)
+	_, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name, "PUT", payload, token, "application/json")
+	if resp == nil {
+		return ErrConnectionRefused
+	}
+
+	switch resp.StatusCode {
+	case 404:
+		return errors.New("Specified environment does not exist")
+	case 403:
+		return errors.New("You don't have permissions to perform this action, please login as a resource owner")
+	case 401:
+		return errors.New("Invalid session, please log in")
+	}
+
+	return rerr
 }
 
 // CreateEnv : Creates a new empty environmnet
-func (m *Manager) CreateEnv(token, name, project string, credentials map[string]string) (string, error) {
-	d := model.NewDefinition(name, project)
+func (m *Manager) CreateEnv(token, name, project string, credentials map[string]interface{}) error {
+	e := model.Env{
+		Name:        name,
+		Credentials: credentials,
+	}
 
-	return m.ApplyEnv(d, token, credentials, false, false)
-}
-
-// Apply : Applies a yaml to create / update a new env
-func (m *Manager) Apply(token, path string, credentials map[string]string, monit, dry bool) (string, error) {
-	var d model.Definition
-
-	payload, err := ioutil.ReadFile(path)
+	payload, err := json.Marshal(e)
 	if err != nil {
-		return "", errors.New("You should specify a valid template path or store an ernest.yml on the current folder")
+		return err
 	}
 
-	err = d.Load(payload)
-	if err != nil {
-		return "", errors.New("Could not process definition yaml")
-	}
-
-	// Load any imported files
-	if err := d.LoadFileImports(); err != nil {
-		return "", err
-	}
-
-	return m.ApplyEnv(d, token, credentials, monit, dry)
-}
-
-// ApplyEnv : Applies a yaml to create / update a new env
-func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[string]string, monit, dry bool) (string, error) {
-
-	if len(credentials) > 0 {
-		d.AttachMap("credentials", credentials)
-	}
-
-	payload, err := d.Save()
-
-	if err != nil {
-		return "", errors.New("Could not finalize definition yaml")
-	}
-
-	if dry {
-		return m.dryApply(token, payload, d)
-	}
-
-	var response struct {
-		ID      string `json:"id,omitempty"`
-		Name    string `json:"name,omitempty"`
-		Project string `json:"project,omitempty"`
-		Message string `json:"message,omitempty"`
-	}
-
-	body, resp, rerr := m.doRequest("/api/projects/"+d.Project+"/envs/"+d.Name+"/builds/", "POST", payload, token, "application/yaml")
+	_, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/", "POST", payload, token, "application/json")
 	if resp == nil {
-		return "", ErrConnectionRefused
+		return ErrConnectionRefused
 	}
 
-	if resp.StatusCode == 403 {
-		return "", errors.New("You don't have permissions to perform this action")
-	}
-	if resp.StatusCode == 401 {
-		return "", errors.New("Invalid session, please log in")
-	}
-
-	err = json.Unmarshal([]byte(body), &response)
-	if err != nil {
-		return "", errors.New(body)
+	switch resp.StatusCode {
+	case 404:
+		return errors.New("Specified project does not exist")
+	case 403:
+		return errors.New("You don't have permissions to perform this action, please login as a resource owner")
 	}
 
-	if rerr != nil {
-		return "", errors.New(response.Message)
-	}
-
-	if monit {
-		err = helper.Monitorize(m.URL, "/events", token, response.ID)
-		if err != nil {
-			return response.ID, err
-		}
-
-		fmt.Println("================\nPlatform Details\n================\n ")
-		var srv model.Service
-
-		srv, err = m.EnvStatus(token, response.Project, response.Name)
-		if err != nil {
-			return response.ID, err
-		}
-
-		view.PrintEnvInfo(&srv)
-	}
-
-	return response.ID, nil
-}
-
-// Import : Imports an existing env
-func (m *Manager) Import(token string, name string, project string, filters []string) (streamID string, err error) {
-	var s struct {
-		Name          string   `json:"name"`
-		Project       string   `json:"project"`
-		ImportFilters []string `json:"import_filters,omitempty"`
-	}
-	s.Name = name
-	s.Project = project
-	s.ImportFilters = filters
-	payload, err := json.Marshal(s)
-	if err != nil {
-		return "", errors.New("Invalid name or project")
-	}
-
-	var response struct {
-		ID      string `json:"id,omitempty"`
-		Name    string `json:"name,omitempty"`
-		Message string `json:"message,omitempty"`
-	}
-
-	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/import/", "POST", payload, token, "application/yaml")
-	if resp == nil {
-		return "", ErrConnectionRefused
-	}
-
-	err = json.Unmarshal([]byte(body), &response)
-	if err != nil {
-		return "", errors.New(body)
-	}
-
-	if rerr != nil {
-		return "", errors.New(response.Message)
-	}
-
-	err = helper.Monitorize(m.URL, "/events", token, response.ID)
-
-	return response.ID, err
-}
-
-func (m *Manager) dryApply(token string, payload []byte, d model.Definition) (string, error) {
-	var body string
-	body, resp, err := m.doRequest("/api/projects/"+d.Project+"/envs/"+d.Name+"/builds/?dry=true", "POST", payload, token, "application/yaml")
-	if err != nil {
-		if resp == nil {
-			return "", ErrConnectionRefused
-		}
-		var internalError struct {
-			Message string `json:"message"`
-		}
-		if err := json.Unmarshal([]byte(body), &internalError); err != nil {
-			return "", errors.New(body)
-		}
-		return "", errors.New(internalError.Message)
-	}
-	view.EnvDry(body)
-	return "", nil
+	return rerr
 }

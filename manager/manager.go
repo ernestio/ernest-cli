@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -49,6 +50,10 @@ func (m *Manager) client() *http.Client {
 }
 
 func (m *Manager) doRequest(url, method string, payload []byte, token string, contentType string) (string, *http.Response, error) {
+	return m.doRequestWithQuery(url, method, payload, token, contentType, nil)
+}
+
+func (m *Manager) doRequestWithQuery(url, method string, payload []byte, token string, contentType string, query map[string][]string) (string, *http.Response, error) {
 	url = m.URL + url
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(payload))
 	if token != "" {
@@ -59,8 +64,13 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 	}
 	req.Header.Add("User-Agent", "Ernest/"+m.Version)
 
-	resp, err := m.client().Do(req)
+	q := req.URL.Query()
+	for k, vals := range query {
+		q.Add(k, strings.Join(vals, ","))
+	}
+	req.URL.RawQuery = q.Encode()
 
+	resp, err := m.client().Do(req)
 	if err != nil {
 		return err.Error(), resp, err
 	}
@@ -77,9 +87,9 @@ func (m *Manager) doRequest(url, method string, payload []byte, token string, co
 	body := string(responseBody)
 
 	if resp.StatusCode != 200 {
-		return string(body), resp, errors.New(resp.Status)
+		return body, resp, errors.New(resp.Status)
 	}
-	return string(body), resp, nil
+	return body, resp, nil
 }
 
 // GetSession ..

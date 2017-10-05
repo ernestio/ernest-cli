@@ -21,7 +21,7 @@ type buildhandler struct {
 	format    string
 	failures  []error
 	args      []interface{}
-	service   model.ServiceEvent
+	service   model.BuildEvent
 	component model.ComponentEvent
 }
 
@@ -50,18 +50,18 @@ func (h *buildhandler) subscribe() error {
 			subject := m["_subject"].(string)
 
 			switch subject {
-			case SERVICECREATE, SERVICEDELETE, SERVICEIMPORT:
-				h.service = processServiceEvent(m)
+			case BUILDCREATE, BUILDDELETE, BUILDIMPORT:
+				h.service = processBuildEvent(m)
 				h.format, h.args = renderOutput(h.service)
-			case SERVICECREATEDONE, SERVICECREATEERROR, SERVICEDELETEDONE, SERVICEDELETEERROR, SERVICEIMPORTDONE, SERVICEIMPORTERROR:
-				h.service = processServiceEvent(m)
+			case BUILDCREATEDONE, BUILDCREATEERROR, BUILDDELETEDONE, BUILDDELETEERROR, BUILDIMPORTDONE, BUILDIMPORTERROR:
+				h.service = processBuildEvent(m)
 				err = renderUpdate(h.service, model.ComponentEvent{}, h.args)
 				if err != nil {
 					return err
 				}
 			default:
 				h.component = processComponentEvent(m)
-				cerr := renderUpdate(model.ServiceEvent{}, h.component, h.args)
+				cerr := renderUpdate(model.BuildEvent{}, h.component, h.args)
 				if cerr != nil {
 					h.failures = append(h.failures, cerr)
 				}
@@ -75,9 +75,9 @@ func (h *buildhandler) subscribe() error {
 			}
 
 			switch subject {
-			case SERVICECREATEDONE, SERVICEDELETEDONE, SERVICEIMPORTDONE:
+			case BUILDCREATEDONE, BUILDDELETEDONE, BUILDIMPORTDONE:
 				return nil
-			case SERVICECREATEERROR, SERVICEDELETEERROR, SERVICEIMPORTERROR:
+			case BUILDCREATEERROR, BUILDDELETEERROR, BUILDIMPORTERROR:
 				for _, resourceErr := range h.failures {
 					fmt.Printf("Message: %s\n\n", red(resourceErr))
 				}

@@ -10,7 +10,6 @@ import (
 	"github.com/ernestio/ernest-cli/helper"
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
-	"github.com/fatih/color"
 	"github.com/nu7hatch/gouuid"
 	"github.com/urfave/cli"
 )
@@ -30,8 +29,7 @@ var CmdLog = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		uu, _ := uuid.NewV4()
@@ -41,8 +39,7 @@ var CmdLog = cli.Command{
 		}
 
 		if err := m.SetLogger(cfg.Token, logger); err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		if c.Bool("raw") {
@@ -53,7 +50,7 @@ var CmdLog = cli.Command{
 
 		defer func() {
 			if err := m.DelLogger(cfg.Token, logger); err != nil {
-				color.Red("Ernest wasn't able to reset sse logger")
+				h.PrintError("Ernest wasn't able to reset sse logger")
 			}
 		}()
 

@@ -65,13 +65,11 @@ var CreateVcloudProject = cli.Command{
 		var errs []string
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the project name")
-			return nil
+			h.PrintError("You should specify the project name")
 		}
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		name := c.Args()[0]
@@ -82,8 +80,7 @@ var CreateVcloudProject = cli.Command{
 		if template != "" {
 			var t model.ProjectTemplate
 			if err := getProjectTemplate(template, &t); err != nil {
-				color.Red(err.Error())
-				return nil
+				h.PrintError(err.Error())
 			}
 			url = t.URL
 			network = t.Network
@@ -132,7 +129,7 @@ var CreateVcloudProject = cli.Command{
 			rtype = "vcloud-fake"
 		}
 		if len(errs) > 0 {
-			color.Red("Please, fix the error shown below to continue")
+			h.PrintError("Please, fix the error shown below to continue")
 			for _, e := range errs {
 				fmt.Println("  - " + e)
 			}
@@ -141,7 +138,7 @@ var CreateVcloudProject = cli.Command{
 
 		body, err := m.CreateVcloudProject(cfg.Token, name, rtype, username, password, url, network, c.String("vse-url"))
 		if err != nil {
-			color.Red(body)
+			h.PrintError(body)
 		} else {
 			color.Green("Project '" + name + "' successfully created ")
 		}
@@ -158,20 +155,17 @@ var DeleteProject = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the project name")
-			return nil
+			h.PrintError("You should specify the project name")
 		}
 		name := c.Args()[0]
 
 		err := m.DeleteProject(cfg.Token, name)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("Project " + name + " successfully removed")
 
@@ -206,12 +200,10 @@ var UpdateVCloudProject = cli.Command{
 		var user, password, org string
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the project name")
-			return nil
+			h.PrintError("You should specify the project name")
 		}
 		name := c.Args()[0]
 		user = c.String("user")
@@ -219,22 +211,18 @@ var UpdateVCloudProject = cli.Command{
 		org = c.String("org")
 
 		if user == "" {
-			color.Red("You should specify user name with '--user' flag")
-			return nil
+			h.PrintError("You should specify user name with '--user' flag")
 		}
 		if password == "" {
-			color.Red("You should specify user password with '--password' flag")
-			return nil
+			h.PrintError("You should specify user password with '--password' flag")
 		}
 		if org == "" {
-			color.Red("You should specify user org with '--org' flag")
-			return nil
+			h.PrintError("You should specify user org with '--org' flag")
 		}
 
 		err := m.UpdateVCloudProject(cfg.Token, name, user+"@"+org, password)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("Project " + name + " successfully updated")
 

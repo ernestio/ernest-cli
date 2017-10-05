@@ -33,28 +33,29 @@ var MonitorEnv = cli.Command{
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify an existing project name")
-			return nil
+			h.PrintError("You should specify an existing project name")
 		}
 		if len(c.Args()) == 1 {
-			color.Red("You should specify an existing env name")
-			return nil
+			h.PrintError("You should specify an existing env name")
+		}
+		if len(c.Args()) == 2 {
+			h.PrintError("You should specify a build id")
 		}
 
 		project := c.Args()[0]
 		env := c.Args()[1]
-		service, err := m.EnvStatus(cfg.Token, project, env)
+		id := c.Args()[2]
+		build, err := m.BuildStatus(cfg.Token, project, env, id)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
-		if service.Status == "done" {
+		if build.Status == "done" {
 			color.Yellow("Environment has been successfully built")
 			color.Yellow("You can check its information running `ernest-cli env info " + project + " / " + env + "`")
 			return nil
 		}
 
-		return h.Monitorize(cfg.URL, "/events", cfg.Token, service.ID)
+		return h.Monitorize(cfg.URL, "/events", cfg.Token, build.ID)
 	},
 }

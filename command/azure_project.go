@@ -7,6 +7,7 @@ package command
 // CmdProject subcommand
 import (
 	"fmt"
+	"strings"
 
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/fatih/color"
@@ -62,14 +63,11 @@ var CreateAzureProject = cli.Command{
 		m, cfg := setup(c)
 
 		if len(c.Args()) < 1 {
-			msg := "You should specify the project name"
-			color.Red(msg)
-			return nil
+			h.PrintError("You should specify the project name")
 		}
 
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 		name := c.Args()[0]
 
@@ -126,13 +124,12 @@ var CreateAzureProject = cli.Command{
 		}
 
 		if len(errs) > 0 {
-			color.Red("Please, fix the error shown below to continue")
+			msgs := []string{"Please, fix the error shown below to continue"}
 			for _, e := range errs {
-				fmt.Println("  - " + e)
+				msgs = append(msgs, "  - "+e)
 			}
-			return nil
+			h.PrintError(strings.Join(msgs, "\n"))
 		}
-
 		rtype := "azure"
 
 		if fake {
@@ -140,7 +137,7 @@ var CreateAzureProject = cli.Command{
 		}
 		body, err := m.CreateAzureProject(cfg.Token, name, rtype, region, subscriptionID, clientID, clientSecret, tenantID, environment)
 		if err != nil {
-			color.Red(body)
+			h.PrintError(body)
 		} else {
 			color.Green("Project '" + name + "' successfully created ")
 		}

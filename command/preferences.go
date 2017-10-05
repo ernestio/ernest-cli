@@ -22,13 +22,11 @@ var ListLoggers = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 		loggers, err := m.ListLoggers(cfg.Token)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		view.PrintLoggerList(loggers)
@@ -72,13 +70,11 @@ var SetLogger = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify the logger type (basic | logstash)")
-			return nil
+			h.PrintError("You should specify the logger type (basic | logstash)")
 		}
 
 		logger := model.Logger{
@@ -92,27 +88,22 @@ var SetLogger = cli.Command{
 		}
 		if logger.Type == "basic" {
 			if logger.Logfile == "" {
-				color.Red("You should specify a logfile with --logfile flag")
-				return nil
+				h.PrintError("You should specify a logfile with --logfile flag")
 			}
 		} else if logger.Type == "logstash" {
 			if logger.Hostname == "" {
-				color.Red("You should specify a logstash hostname  with --hostname flag")
-				return nil
+				h.PrintError("You should specify a logstash hostname  with --hostname flag")
 			}
 			if logger.Port == 0 {
-				color.Red("You should specify a logstash port with --port flag")
-				return nil
+				h.PrintError("You should specify a logstash port with --port flag")
 			}
 			if logger.Timeout == 0 {
-				color.Red("You should specify a logstash timeout with --timeout flag")
-				return nil
+				h.PrintError("You should specify a logstash timeout with --timeout flag")
 			}
 
 		} else if logger.Type == "rollbar" {
 			if logger.Token == "" {
-				color.Red("You should specify a rollbar token with --token flag")
-				return nil
+				h.PrintError("You should specify a rollbar token with --token flag")
 			}
 			if logger.Environment == "" {
 				logger.Environment = "development"
@@ -124,8 +115,7 @@ var SetLogger = cli.Command{
 
 		err := m.SetLogger(cfg.Token, logger)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		color.Green("Logger successfully set up")
@@ -142,8 +132,7 @@ var DelLogger = cli.Command{
 	Description: h.T("logger.del.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify the logger type (basic | logstash | rollbar)")
-			return nil
+			h.PrintError("You should specify the logger type (basic | logstash | rollbar)")
 		}
 
 		logger := model.Logger{
@@ -152,14 +141,12 @@ var DelLogger = cli.Command{
 
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		err := m.DelLogger(cfg.Token, logger)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		color.Green("Logger successfully deleted")

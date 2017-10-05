@@ -11,7 +11,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{}) error {
+func renderUpdate(s model.BuildEvent, c model.ComponentEvent, a []interface{}) error {
 	// component status
 	for i, v := range a {
 		t := formatType(c.Type)
@@ -64,25 +64,25 @@ func renderUpdate(s model.ServiceEvent, c model.ComponentEvent, a []interface{})
 
 	// overall status
 	switch s.Subject {
-	case SERVICEDELETEDONE:
+	case BUILDDELETEDONE:
 		a[len(a)-1] = green("Destroyed")
-	case SERVICECREATEDONE:
+	case BUILDCREATEDONE:
 		a[len(a)-1] = green("Applied")
-	case SERVICEIMPORTDONE:
+	case BUILDIMPORTDONE:
 		a[len(a)-1] = green("Imported")
-	case SERVICECREATEERROR, SERVICEDELETEERROR, SERVICEIMPORTERROR:
+	case BUILDCREATEERROR, BUILDDELETEERROR, BUILDIMPORTERROR:
 		a[len(a)-1] = red("Error")
 	}
 
 	return nil
 }
 
-func renderOutput(s model.ServiceEvent) (string, []interface{}) {
+func renderOutput(s model.BuildEvent) (string, []interface{}) {
 	var blue = color.New(color.FgBlue).SprintFunc()
 
 	f := "\nEnvironment Name: %s\n"
 	a := []interface{}{blue(s.Name)}
-	f = f + "Environment ID: %s\n\n"
+	f = f + "Build ID: %s\n\n"
 	a = append(a, blue(s.ID))
 
 	if len(s.Changes) == 0 {
@@ -106,7 +106,7 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 		for _, k := range keys {
 			f = f + "%-" + strconv.Itoa(longestKey+1) + "s %3d/%-3d %s\n"
 			t := formatType(k)
-			if s.Subject == SERVICEIMPORT {
+			if s.Subject == BUILDIMPORT {
 				a = append(a, t, 0, 0, "")
 			} else {
 				a = append(a, t+"s", 0, changes[k], "")
@@ -117,11 +117,11 @@ func renderOutput(s model.ServiceEvent) (string, []interface{}) {
 	f = f + "\nStatus: %s\n\n"
 	var status string
 	switch s.Subject {
-	case SERVICECREATE:
+	case BUILDCREATE:
 		status = yellow("Applying")
-	case SERVICEDELETE:
+	case BUILDDELETE:
 		status = yellow("Destroying")
-	case SERVICEIMPORT:
+	case BUILDIMPORT:
 		status = yellow("Importing")
 	default:
 		status = yellow("Unknown")
@@ -146,8 +146,8 @@ func formatType(t string) string {
 	return strings.Title(t)
 }
 
-func processServiceEvent(s map[string]interface{}) model.ServiceEvent {
-	var m model.ServiceEvent
+func processBuildEvent(s map[string]interface{}) model.BuildEvent {
+	var m model.BuildEvent
 
 	config := &mapstructure.DecoderConfig{
 		Metadata: nil,

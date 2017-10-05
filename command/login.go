@@ -71,15 +71,13 @@ var Login = cli.Command{
 
 		token, err := m.Login(username, password)
 		if err != nil {
-			color.Red(err.Error())
-			os.Exit(1)
+			h.PrintError(err.Error())
 		}
 		cfg.Token = token
 		cfg.User = username
 		err = model.SaveConfig(cfg)
 		if err != nil {
-			color.Red("Can't write config file")
-			os.Exit(1)
+			h.PrintError("Can't write config file")
 		}
 		color.Green("Welcome back " + username)
 		return nil

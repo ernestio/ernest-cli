@@ -23,14 +23,12 @@ var Target = cli.Command{
 	Description: h.T("target.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify the target url")
-			return nil
+			h.PrintError("You should specify the target url")
 		}
 		_, cfg := setup(c)
 		cfg.URL = c.Args()[0]
 		if err := persistTarget(cfg); err != nil {
-			color.Red("Couldn't write config file ~/.ernest check permissions")
-			return nil
+			h.PrintError("Couldn't write config file ~/.ernest check permissions")
 		}
 		color.Green("Target set")
 		return nil

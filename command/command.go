@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"log"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/manager"
 	"github.com/ernestio/ernest-cli/model"
-	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
 
@@ -20,7 +20,7 @@ func setup(c *cli.Context) (*manager.Manager, *model.Config) {
 	if config == nil {
 		config = &model.Config{}
 		if c.Command.Name != "target" && c.Command.Name != "setup" {
-			color.Red("Environment not configured, please use target command")
+			h.PrintError("Environment not configured, please use target command")
 		}
 	}
 	m := manager.Manager{URL: config.URL, Version: c.App.Version}
