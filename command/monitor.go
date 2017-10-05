@@ -38,13 +38,15 @@ var MonitorEnv = cli.Command{
 		if len(c.Args()) == 1 {
 			h.PrintError("You should specify an existing env name")
 		}
-		if len(c.Args()) == 2 {
-			h.PrintError("You should specify a build id")
-		}
 
 		project := c.Args()[0]
 		env := c.Args()[1]
-		id := c.Args()[2]
+
+		id, err := m.LatestBuildID(cfg.Token, project, env)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
 		build, err := m.BuildStatus(cfg.Token, project, env, id)
 		if err != nil {
 			h.PrintError(err.Error())
