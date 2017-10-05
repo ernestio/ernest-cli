@@ -6,7 +6,7 @@ package command
 
 // CmdProject subcommand
 import (
-	"fmt"
+	"strings"
 
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
@@ -129,11 +129,11 @@ var CreateVcloudProject = cli.Command{
 			rtype = "vcloud-fake"
 		}
 		if len(errs) > 0 {
-			h.PrintError("Please, fix the error shown below to continue")
+			msgs := []string{"Please, fix the error shown below to continue"}
 			for _, e := range errs {
-				fmt.Println("  - " + e)
+				msgs = append(msgs, "  - "+e)
 			}
-			return nil
+			h.PrintError(strings.Join(msgs, "\n"))
 		}
 
 		body, err := m.CreateVcloudProject(cfg.Token, name, rtype, username, password, url, network, c.String("vse-url"))
