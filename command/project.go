@@ -12,7 +12,6 @@ import (
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
-	"github.com/fatih/color"
 	"github.com/urfave/cli"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -26,13 +25,11 @@ var ListProjects = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 		projects, err := m.ListProjects(cfg.Token)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		view.PrintProjectList(projects)
@@ -50,18 +47,15 @@ var InfoProject = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the project name")
-			return nil
+			h.PrintError("You should specify the project name")
 		}
 		project := c.Args()[0]
 		p, err := m.InfoProject(cfg.Token, project)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		view.PrintProjectInfo(p)

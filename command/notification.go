@@ -21,13 +21,11 @@ var ListNotifications = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 		notifications, err := m.ListNotifications(cfg.Token)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		view.PrintNotificationList(notifications)
@@ -44,16 +42,14 @@ var DeleteNotification = cli.Command{
 	Description: h.T("notification.delete.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify a valid name")
-			return nil
+			h.PrintError("You should specify a valid name")
 		}
 
 		name := c.Args()[0]
 		m, cfg := setup(c)
 		err := m.DeleteNotification(cfg.Token, name)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("Notify " + name + " successfully delete")
 		return nil
@@ -68,13 +64,11 @@ var UpdateNotification = cli.Command{
 	Description: h.T("notification.update.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify a valid name")
-			return nil
+			h.PrintError("You should specify a valid name")
 		}
 
 		if len(c.Args()) < 2 {
-			color.Red("You should specify a notify config options")
-			return nil
+			h.PrintError("You should specify a notify config options")
 		}
 
 		name := c.Args()[0]
@@ -82,8 +76,7 @@ var UpdateNotification = cli.Command{
 		m, cfg := setup(c)
 		err := m.UpdateNotification(cfg.Token, name, notifyConfig)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("Notify " + name + " successfully updated")
 		return nil
@@ -98,16 +91,13 @@ var AddServiceToNotification = cli.Command{
 	Description: h.T("notification.service.add.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify a valid project name")
-			return nil
+			h.PrintError("You should specify a valid project name")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You should specify a valid environment name")
-			return nil
+			h.PrintError("You should specify a valid environment name")
 		}
 		if len(c.Args()) < 3 {
-			color.Red("You should specify a valid notify name")
-			return nil
+			h.PrintError("You should specify a valid notify name")
 		}
 
 		service := c.Args()[0] + "/" + c.Args()[1]
@@ -115,8 +105,7 @@ var AddServiceToNotification = cli.Command{
 		m, cfg := setup(c)
 		err := m.AddServiceToNotification(cfg.Token, service, notify, false)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("Environment " + service + " successfully attached to " + notify + " notify")
 		return nil
@@ -131,12 +120,10 @@ var RmServiceToNotification = cli.Command{
 	Description: h.T("notification.service.rm.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify a valid environment name")
-			return nil
+			h.PrintError("You should specify a valid environment name")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You should specify a valid notify name")
-			return nil
+			h.PrintError("You should specify a valid notify name")
 		}
 
 		service := c.Args()[0]
@@ -144,8 +131,7 @@ var RmServiceToNotification = cli.Command{
 		m, cfg := setup(c)
 		err := m.AddServiceToNotification(cfg.Token, service, notify, true)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("Environment " + service + " successfully removed from " + notify + " notify")
 		return nil
@@ -160,17 +146,14 @@ var CreateNotification = cli.Command{
 	Description: h.T("notification.create.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify a valid name")
-			return nil
+			h.PrintError("You should specify a valid name")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You should specify a notify type")
-			return nil
+			h.PrintError("You should specify a notify type")
 		}
 
 		if len(c.Args()) < 3 {
-			color.Red("You should specify a notify config options")
-			return nil
+			h.PrintError("You should specify a notify config options")
 		}
 
 		name := c.Args()[0]
@@ -179,8 +162,7 @@ var CreateNotification = cli.Command{
 		m, cfg := setup(c)
 		_, err := m.CreateNotification(cfg.Token, name, notifyType, notifyConfig)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("Notify " + name + " successfully created")
 		return nil

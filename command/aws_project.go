@@ -6,7 +6,7 @@ package command
 
 // CmdProject subcommand
 import (
-	"fmt"
+	"strings"
 
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
@@ -53,14 +53,11 @@ var CreateAWSProject = cli.Command{
 		m, cfg := setup(c)
 
 		if len(c.Args()) < 1 {
-			msg := "You should specify the project name"
-			color.Red(msg)
-			return nil
+			h.PrintError("You should specify the project name")
 		}
 
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 		name := c.Args()[0]
 
@@ -68,8 +65,7 @@ var CreateAWSProject = cli.Command{
 		if template != "" {
 			var t model.ProjectTemplate
 			if err := getProjectTemplate(template, &t); err != nil {
-				color.Red(err.Error())
-				return nil
+				h.PrintError(err.Error())
 			}
 			accessKeyID = t.Token
 			secretAccessKey = t.Secret
@@ -102,11 +98,11 @@ var CreateAWSProject = cli.Command{
 		}
 
 		if len(errs) > 0 {
-			color.Red("Please, fix the error shown below to continue")
+			msgs := []string{"Please, fix the error shown below to continue"}
 			for _, e := range errs {
-				fmt.Println("  - " + e)
+				msgs = append(msgs, "  - "+e)
 			}
-			return nil
+			h.PrintError(strings.Join(msgs, "\n"))
 		}
 
 		rtype := "aws"
@@ -116,7 +112,7 @@ var CreateAWSProject = cli.Command{
 		}
 		body, err := m.CreateAWSProject(cfg.Token, name, rtype, region, accessKeyID, secretAccessKey)
 		if err != nil {
-			color.Red(body)
+			h.PrintError(body)
 		} else {
 			color.Green("Project '" + name + "' successfully created ")
 		}
@@ -146,31 +142,26 @@ var UpdateAWSProject = cli.Command{
 		var accessKeyID, secretAccessKey string
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify the project name")
-			return nil
+			h.PrintError("You should specify the project name")
 		}
 		name := c.Args()[0]
 		accessKeyID = c.String("access_key_id")
 		secretAccessKey = c.String("secret_access_key")
 
 		if accessKeyID == "" {
-			color.Red("You should specify your aws access key id with '--access_key_id' flag")
-			return nil
+			h.PrintError("You should specify your aws access key id with '--access_key_id' flag")
 		}
 		if secretAccessKey == "" {
-			color.Red("You should specify your aws secret access key with '--secret_access_key' flag")
-			return nil
+			h.PrintError("You should specify your aws secret access key with '--secret_access_key' flag")
 		}
 
 		err := m.UpdateAWSProject(cfg.Token, name, accessKeyID, secretAccessKey)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("Project " + name + " successfully updated")
 

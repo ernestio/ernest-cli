@@ -23,8 +23,7 @@ var Logout = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're already logged out")
-			os.Exit(1)
+			h.PrintError("You're already logged out")
 		}
 		if m == nil {
 			os.Exit(1)
@@ -33,8 +32,7 @@ var Logout = cli.Command{
 		cfg.User = ""
 		err := model.SaveConfig(cfg)
 		if err != nil {
-			color.Red("Can't write config file")
-			os.Exit(1)
+			h.PrintError("Can't write config file")
 		}
 		color.Green("Bye.")
 		return nil

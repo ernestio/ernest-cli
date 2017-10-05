@@ -8,7 +8,6 @@ package command
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"strings"
 
 	h "github.com/ernestio/ernest-cli/helper"
@@ -27,13 +26,11 @@ var ListEnvs = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 		envs, err := m.ListEnvs(cfg.Token)
 		if err != nil {
-			color.Red(err.Error())
-			return err
+			h.PrintError(err.Error())
 		}
 
 		view.PrintEnvList(envs)
@@ -52,25 +49,21 @@ var UpdateEnv = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You must provide the project name")
-			return nil
+			h.PrintError("You must provide the project name")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You must provide the new environment name")
-			return nil
+			h.PrintError("You must provide the new environment name")
 		}
 		project := c.Args()[0]
 		env := c.Args()[1]
 
 		err := m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
 		if err != nil {
-			color.Red(err.Error())
-			os.Exit(1)
+			h.PrintError(err.Error())
 		}
 
 		color.Green("Environment successfully updated")
@@ -95,25 +88,21 @@ var CreateEnv = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You must provide the project name")
-			return nil
+			h.PrintError("You must provide the project name")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You must provide the new environment name")
-			return nil
+			h.PrintError("You must provide the new environment name")
 		}
 		project := c.Args()[0]
 		env := c.Args()[1]
 
 		err := m.CreateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("Environment successfully created")
 
@@ -146,8 +135,7 @@ var ApplyEnv = cli.Command{
 		}
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		var err error
@@ -158,8 +146,7 @@ var ApplyEnv = cli.Command{
 		}
 		response, err := m.Apply(cfg.Token, file, ProviderFlagsToSlice(c), monit, dry)
 		if err != nil {
-			color.Red(err.Error())
-			os.Exit(1)
+			h.PrintError(err.Error())
 		}
 		if dry == true {
 			fmt.Println(string(response))
@@ -188,17 +175,14 @@ var DestroyEnv = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify an existing project name")
-			return nil
+			h.PrintError("You should specify an existing project name")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You should specify an existing project environment")
-			return nil
+			h.PrintError("You should specify an existing project environment")
 		}
 		project := c.Args()[0]
 		env := c.Args()[1]
@@ -206,15 +190,13 @@ var DestroyEnv = cli.Command{
 		if c.Bool("force") {
 			err := m.ForceDestroy(cfg.Token, project, env)
 			if err != nil {
-				color.Red(err.Error())
-				return nil
+				h.PrintError(err.Error())
 			}
 		} else {
 			if c.Bool("yes") {
 				err := m.Destroy(cfg.Token, project, env, true)
 				if err != nil {
-					color.Red(err.Error())
-					return nil
+					h.PrintError(err.Error())
 				}
 			} else {
 				fmt.Print("Do you really want to destroy this environment? (Y/n) ")
@@ -223,8 +205,7 @@ var DestroyEnv = cli.Command{
 				}
 				err := m.Destroy(cfg.Token, project, env, true)
 				if err != nil {
-					color.Red(err.Error())
-					return nil
+					h.PrintError(err.Error())
 				}
 			}
 		}
@@ -243,17 +224,14 @@ var HistoryEnv = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify an existing project name")
-			return nil
+			h.PrintError("You should specify an existing project name")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You should specify an existing environment name")
-			return nil
+			h.PrintError("You should specify an existing environment name")
 		}
 
 		project := c.Args()[0]
@@ -274,24 +252,20 @@ var ResetEnv = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify the project name")
-			return nil
+			h.PrintError("You should specify the project name")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You should specify the environment name")
-			return nil
+			h.PrintError("You should specify the environment name")
 		}
 		project := c.Args()[0]
 		env := c.Args()[1]
 		err := m.ResetEnv(project, env, cfg.Token)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Red("You've successfully resetted the environment '" + project + " / " + env + "'")
 
@@ -314,13 +288,11 @@ var RevertEnv = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) < 3 {
-			color.Red("Please specify a project, environment and build ID")
-			return nil
+			h.PrintError("Please specify a project, environment and build ID")
 		}
 		project := c.Args()[0]
 		env := c.Args()[1]
@@ -329,8 +301,7 @@ var RevertEnv = cli.Command{
 
 		response, err := m.RevertEnv(project, env, buildID, cfg.Token, dry)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		if dry == true {
 			fmt.Println(string(response))
@@ -358,32 +329,27 @@ var DefinitionEnv = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) < 1 {
-			color.Red("You should specify the project name")
-			return nil
+			h.PrintError("You should specify the project name")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You should specify the env name")
-			return nil
+			h.PrintError("You should specify the env name")
 		}
 		project := c.Args()[0]
 		env := c.Args()[1]
 		if c.String("build") != "" {
 			definition, err := m.BuildDefinitionFromIndex(cfg.Token, project, env, c.String("build"))
 			if err != nil {
-				color.Red(err.Error())
-				os.Exit(1)
+				h.PrintError(err.Error())
 			}
 			fmt.Println(string(definition))
 		} else {
 			definition, err := m.LatestBuildDefinition(cfg.Token, project, env)
 			if err != nil {
-				color.Red(err.Error())
-				os.Exit(1)
+				h.PrintError(err.Error())
 			}
 
 			fmt.Println(string(definition))
@@ -412,17 +378,14 @@ var InfoEnv = cli.Command{
 
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify an existing project name")
-			return nil
+			h.PrintError("You should specify an existing project name")
 		}
 		if len(c.Args()) == 1 {
-			color.Red("You should specify an existing env name")
-			return nil
+			h.PrintError("You should specify an existing env name")
 		}
 
 		project := c.Args()[0]
@@ -435,8 +398,7 @@ var InfoEnv = cli.Command{
 		}
 
 		if err != nil {
-			color.Red(err.Error())
-			os.Exit(1)
+			h.PrintError(err.Error())
 		}
 		view.PrintEnvInfo(&b)
 		return nil
@@ -455,13 +417,11 @@ var DiffEnv = cli.Command{
 
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) < 4 {
-			color.Red("You should specify the project and env names and two build ids to compare them")
-			return nil
+			h.PrintError("You should specify the project and env names and two build ids to compare them")
 		}
 
 		project := c.Args()[0]
@@ -471,19 +431,13 @@ var DiffEnv = cli.Command{
 
 		build1, err := m.BuildStatus(cfg.Token, project, env, b1)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		build2, err := m.BuildStatus(cfg.Token, project, env, b2)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
-		if err != nil {
-			color.Red(err.Error())
-			os.Exit(1)
-		}
 		view.PrintEnvDiff(build1, build2)
 		return nil
 	},
@@ -514,17 +468,14 @@ var ImportEnv = cli.Command{
 
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify an existing project name")
-			return nil
+			h.PrintError("You should specify an existing project name")
 		}
 		if len(c.Args()) == 1 {
-			color.Red("You should specify a valid environment name")
-			return nil
+			h.PrintError("You should specify a valid environment name")
 		}
 
 		if c.String("filters") != "" {
@@ -536,8 +487,7 @@ var ImportEnv = cli.Command{
 		_, err = m.Import(cfg.Token, name, project, filters)
 
 		if err != nil {
-			color.Red(err.Error())
-			os.Exit(1)
+			h.PrintError(err.Error())
 		}
 		return nil
 	},

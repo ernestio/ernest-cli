@@ -33,8 +33,7 @@ var ListUsers = cli.Command{
 		m, cfg := setup(c)
 		users, err := m.ListUsers(cfg.Token)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		w := new(tabwriter.Writer)
@@ -71,12 +70,10 @@ var CreateUser = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify an user username and a password")
-			return nil
+			h.PrintError("You should specify an user username and a password")
 		}
 		if len(c.Args()) < 2 {
-			color.Red("You should specify the user password")
-			return nil
+			h.PrintError("You should specify the user password")
 		}
 
 		usr := c.Args()[0]
@@ -85,8 +82,7 @@ var CreateUser = cli.Command{
 		m, cfg := setup(c)
 		err := m.CreateUser(cfg.Token, usr, email, usr, pwd)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		color.Green("User " + usr + " successfully created")
 		return nil
@@ -124,38 +120,32 @@ var PasswordUser = cli.Command{
 
 		session, err := m.GetSession(cfg.Token)
 		if err != nil {
-			color.Red("You don’t have permissions to perform this action")
-			return nil
+			h.PrintError("You don’t have permissions to perform this action")
 		}
 
 		if !session.IsAdmin && username != "" {
-			color.Red("You don’t have permissions to perform this action")
-			return nil
+			h.PrintError("You don’t have permissions to perform this action")
 		}
 
 		if session.IsAdmin && username != "" {
 			if password == "" {
-				color.Red("Please provide a valid password for the user with `--password`")
-				return nil
+				h.PrintError("Please provide a valid password for the user with `--password`")
 			}
 
 			// Just change the password with the given values for the given user
 			usr, err := m.GetUserByUsername(cfg.Token, username)
 			if err = m.ChangePasswordByAdmin(cfg.Token, usr.ID, usr.Username, usr.GroupID, password); err != nil {
-				color.Red(err.Error())
-				return nil
+				h.PrintError(err.Error())
 			}
 			color.Green("`" + usr.Username + "` password has been changed")
 		} else {
 			// Ask the user for credentials
 			var users []model.User
 			if users, err = m.ListUsers(cfg.Token); err != nil {
-				color.Red("You don’t have permissions to perform this action")
-				return nil
+				h.PrintError("You don’t have permissions to perform this action")
 			}
 			if len(users) == 0 {
-				color.Red("You don’t have permissions to perform this action")
-				return nil
+				h.PrintError("You don’t have permissions to perform this action")
 			}
 
 			var user model.User
@@ -186,14 +176,12 @@ var PasswordUser = cli.Command{
 			}
 
 			if newpassword != rnewpassword {
-				color.Red("Aborting... New password and confirmation doesn't match.")
-				return nil
+				h.PrintError("Aborting... New password and confirmation doesn't match.")
 			}
 
 			err = m.ChangePassword(cfg.Token, user.ID, user.Username, user.GroupID, oldpassword, newpassword)
 			if err != nil {
-				color.Red(err.Error())
-				return err
+				h.PrintError(err.Error())
 			}
 			color.Green("Your password has been changed")
 		}
@@ -210,8 +198,7 @@ var DisableUser = cli.Command{
 	Description: h.T("user.disable.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			color.Red("You should specify an username")
-			return nil
+			h.PrintError("You should specify an username")
 		}
 
 		m, cfg := setup(c)
@@ -219,24 +206,20 @@ var DisableUser = cli.Command{
 
 		session, err := m.GetSession(cfg.Token)
 		if err != nil {
-			color.Red("You don’t have permissions to perform this action")
-			return nil
+			h.PrintError("You don’t have permissions to perform this action")
 		}
 
 		if !session.IsAdmin {
-			color.Red("You don’t have permissions to perform this action")
-			return nil
+			h.PrintError("You don’t have permissions to perform this action")
 		}
 
 		user, err := m.GetUserByUsername(cfg.Token, username)
 		if err != nil {
-			color.Red(err.Error())
-			return err
+			h.PrintError(err.Error())
 		}
 
 		if err = m.ChangePasswordByAdmin(cfg.Token, user.ID, user.Username, user.GroupID, randString(16)); err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		color.Green("Account `" + username + "` has been disabled")
@@ -260,14 +243,12 @@ var InfoUser = cli.Command{
 		m, cfg := setup(c)
 		session, err := m.GetSession(cfg.Token)
 		if err != nil {
-			color.Red("You don’t have permissions to perform this action")
-			return nil
+			h.PrintError("You don’t have permissions to perform this action")
 		}
 
 		username := c.String("user")
 		if username != "" && session.IsAdmin == false {
-			color.Red("You don’t have permissions to access '" + username + "' information")
-			return nil
+			h.PrintError("You don’t have permissions to access '" + username + "' information")
 		}
 		if username == "" {
 			username = cfg.User
@@ -275,8 +256,7 @@ var InfoUser = cli.Command{
 
 		user, err := m.GetUser(cfg.Token, username)
 		if err != nil {
-			color.Red(err.Error())
-			return err
+			h.PrintError(err.Error())
 		}
 
 		view.PrintUserInfo(user)

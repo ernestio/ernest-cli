@@ -5,7 +5,6 @@
 package command
 
 import (
-	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
 	h "github.com/ernestio/ernest-cli/helper"
@@ -28,18 +27,15 @@ var FindComponents = cli.Command{
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if len(c.Args()) == 0 {
-			color.Red("You should specify an existing project name")
-			return nil
+			h.PrintError("You should specify an existing project name")
 		}
 
 		if len(c.Args()) == 1 {
-			color.Red("You should specify the component type")
-			return nil
+			h.PrintError("You should specify the component type")
 		}
 
 		project := c.Args()[0]
@@ -47,8 +43,7 @@ var FindComponents = cli.Command{
 		service := c.String("environment")
 		components, err := m.FindComponents(cfg.Token, project, component, service)
 		if err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 		view.PrintComponentsList(components)
 

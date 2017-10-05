@@ -45,23 +45,19 @@ var CmdRolesSet = cli.Command{
 		p := c.String("project")
 		e := c.String("environment")
 		if r == "" {
-			color.Red("Please provide a role with --role flag")
-			return nil
+			h.PrintError("Please provide a role with --role flag")
 		}
 		if u == "" {
-			color.Red("Please provide a user with --user flag")
-			return nil
+			h.PrintError("Please provide a user with --user flag")
 		}
 		if p == "" {
-			color.Red("Please provide a project with --project flag")
-			return nil
+			h.PrintError("Please provide a project with --project flag")
 		}
 
 		m, cfg := setup(c)
 		body, err := m.SetRole(cfg.Token, u, p, e, r)
 		if err != nil {
-			color.Red(body)
-			return nil
+			h.PrintError(body)
 		}
 		resource := p
 		if e != "" {
@@ -111,22 +107,19 @@ var CmdRolesUnset = cli.Command{
 		p := c.String("project")
 		e := c.String("environment")
 		if r == "" {
-			color.Red("Please provide a role with --role flag")
-			return nil
+			h.PrintError("Please provide a role with --role flag")
 		}
 		if u == "" {
-			color.Red("Please provide a user with --user flag")
-			return nil
+			h.PrintError("Please provide a user with --user flag")
 		}
 		if p == "" {
-			color.Red("Please provide a project with --project flag")
-			return nil
+			h.PrintError("Please provide a project with --project flag")
 		}
 
 		m, cfg := setup(c)
 		body, err := m.UnsetRole(cfg.Token, u, p, e, r)
 		if err != nil {
-			color.Red(body)
+			h.PrintError(body)
 			return nil
 		}
 

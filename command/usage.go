@@ -39,19 +39,16 @@ var CmdUsage = cli.Command{
 
 		m, cfg := setup(c)
 		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
+			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
 		if body, err = m.GetUsageReport(cfg.Token, c.String("from"), c.String("to")); err != nil {
-			color.Red(err.Error())
-			return nil
+			h.PrintError(err.Error())
 		}
 
 		if c.String("output") != "" {
 			if err := ioutil.WriteFile(c.String("output"), []byte(body), 0644); err != nil {
-				color.Red(err.Error())
-				return nil
+				h.PrintError(err.Error())
 			}
 			color.Green("A file named " + c.String("output") + " has been exported to the current folder")
 		} else {
