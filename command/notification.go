@@ -83,57 +83,70 @@ var UpdateNotification = cli.Command{
 	},
 }
 
-// AddServiceToNotification : Creates a new user
-var AddServiceToNotification = cli.Command{
+// AddEntityToNotification : Creates a new user
+var AddEntityToNotification = cli.Command{
 	Name:        "add",
 	Usage:       h.T("notification.service.add.usage"),
 	ArgsUsage:   h.T("notification.service.add.args"),
 	Description: h.T("notification.service.add.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			h.PrintError("You should specify a valid project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify a valid environment name")
-		}
-		if len(c.Args()) < 3 {
 			h.PrintError("You should specify a valid notify name")
 		}
+		if len(c.Args()) < 2 {
+			h.PrintError("You should specify a valid project name")
+		}
 
-		service := c.Args()[0] + "/" + c.Args()[1]
-		notify := c.Args()[2]
+		project := c.Args()[1]
+		env := ""
+		if len(c.Args()) > 2 {
+			env = c.Args()[2]
+		}
+		notify := c.Args()[0]
 		m, cfg := setup(c)
-		err := m.AddServiceToNotification(cfg.Token, service, notify, false)
+		err := m.AddEntityToNotification(cfg.Token, project, env, notify, false)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
-		color.Green("Environment " + service + " successfully attached to " + notify + " notify")
+		entity := project
+		if env != "" {
+			entity = entity + "/" + env
+		}
+		color.Green("Environment " + entity + " successfully attached to " + notify + " notify")
 		return nil
 	},
 }
 
-// RmServiceToNotification : Creates a new user
-var RmServiceToNotification = cli.Command{
+// RmEntityToNotification : Creates a new user
+var RmEntityToNotification = cli.Command{
 	Name:        "remove",
 	Usage:       h.T("notification.service.rm.usage"),
 	ArgsUsage:   h.T("notification.service.rm.args"),
 	Description: h.T("notification.service.rm.description"),
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
-			h.PrintError("You should specify a valid environment name")
-		}
-		if len(c.Args()) < 2 {
 			h.PrintError("You should specify a valid notify name")
 		}
+		if len(c.Args()) < 2 {
+			h.PrintError("You should specify a valid project name")
+		}
 
-		service := c.Args()[0]
-		notify := c.Args()[1]
+		notify := c.Args()[0]
+		project := c.Args()[1]
+		env := ""
+		if len(c.Args()) > 2 {
+			env = c.Args()[2]
+		}
 		m, cfg := setup(c)
-		err := m.AddServiceToNotification(cfg.Token, service, notify, true)
+		err := m.AddEntityToNotification(cfg.Token, project, env, notify, true)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
-		color.Green("Environment " + service + " successfully removed from " + notify + " notify")
+		entity := project
+		if env != "" {
+			entity = entity + "/" + env
+		}
+		color.Green("Environment " + entity + " successfully removed from " + notify + " notify")
 		return nil
 	},
 }
@@ -178,7 +191,7 @@ var CmdNotification = cli.Command{
 		CreateNotification,
 		UpdateNotification,
 		DeleteNotification,
-		AddServiceToNotification,
-		RmServiceToNotification,
+		AddEntityToNotification,
+		RmEntityToNotification,
 	},
 }

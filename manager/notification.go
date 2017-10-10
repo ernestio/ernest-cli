@@ -7,7 +7,6 @@ package manager
 import (
 	"encoding/json"
 	"errors"
-	"strconv"
 
 	"github.com/ernestio/ernest-cli/model"
 )
@@ -61,16 +60,13 @@ func (m *Manager) ListNotifications(token string) (notifications []model.Notific
 
 // DeleteNotification : Deletes an existing notification by its name
 func (m *Manager) DeleteNotification(token string, name string) (err error) {
-	g, err := m.getNotificationByName(token, name)
-	if err != nil {
-		return errors.New("Notification '" + name + "' does not exist, please specify a different notification name")
-	}
-	id := strconv.Itoa(g.ID)
-
-	body, res, err := m.doRequest("/api/notifications/"+id, "DELETE", []byte(""), token, "")
+	body, res, err := m.doRequest("/api/notifications/"+name, "DELETE", []byte(""), token, "")
 	if err != nil {
 		if res == nil {
 			return ErrConnectionRefused
+		}
+		if res.StatusCode == 404 {
+			return errors.New("Notification '" + name + "' does not exist, please specify a different notification name")
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -86,12 +82,6 @@ func (m *Manager) DeleteNotification(token string, name string) (err error) {
 
 // UpdateNotification : updates notification details
 func (m *Manager) UpdateNotification(token, name, config string) (err error) {
-	g, err := m.getNotificationByName(token, name)
-	if err != nil {
-		return errors.New("Notification '" + name + "' does not exist, please specify a different notification name")
-	}
-	id := strconv.Itoa(g.ID)
-
 	mPayload := make(map[string]string)
 	mPayload["name"] = name
 	mPayload["config"] = config
@@ -100,10 +90,13 @@ func (m *Manager) UpdateNotification(token, name, config string) (err error) {
 		return errors.New("Internal error processing your input")
 	}
 
-	body, res, err := m.doRequest("/api/notifications/"+id, "PUT", payload, token, "")
+	body, res, err := m.doRequest("/api/notifications/"+name, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
 			return ErrConnectionRefused
+		}
+		if res.StatusCode == 404 {
+			return errors.New("Notification '" + name + "' does not exist, please specify a different notification name")
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -118,27 +111,17 @@ func (m *Manager) UpdateNotification(token, name, config string) (err error) {
 	return nil
 }
 
-// AddServiceToNotification : updates notification details
-func (m *Manager) AddServiceToNotification(token, service, name string, delete bool) (err error) {
-	g, err := m.getNotificationByName(token, name)
-	if err != nil {
-		return errors.New("Notification '" + name + "' does not exist, please specify a different notification name")
-	}
-	id := strconv.Itoa(g.ID)
-
-	mPayload := make(map[string]string)
-	mPayload["name"] = name
-	mPayload["service"] = service
-	payload, err := json.Marshal(mPayload)
-	if err != nil {
-		return errors.New("Internal error processing your input")
-	}
-
+// AddEntityToNotification : updates notification details
+func (m *Manager) AddEntityToNotification(token, project, env, name string, delete bool) (err error) {
 	method := "POST"
 	if delete {
 		method = "DELETE"
 	}
-	body, res, err := m.doRequest("/api/notifications/"+id+"/"+service, method, payload, token, "")
+	url := "/api/notifications/" + name + "/projects/" + project
+	if env != "" {
+		url = "/api/notifications/" + name + "/projects/" + project + "/envs/" + env
+	}
+	body, res, err := m.doRequest(url, method, nil, token, "")
 	if err != nil {
 		if res == nil {
 			return ErrConnectionRefused

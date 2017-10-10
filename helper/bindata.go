@@ -348,28 +348,30 @@ var _langEnYml = []byte(`en:
     service:
       add:
         usage: "Add environment to an existing notify."
-        args: "<project_name> <env_name> <notify_name>"
+        args: "<notification_name> <project_name> [<env_name>]"
         description: |
           Adds a environment to an existing notify.
 
           Example:
-            $ ernest notify add <project_name> <environment_name> <notify_name>
+            $ ernest notify add <notify_name> <project_name> <environment_name>
 
 
           Example:
-          $ ernest notify add my_env my_notify 
+          $ ernest notify add my_notify my_project
+          $ ernest notify add my_notify my_project my_env
       rm:
         usage: "Removes an environment to an existing notify."
-        args: "<env_name> <notify_name>"
+        args: "<notify_name> <project_name> [<env_name>]"
         description: |
           Removes an environment to an existing notify.
 
           Example:
-            $ ernest notify remove <env_name> <notify_name>
+            $ ernest notify remove <notify_name> <project_name> <env_name>
 
 
           Example:
-          $ ernest notify remove my_env my_notify 
+          $ ernest notify remove my_notify my_project
+          $ ernest notify remove my_notify my_project my_env
     create:
       usage: "Create a new notify."
       args: "<notify_name> <notify_type> <notify_config>"
@@ -526,7 +528,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 15122, mode: os.FileMode(420), modTime: time.Unix(1504859240, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 15287, mode: os.FileMode(420), modTime: time.Unix(1507626753, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
