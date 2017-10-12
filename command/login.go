@@ -46,7 +46,7 @@ var Login = cli.Command{
 
 		if c.String("user") == "" {
 			fmt.Printf("Username: ")
-			_, err := fmt.Scanf("%s", &username)
+			_, err := fmt.Scanln(&username)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 			}
@@ -57,7 +57,7 @@ var Login = cli.Command{
 		if c.String("password") == "" {
 			fmt.Printf("Password: ")
 			if runtime.GOOS == "windows" {
-				_, err := fmt.Scanf("%s", &password)
+				_, err := fmt.Scanln(&password)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 				}
