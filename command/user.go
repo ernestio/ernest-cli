@@ -40,14 +40,14 @@ var ListUsers = cli.Command{
 		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Group", "Admin"})
+		table.SetHeader([]string{"ID", "Name", "Group", "Type", "Admin"})
 		for _, u := range users {
 			id := strconv.Itoa(u.ID)
 			admin := "no"
 			if u.IsAdmin {
 				admin = "yes"
 			}
-			table.Append([]string{id, u.Username, u.GroupName, admin})
+			table.Append([]string{id, u.Username, u.GroupName, u.Type, admin})
 		}
 		table.Render()
 
