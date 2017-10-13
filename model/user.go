@@ -11,6 +11,7 @@ type User struct {
 	Email     string   `json:"email"`
 	GroupID   int      `json:"group_id"`
 	GroupName string   `json:"group_name"`
+	Type      string   `json:"type"`
 	IsAdmin   bool     `json:"admin"`
 	Projects  []string `json:"projects"`
 	Envs      []string `json:"envs"`
