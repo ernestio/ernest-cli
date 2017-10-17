@@ -246,3 +246,50 @@ func (m *Manager) CreateEnv(token, name, project string, credentials map[string]
 
 	return rerr
 }
+
+// SyncEnv : Sync's an environmnet
+func (m *Manager) SyncEnv(token, name, project string) error {
+	a := model.Action{
+		Type: "sync",
+	}
+
+	data, err := json.Marshal(a)
+	if err != nil {
+		return err
+	}
+
+	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
+	fmt.Println(body)
+	if resp == nil {
+		return ErrConnectionRefused
+	}
+	if rerr != nil {
+		return rerr
+	}
+
+	err = json.Unmarshal([]byte(body), &a)
+	if err != nil {
+		return errors.New(body)
+	}
+
+	err = helper.Monitorize(m.URL, "/events", token, a.ResourceID)
+	if err != nil {
+		return err
+	}
+
+	b, err := m.BuildStatusByID(token, project, name, a.ResourceID)
+	if err != nil {
+		return err
+	}
+
+	switch b.Status {
+	case "done":
+		fmt.Println("no changes detected")
+	case "awaiting_resolution":
+		fmt.Println("changes detected")
+	case "errored":
+		fmt.Println("unable to sync")
+	}
+
+	return nil
+}

@@ -155,6 +155,41 @@ var ApplyEnv = cli.Command{
 	},
 }
 
+// SyncEnv command
+// Syncs an environment with the cloud provider
+var SyncEnv = cli.Command{
+	Name:        "sync",
+	Aliases:     []string{"s"},
+	Usage:       h.T("envs.sync.usage"),
+	ArgsUsage:   h.T("envs.sync.args"),
+	Description: h.T("envs.sync.description"),
+	Flags:       append([]cli.Flag{}),
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			h.PrintError("You're not allowed to perform this action, please log in")
+		}
+
+		if len(c.Args()) < 1 {
+			h.PrintError("You should specify an existing project name")
+		}
+		if len(c.Args()) < 2 {
+			h.PrintError("You should specify an existing project environment")
+		}
+
+		project := c.Args()[0]
+		env := c.Args()[1]
+
+		err := m.SyncEnv(cfg.Token, env, project)
+		if err != nil {
+			h.PrintError(err.Error())
+			return nil
+		}
+
+		return nil
+	},
+}
+
 // DestroyEnv command
 var DestroyEnv = cli.Command{
 	Name:        "delete",
@@ -539,5 +574,6 @@ var CmdEnv = cli.Command{
 		MonitorEnv,
 		DiffEnv,
 		ImportEnv,
+		SyncEnv,
 	},
 }

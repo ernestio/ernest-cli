@@ -198,7 +198,7 @@ func (m *Manager) Import(token string, name string, project string, filters []st
 		return "", err
 	}
 
-	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/yaml")
+	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
 	if resp == nil {
 		return "", ErrConnectionRefused
 	}
