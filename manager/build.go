@@ -137,6 +137,25 @@ func (m *Manager) LatestBuildID(token, project, env string) (string, error) {
 	return builds[0].ID, nil
 }
 
+// BuildMappingChanges ...
+func (m *Manager) BuildMappingChanges(token, project, env, build string) (string, error) {
+	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+build+"/mapping/?changes=true", "GET", nil, token, "application/json")
+	if err != nil {
+		if resp == nil {
+			return "", ErrConnectionRefused
+		}
+		var internalError struct {
+			Message string `json:"message"`
+		}
+		if err := json.Unmarshal([]byte(body), &internalError); err != nil {
+			return "", errors.New(body)
+		}
+		return "", errors.New(internalError.Message)
+	}
+
+	return body, nil
+}
+
 // LatestBuildStatus ...
 func (m *Manager) LatestBuildStatus(token, project, env string) (build model.Build, err error) {
 	id, err := m.LatestBuildID(token, project, env)

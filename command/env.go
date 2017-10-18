@@ -190,6 +190,72 @@ var SyncEnv = cli.Command{
 	},
 }
 
+// ResolveEnv command
+// Resolves an issue that requires user input
+var ResolveEnv = cli.Command{
+	Name:        "resolve",
+	Aliases:     []string{"r"},
+	Usage:       h.T("envs.resolve.usage"),
+	ArgsUsage:   h.T("envs.resolve.args"),
+	Description: h.T("envs.resolve.description"),
+	Flags: append([]cli.Flag{
+		cli.BoolFlag{
+			Name:  "accept, a",
+			Usage: "Accept Sync changes",
+		},
+		cli.BoolFlag{
+			Name:  "reject, r",
+			Usage: "Reject Sync changes",
+		},
+		cli.BoolFlag{
+			Name:  "ignore, i",
+			Usage: "Ignore Sync changes",
+		},
+	}),
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			h.PrintError("You're not allowed to perform this action, please log in")
+		}
+
+		if len(c.Args()) < 1 {
+			h.PrintError("You should specify an existing project name")
+		}
+		if len(c.Args()) < 2 {
+			h.PrintError("You should specify an existing project environment")
+		}
+
+		var resolution string
+
+		if c.Bool("accept") {
+			resolution = "accept-changes"
+		}
+
+		if c.Bool("reject") {
+			resolution = "reject-changes"
+		}
+
+		if c.Bool("ignore") {
+			resolution = "ignore-changes"
+		}
+
+		if resolution == "" {
+			h.PrintError("You should specify a valid resolution [accept|reject|ignore]")
+		}
+
+		project := c.Args()[0]
+		env := c.Args()[1]
+
+		err := m.ResolveEnv(cfg.Token, env, project, resolution)
+		if err != nil {
+			h.PrintError(err.Error())
+			return nil
+		}
+
+		return nil
+	},
+}
+
 // DestroyEnv command
 var DestroyEnv = cli.Command{
 	Name:        "delete",
@@ -575,5 +641,6 @@ var CmdEnv = cli.Command{
 		DiffEnv,
 		ImportEnv,
 		SyncEnv,
+		ResolveEnv,
 	},
 }
