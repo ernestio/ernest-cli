@@ -63,7 +63,7 @@ var _langEnYml = []byte(`en:
       args: " "
       description: |
         List available users.
-      
+
       Example:
           $ ernest user list
     create:
@@ -101,7 +101,7 @@ var _langEnYml = []byte(`en:
           $ ernest user info
           $ ernest user info --user <user-name>
   aws:
-    create: 
+    create:
       usage: "Create a new aws project."
       description: |
         Create a new AWS project on the targeted instance of Ernest.
@@ -116,7 +116,7 @@ var _langEnYml = []byte(`en:
             secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
             region: us-west-2
       args: "<project-name>"
-    update: 
+    update:
       usage: "Updates the specified AWS project."
       args: "<project-name>"
       description: |
@@ -178,7 +178,7 @@ var _langEnYml = []byte(`en:
 
         Example:
           $ ernest environment list
-    udpate:
+    update:
       usage: "Creates an empty environment based on a specific project"
       args: "<project> <environment>"
       description: |
@@ -243,7 +243,7 @@ var _langEnYml = []byte(`en:
     definition:
       usage: "Show the current definition of an environment by its name"
       args: "<project_name> <env_name>"
-      description: | 
+      description: |
         Show the current definition of an environment by its name getting the definition about the build.
 
         Example:
@@ -258,6 +258,29 @@ var _langEnYml = []byte(`en:
         Examples:
           $ ernest env definition <my_project> <my_env>
           $ ernest env definition <my_project> <my_env> --build build1
+    sync:
+      usage: "$ ernest env sync <my_project> <my_env>"
+      args: "<project_name> <env_name>"
+      description: |
+        Will sync ernest's environment state from a provider.
+        Any changes detected can then be resolved using the 'resolve' command.
+
+        Examples:
+          $ ernest env sync <my_project> <my_env>
+    resolve:
+      usage: "$ ernest env resolve --[accept|reject|ignore] <my_project> <my_env>"
+      args: "<project_name> <env_name>"
+      description: |
+        Provides the ability to manage changes detected by a sync.
+        Options:
+          accept changes from provider. Ernests internal state will be updated.
+          reject changes from provider. Ernest will create a build to restore and overwrite any changes on the provider.
+          ignore changes from provider. Ernest will disgard the results of the last sync.
+
+        Examples:
+          $ ernest env resolve --accept <my_project> <my_env>
+          $ ernest env resolve --reject <my_project> <my_env>
+          $ ernest env resolve --ignore <my_project> <my_env>
     diff:
       usage: "$ ernest env diff <project_name> <env_name> <build_a> <build_b>"
       args: "<env_aname> <build_a> <build_b>"
@@ -436,7 +459,7 @@ var _langEnYml = []byte(`en:
         Set permissions for a user on a specific resource
 
         Example:
-          $ ernest roles set -u john -r owner -p my_project 
+          $ ernest roles set -u john -r owner -p my_project
           $ ernest roles set -u john -r reader -p my_project -e my_environment
     unset:
       usage: "ernest role unset -u john -r owner -p my_project"
@@ -445,7 +468,7 @@ var _langEnYml = []byte(`en:
         Set permissions for a user on a specific resource
 
         Example:
-          $ ernest roles set -u john -r owner -p my_project 
+          $ ernest roles set -u john -r owner -p my_project
           $ ernest roles set -u john -r reader -p my_project -e my_environment
   setup:
     usage: "Use it to setup your ernest instance"
@@ -512,10 +535,6 @@ var _langEnYml = []byte(`en:
 
         Example:
           $ ernest project update vcloud --user <me> --org <org> --password <secret> my_project
-
-
-
-
 `)
 
 func langEnYmlBytes() ([]byte, error) {
@@ -528,7 +547,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 15287, mode: os.FileMode(420), modTime: time.Unix(1507626753, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 16345, mode: os.FileMode(420), modTime: time.Unix(1508413010, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
