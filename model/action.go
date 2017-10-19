@@ -15,5 +15,6 @@ type Action struct {
 		Filters     []string `json:"filters,omitempty"`
 		BuildID     string   `json:"build_id,omitempty"`
 		Environment string   `json:"environment,omitempty"`
+		Resolution  string   `json:"resolution,omitempty"`
 	} `json:"options,omitempty"`
 }

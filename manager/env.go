@@ -5,13 +5,16 @@
 package manager
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
+	"github.com/fatih/color"
 )
 
 // ListEnvs ...
@@ -245,4 +248,113 @@ func (m *Manager) CreateEnv(token, name, project string, credentials map[string]
 	}
 
 	return rerr
+}
+
+// SyncEnv : Sync's an environmnet
+func (m *Manager) SyncEnv(token, name, project string) error {
+	a := model.Action{
+		Type: "sync",
+	}
+
+	data, err := json.Marshal(a)
+	if err != nil {
+		return err
+	}
+
+	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
+	if resp == nil {
+		return ErrConnectionRefused
+	}
+	if rerr != nil {
+		return rerr
+	}
+
+	err = json.Unmarshal([]byte(body), &a)
+	if err != nil {
+		return errors.New(body)
+	}
+
+	stream := helper.OpenStream(m.URL, "/events", token, a.ResourceID)
+
+	for {
+		var m map[string]interface{}
+
+		msg, ok := <-stream
+		if !ok {
+			return errors.New("could not monitor sync progress")
+		}
+
+		if msg.Data == nil {
+			continue
+		}
+
+		err = json.Unmarshal(bytes.Trim(msg.Data, "\x00"), &m)
+		if err != nil {
+			return err
+		}
+
+		if m["_subject"].(string) == "build.import.done" {
+			break
+		}
+	}
+
+	time.Sleep(time.Second * 1)
+
+	b, err := m.BuildStatusByID(token, project, name, a.ResourceID)
+	if err != nil {
+		return err
+	}
+
+	switch b.Status {
+	case "done":
+		color.Green("No changes detected")
+	case "awaiting_resolution":
+		color.Red("Changes detected")
+		fmt.Println("")
+
+		body, err := m.BuildMappingChanges(token, project, name, a.ResourceID)
+		if err != nil {
+			return err
+		}
+
+		view.SyncChanges(body)
+	case "errored":
+		color.Red("Sync failed!")
+	}
+
+	return nil
+}
+
+// ResolveEnv : Resolves an issue with an environment
+func (m *Manager) ResolveEnv(token, name, project, resolution string) error {
+	a := model.Action{
+		Type: "resolve",
+	}
+
+	a.Options.Resolution = resolution
+
+	data, err := json.Marshal(a)
+	if err != nil {
+		return err
+	}
+
+	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
+	if resp == nil {
+		return ErrConnectionRefused
+	}
+	if rerr != nil {
+		return rerr
+	}
+
+	err = json.Unmarshal([]byte(body), &a)
+	if err != nil {
+		return errors.New(body)
+	}
+
+	if a.Status == "done" {
+		color.Green("Sync successfully resolved!")
+		return nil
+	}
+
+	return helper.Monitorize(m.URL, "/events", token, a.ResourceID)
 }

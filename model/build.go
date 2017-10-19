@@ -8,6 +8,7 @@ package model
 type Build struct {
 	ID          string   `json:"id"`
 	Name        string   `json:"name"`
+	Type        string   `json:"type"`
 	Project     int      `json:"project_id"`
 	ProjectName string   `json:"project"`
 	Provider    string   `json:"provider"`

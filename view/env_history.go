@@ -20,12 +20,12 @@ func PrintEnvHistory(name string, builds []model.Build) {
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Status", "Version", "User"})
+		table.SetHeader([]string{"ID", "Name", "Type", "Status", "Version", "User"})
 		num := len(builds) + 1
 		for _, b := range builds {
 			num = num - 1
 			id := strconv.Itoa(num)
-			table.Append([]string{id, name, b.Status, b.CreatedAt, b.UserName})
+			table.Append([]string{id, name, b.Type, b.Status, b.CreatedAt, b.UserName})
 		}
 		table.Render()
 	}
