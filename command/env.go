@@ -530,16 +530,27 @@ var DiffEnv = cli.Command{
 		b1 := c.Args()[2]
 		b2 := c.Args()[3]
 
-		build1, err := m.BuildStatus(cfg.Token, project, env, b1)
+		id1, err := m.BuildIDFromIndex(cfg.Token, project, env, b1)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
-		build2, err := m.BuildStatus(cfg.Token, project, env, b2)
+		id2, err := m.BuildIDFromIndex(cfg.Token, project, env, b2)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
 
-		view.PrintEnvDiff(build1, build2)
+		def1, err := m.BuildDefinitionByID(cfg.Token, project, env, id1)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
+		def2, err := m.BuildDefinitionByID(cfg.Token, project, env, id2)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
+		view.PrintEnvDiff(id1, id2, def1, def2)
+
 		return nil
 	},
 }
