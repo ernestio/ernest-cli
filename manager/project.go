@@ -7,7 +7,6 @@ package manager
 import (
 	"encoding/json"
 	"errors"
-	"strconv"
 
 	"github.com/ernestio/ernest-cli/model"
 )
@@ -78,16 +77,13 @@ func (m *Manager) ListProjects(token string) (projects []model.Project, err erro
 
 // DeleteProject : Deletes an existing project by its name
 func (m *Manager) DeleteProject(token string, name string) (err error) {
-	g, err := m.getProjectByName(token, name)
-	if err != nil {
-		return errors.New("Project '" + name + "' does not exist, please specify a different project name")
-	}
-	id := strconv.Itoa(g.ID)
-
-	body, res, err := m.doRequest("/api/projects/"+id, "DELETE", []byte(""), token, "")
+	body, res, err := m.doRequest("/api/projects/"+name, "DELETE", []byte(""), token, "")
 	if err != nil {
 		if res == nil {
 			return ErrConnectionRefused
+		}
+		if res.StatusCode == 404 {
+			return errors.New("Project '" + name + "' does not exist, please specify a different project name")
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -100,17 +96,14 @@ func (m *Manager) DeleteProject(token string, name string) (err error) {
 
 // UpdateVCloudProject : updates vcloud project details
 func (m *Manager) UpdateVCloudProject(token, name, user, password string) (err error) {
-	g, err := m.getProjectByName(token, name)
-	if err != nil {
-		return errors.New("Project '" + name + "' does not exist, please specify a different project name")
-	}
-	id := strconv.Itoa(g.ID)
-
 	payload := []byte(`{"credentials": {"username":"` + user + `", "password":"` + password + `"}}`)
-	body, res, err := m.doRequest("/api/projects/"+id, "PUT", payload, token, "")
+	body, res, err := m.doRequest("/api/projects/"+name, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
 			return ErrConnectionRefused
+		}
+		if res.StatusCode == 404 {
+			return errors.New("Project '" + name + "' does not exist, please specify a different project name")
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -124,17 +117,14 @@ func (m *Manager) UpdateVCloudProject(token, name, user, password string) (err e
 
 // UpdateAWSProject : updates awsproject details
 func (m *Manager) UpdateAWSProject(token, name, awsAccessKeyID, awsSecretAccessKey string) (err error) {
-	g, err := m.getProjectByName(token, name)
-	if err != nil {
-		return errors.New("Project '" + name + "' does not exist, please specify a different project name")
-	}
-	id := strconv.Itoa(g.ID)
-
 	payload := []byte(`{"credentials": {"aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}}`)
-	body, res, err := m.doRequest("/api/projects/"+id, "PUT", payload, token, "")
+	body, res, err := m.doRequest("/api/projects/"+name, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
 			return ErrConnectionRefused
+		}
+		if res.StatusCode == 404 {
+			return errors.New("Project '" + name + "' does not exist, please specify a different project name")
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
@@ -148,17 +138,14 @@ func (m *Manager) UpdateAWSProject(token, name, awsAccessKeyID, awsSecretAccessK
 
 // UpdateAzureProject : updates awsproject details
 func (m *Manager) UpdateAzureProject(token, name, subscriptionID, clientID, clientSecret, tenantID, environment string) (err error) {
-	g, err := m.getProjectByName(token, name)
-	if err != nil {
-		return errors.New("Project '" + name + "' does not exist, please specify a different project name")
-	}
-	id := strconv.Itoa(g.ID)
-
 	payload := []byte(`{"credentials": {"azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}}`)
-	body, res, err := m.doRequest("/api/projects/"+id, "PUT", payload, token, "")
+	body, res, err := m.doRequest("/api/projects/"+name, "PUT", payload, token, "")
 	if err != nil {
 		if res == nil {
 			return ErrConnectionRefused
+		}
+		if res.StatusCode == 404 {
+			return errors.New("Project '" + name + "' does not exist, please specify a different project name")
 		}
 		if res.StatusCode == 400 {
 			return errors.New(body)
