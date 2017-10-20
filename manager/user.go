@@ -63,7 +63,7 @@ func (m *Manager) GetUser(token string, userid string) (user model.User, err err
 
 // CreateUser ...
 func (m *Manager) CreateUser(token string, name string, email string, user string, password string) error {
-	payload := []byte(`{"group_id": 0, "username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
+	payload := []byte(`{"username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
 	body, resp, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
 		if resp == nil {
@@ -82,8 +82,8 @@ func (m *Manager) CreateUser(token string, name string, email string, user strin
 }
 
 // ChangePassword ...
-func (m *Manager) ChangePassword(token string, userid int, username string, usergroup int, oldpassword string, newpassword string) error {
-	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "group_id": ` + strconv.Itoa(usergroup) + `, "password": "` + newpassword + `", "oldpassword": "` + oldpassword + `"}`)
+func (m *Manager) ChangePassword(token string, userid int, username string, oldpassword string, newpassword string) error {
+	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "password": "` + newpassword + `", "oldpassword": "` + oldpassword + `"}`)
 	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		if resp.StatusCode != 200 {
@@ -96,8 +96,8 @@ func (m *Manager) ChangePassword(token string, userid int, username string, user
 }
 
 // ChangePasswordByAdmin ...
-func (m *Manager) ChangePasswordByAdmin(token string, userid int, username string, usergroup int, newpassword string) error {
-	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "group_id": ` + strconv.Itoa(usergroup) + `, "password": "` + newpassword + `"}`)
+func (m *Manager) ChangePasswordByAdmin(token string, userid int, username string, newpassword string) error {
+	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `, "password": "` + newpassword + `"}`)
 	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
 	if err != nil {
 		if resp.StatusCode != 200 {
