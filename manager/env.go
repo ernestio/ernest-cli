@@ -78,11 +78,10 @@ func (m *Manager) ResetEnv(project, env, token string) error {
 // RevertEnv reverts a env to a previous known state using a build ID
 func (m *Manager) RevertEnv(project, env, buildID, token string, dry bool) (string, error) {
 	// get requested manifest
-	b, err := m.BuildStatus(token, project, env, buildID)
+	payload, err := m.BuildDefinitionFromIndex(token, project, env, buildID)
 	if err != nil {
 		return "", err
 	}
-	payload := []byte(b.Definition)
 
 	// apply requested manifest
 	var d model.Definition
@@ -101,42 +100,7 @@ func (m *Manager) RevertEnv(project, env, buildID, token string, dry bool) (stri
 		return m.dryApply(token, payload, d)
 	}
 
-	var response struct {
-		ID      string `json:"id,omitempty"`
-		Name    string `json:"name,omitempty"`
-		Message string `json:"message,omitempty"`
-	}
-
-	body, resp, rerr := m.doRequest("/api/projects/"+d.Project+"/envs/", "POST", payload, token, "application/yaml")
-	if resp == nil {
-		return "", ErrConnectionRefused
-	}
-
-	err = json.Unmarshal([]byte(body), &response)
-	if err != nil {
-		return "", errors.New(body)
-	}
-
-	if rerr != nil {
-		return "", errors.New(response.Message)
-	}
-
-	err = helper.Monitorize(m.URL, "/events", token, response.ID)
-	if err != nil {
-		return "", err
-	}
-
-	fmt.Println("================\nPlatform Details\n================\n ")
-	var build model.Build
-
-	build, err = m.BuildStatus(token, project, env, response.ID)
-	if err != nil {
-		return response.ID, err
-	}
-
-	view.PrintEnvInfo(&build)
-
-	return response.ID, nil
+	return m.ApplyEnv(d, token, nil, true, false)
 }
 
 // Destroy : Destroys an existing env
