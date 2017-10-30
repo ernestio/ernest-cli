@@ -8,7 +8,7 @@ jobs:
        ROOTPATH: /home/circleci/.go_workspace/src/github.com/ernestio
        NATS_URI_TEST:  nats://127.0.0.1:4222
        GOBIN: /home/circleci/.go_workspace/bin
-       CURRENT_INSTANCE: http://ernest.local:80/
+       CURRENT_INSTANCE: https://ernest.local
        JWT_SECRET: test
        IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
        ERNEST_LOG_FILE: '/tmp/ernest.log'
@@ -32,6 +32,6 @@ jobs:
        - run: 
            name: Integration Tests
            command: |
-             git clone -b f-circleci-v2-680 git@github.com:ernestio/toolset.git /tmp/toolset/
+             git clone git@github.com:ernestio/toolset.git /tmp/toolset/
              cd /tmp/toolset/ernestci/ && bundle install
              ruby /tmp/toolset/ernestci/run.rb $CIRCLE_WORKING_DIRECTORY/.ernest-ci
