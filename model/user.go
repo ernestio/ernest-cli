@@ -12,7 +12,14 @@ type User struct {
 	GroupID   int      `json:"group_id"`
 	GroupName string   `json:"group_name"`
 	Type      string   `json:"type"`
-	IsAdmin   bool     `json:"admin"`
+	Admin     *bool    `json:"admin"`
 	Projects  []string `json:"projects"`
 	Envs      []string `json:"envs"`
+}
+
+func (u *User) IsAdmin() bool {
+	if u.Admin != nil {
+		return *u.Admin
+	}
+	return false
 }
