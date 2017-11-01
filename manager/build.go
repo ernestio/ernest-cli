@@ -182,7 +182,7 @@ func (m *Manager) Apply(token, path string, credentials map[string]interface{}, 
 
 	_, err = m.EnvStatus(token, d.Project, d.Name)
 	if err != nil {
-		err = m.CreateEnv(token, d.Name, d.Project, credentials)
+		err = m.CreateEnv(token, d.Name, d.Project, credentials, nil)
 		if err != nil {
 			return "", err
 		}
@@ -200,7 +200,7 @@ func (m *Manager) Apply(token, path string, credentials map[string]interface{}, 
 func (m *Manager) Import(token string, name string, project string, filters []string) (streamID string, err error) {
 	_, err = m.EnvStatus(token, project, name)
 	if err != nil {
-		err = m.CreateEnv(token, name, project, nil)
+		err = m.CreateEnv(token, name, project, nil, nil)
 		if err != nil {
 			return "", err
 		}

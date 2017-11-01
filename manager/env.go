@@ -159,10 +159,11 @@ func (m *Manager) ForceDestroy(token, project, env string) error {
 }
 
 // UpdateEnv : Updates credentials on a specific environment
-func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]interface{}) error {
+func (m *Manager) UpdateEnv(token, name, project string, credentials, options map[string]interface{}) error {
 	e := model.Env{
 		Name:        name,
 		Credentials: credentials,
+		Options:     options,
 	}
 
 	payload, err := json.Marshal(e)
@@ -188,10 +189,11 @@ func (m *Manager) UpdateEnv(token, name, project string, credentials map[string]
 }
 
 // CreateEnv : Creates a new empty environmnet
-func (m *Manager) CreateEnv(token, name, project string, credentials map[string]interface{}) error {
+func (m *Manager) CreateEnv(token, name, project string, credentials, options map[string]interface{}) error {
 	e := model.Env{
 		Name:        name,
 		Credentials: credentials,
+		Options:     options,
 	}
 
 	payload, err := json.Marshal(e)
