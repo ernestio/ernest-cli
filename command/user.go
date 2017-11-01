@@ -44,7 +44,7 @@ var ListUsers = cli.Command{
 		for _, u := range users {
 			id := strconv.Itoa(u.ID)
 			admin := "no"
-			if u.IsAdmin {
+			if u.IsAdmin() {
 				admin = "yes"
 			}
 			table.Append([]string{id, u.Username, u.GroupName, u.Type, admin})
@@ -123,11 +123,11 @@ var PasswordUser = cli.Command{
 			h.PrintError("You don’t have permissions to perform this action")
 		}
 
-		if !session.IsAdmin && username != "" {
+		if !session.IsAdmin() && username != "" {
 			h.PrintError("You don’t have permissions to perform this action")
 		}
 
-		if session.IsAdmin && username != "" {
+		if session.IsAdmin() && username != "" {
 			if password == "" {
 				h.PrintError("Please provide a valid password for the user with `--password`")
 			}
@@ -209,7 +209,7 @@ var DisableUser = cli.Command{
 			h.PrintError("You don’t have permissions to perform this action")
 		}
 
-		if !session.IsAdmin {
+		if !session.IsAdmin() {
 			h.PrintError("You don’t have permissions to perform this action")
 		}
 
@@ -247,7 +247,7 @@ var InfoUser = cli.Command{
 		}
 
 		username := c.String("user")
-		if username != "" && session.IsAdmin == false {
+		if username != "" && !session.IsAdmin() {
 			h.PrintError("You don’t have permissions to access '" + username + "' information")
 		}
 		if username == "" {

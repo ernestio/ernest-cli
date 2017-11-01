@@ -34,7 +34,14 @@ type Session struct {
 	GroupID int    `json:"group_id"`
 	Name    string `json:"name"`
 	Email   string `json:"email"`
-	IsAdmin bool   `json:"admin"`
+	Admin   *bool  `json:"admin"`
+}
+
+func (s *Session) IsAdmin() bool {
+	if s.Admin != nil {
+		return *s.Admin
+	}
+	return false
 }
 
 // ErrConnectionRefused is the error response given
