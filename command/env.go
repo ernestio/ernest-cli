@@ -45,7 +45,12 @@ var UpdateEnv = cli.Command{
 	Usage:       h.T("envs.update.usage"),
 	ArgsUsage:   h.T("envs.update.args"),
 	Description: h.T("envs.update.description"),
-	Flags:       AllProviderFlags,
+	Flags: append([]cli.Flag{
+		cli.StringFlag{
+			Name:  "sync_interval",
+			Usage: "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)",
+		},
+	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
 		if cfg.Token == "" {
@@ -61,7 +66,7 @@ var UpdateEnv = cli.Command{
 		project := c.Args()[0]
 		env := c.Args()[1]
 
-		err := m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
+		err := m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c))
 		if err != nil {
 			h.PrintError(err.Error())
 		}
@@ -84,6 +89,10 @@ var CreateEnv = cli.Command{
 			Name:  "credentials",
 			Usage: "will override project information",
 		},
+		cli.StringFlag{
+			Name:  "sync_interval",
+			Usage: "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)",
+		},
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -100,7 +109,7 @@ var CreateEnv = cli.Command{
 		project := c.Args()[0]
 		env := c.Args()[1]
 
-		err := m.CreateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c))
+		err := m.CreateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c))
 		if err != nil {
 			h.PrintError(err.Error())
 		}
