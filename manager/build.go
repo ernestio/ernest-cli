@@ -340,7 +340,7 @@ func (m *Manager) ReviewBuild(token, name, project, resolution string) error {
 	}
 
 	if a.Status == "done" {
-		color.Green("Sync successfully resolved!")
+		color.Green("Submission successfully rejected!")
 		return nil
 	}
 
