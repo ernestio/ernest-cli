@@ -281,6 +281,19 @@ var _langEnYml = []byte(`en:
           $ ernest env resolve --accept <my_project> <my_env>
           $ ernest env resolve --reject <my_project> <my_env>
           $ ernest env resolve --ignore <my_project> <my_env>
+    review:
+      usage: "$ ernest env review --[accept|reject] <my_project> <my_env>"
+      args: "<project_name> <env_name>"
+      description: |
+        Provides the ability to review submitted builds. Running without any flags will show the diff of the submitted build with the prior environment state.
+        Options:
+          accept submitted build. This will trigger an environment build
+          reject submitted build. The build will be rejected.
+
+        Examples:
+          $ ernest env review <my_project> <my_env>
+          $ ernest env review --accept <my_project> <my_env>
+          $ ernest env review --reject <my_project> <my_env>
     diff:
       usage: "$ ernest env diff <project_name> <env_name> <build_a> <build_b>"
       args: "<env_aname> <build_a> <build_b>"
@@ -547,7 +560,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 16345, mode: os.FileMode(420), modTime: time.Unix(1508413010, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 16997, mode: os.FileMode(420), modTime: time.Unix(1509731486, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
