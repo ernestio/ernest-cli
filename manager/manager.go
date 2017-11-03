@@ -30,11 +30,11 @@ type Token struct {
 
 // Session ...
 type Session struct {
-	UserID  int    `json:"id"`
-	GroupID int    `json:"group_id"`
-	Name    string `json:"name"`
-	Email   string `json:"email"`
-	Admin   *bool  `json:"admin"`
+	ID       int    `json:"id"`
+	GroupID  int    `json:"group_id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Admin    *bool  `json:"admin"`
 }
 
 func (s *Session) IsAdmin() bool {

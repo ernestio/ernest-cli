@@ -254,12 +254,158 @@ var InfoUser = cli.Command{
 			username = cfg.User
 		}
 
-		user, err := m.GetUser(cfg.Token, username)
+		user, err := m.GetUserByUsername(cfg.Token, username)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
 
 		view.PrintUserInfo(user)
+		return nil
+	},
+}
+
+var EnableMFA = cli.Command{
+	Name:        "enable-mfa",
+	Usage:       h.T("user.enable-mfa.usage"),
+	Description: h.T("user.enable-mfa.description"),
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "user-name",
+			Usage: "Target user",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		username := c.String("user-name")
+
+		session, err := m.GetSession(cfg.Token)
+		if err != nil {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if !session.IsAdmin() {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if username == "" {
+			username = session.Username
+		}
+
+		user, err := m.GetUserByUsername(cfg.Token, username)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
+		if *user.MFA {
+			fmt.Println("MFA already enabled")
+			return nil
+		}
+
+		secret, err := m.ToggleMFA(cfg.Token, true, user.ID)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
+		color.Green("MFA enabled")
+		fmt.Printf("Account name: Ernest (%s)\nKey: %s\n", user.Username, secret)
+
+		return nil
+	},
+}
+
+var DisableMFA = cli.Command{
+	Name:        "disable-mfa",
+	Usage:       h.T("user.disable-mfa.usage"),
+	Description: h.T("user.disable-mfa.description"),
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "user-name",
+			Usage: "Target user",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		username := c.String("user-name")
+
+		session, err := m.GetSession(cfg.Token)
+		if err != nil {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if !session.IsAdmin() {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if username == "" {
+			username = session.Username
+		}
+
+		user, err := m.GetUserByUsername(cfg.Token, username)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
+		if !*user.MFA {
+			fmt.Println("MFA already disabled")
+			return nil
+		}
+
+		_, err = m.ToggleMFA(cfg.Token, false, user.ID)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
+		color.Red("MFA disabled")
+
+		return nil
+	},
+}
+
+var ResetMFA = cli.Command{
+	Name:        "reset-mfa",
+	Usage:       h.T("user.reset-mfa.usage"),
+	Description: h.T("user.reset-mfa.description"),
+	Flags: []cli.Flag{
+		cli.StringFlag{
+			Name:  "user-name",
+			Usage: "Target user",
+		},
+	},
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		username := c.String("user-name")
+
+		session, err := m.GetSession(cfg.Token)
+		if err != nil {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if !session.IsAdmin() {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if username == "" {
+			username = session.Username
+		}
+
+		user, err := m.GetUserByUsername(cfg.Token, username)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
+		_, err = m.ToggleMFA(cfg.Token, false, user.ID)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
+		secret, err := m.ToggleMFA(cfg.Token, true, user.ID)
+		if err != nil {
+			h.PrintError(err.Error())
+		}
+
+		color.Green("MFA reset")
+		fmt.Printf("Account name: Ernest (%s)\nKey: %s\n", user.Username, secret)
+
 		return nil
 	},
 }
@@ -287,10 +433,13 @@ var CmdUser = cli.Command{
 	Name:  "user",
 	Usage: h.T("user.usage"),
 	Subcommands: []cli.Command{
-		ListUsers,
 		CreateUser,
-		PasswordUser,
 		DisableUser,
+		DisableMFA,
+		EnableMFA,
 		InfoUser,
+		ListUsers,
+		PasswordUser,
+		ResetMFA,
 	},
 }

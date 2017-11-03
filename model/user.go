@@ -13,6 +13,8 @@ type User struct {
 	GroupName string   `json:"group_name"`
 	Type      string   `json:"type"`
 	Admin     *bool    `json:"admin"`
+	MFA       *bool    `json:"mfa"`
+	MFASecret string   `json:"mfa_secret"`
 	Projects  []string `json:"projects"`
 	Envs      []string `json:"envs"`
 }

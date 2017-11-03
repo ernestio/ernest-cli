@@ -49,7 +49,7 @@ func (m *Manager) GetUserByUsername(token string, name string) (user model.User,
 
 // GetUser ...
 func (m *Manager) GetUser(token string, userid string) (user model.User, err error) {
-	body, resp, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/json")
 	if err != nil {
 		if resp == nil {
 			return user, ErrConnectionRefused
@@ -84,7 +84,7 @@ func (m *Manager) CreateUser(token string, name string, email string, user strin
 // ChangePassword ...
 func (m *Manager) ChangePassword(token string, userid int, username string, oldpassword string, newpassword string) error {
 	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "password": "` + newpassword + `", "oldpassword": "` + oldpassword + `"}`)
-	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/json")
 	if err != nil {
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
@@ -98,7 +98,7 @@ func (m *Manager) ChangePassword(token string, userid int, username string, oldp
 // ChangePasswordByAdmin ...
 func (m *Manager) ChangePasswordByAdmin(token string, userid int, username string, newpassword string) error {
 	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "password": "` + newpassword + `"}`)
-	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/json")
 	if err != nil {
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
@@ -107,4 +107,26 @@ func (m *Manager) ChangePasswordByAdmin(token string, userid int, username strin
 		return err
 	}
 	return nil
+}
+
+// ToggleMFA
+func (m *Manager) ToggleMFA(token string, toggle bool, id int) (string, error) {
+	payload := []byte(`{"id":` + strconv.Itoa(id) + `, "mfa": ` + strconv.FormatBool(toggle) + `}`)
+	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(id), "PUT", payload, token, "application/json")
+	if err != nil {
+		if resp.StatusCode != 200 {
+			e := helper.ResponseMessage([]byte(body))
+			return "", errors.New(e.Message)
+		}
+		return "", err
+	}
+
+	user := &model.User{}
+	err = json.Unmarshal([]byte(body), &user)
+
+	if toggle {
+		return user.MFASecret, nil
+	} else {
+		return "", nil
+	}
 }
