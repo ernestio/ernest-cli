@@ -8,6 +8,7 @@ package command
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	h "github.com/ernestio/ernest-cli/helper"
@@ -50,6 +51,10 @@ var UpdateEnv = cli.Command{
 			Name:  "sync_interval",
 			Usage: "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)",
 		},
+		cli.StringFlag{
+			Name:  "submissions",
+			Usage: "allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'",
+		},
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -66,7 +71,12 @@ var UpdateEnv = cli.Command{
 		project := c.Args()[0]
 		env := c.Args()[1]
 
-		err := m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c))
+		e, err := m.EnvStatus(cfg.Token, project, env)
+		if err != nil {
+			h.PrintError("Environment does not exist!")
+		}
+
+		err = m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c, e.Options))
 		if err != nil {
 			h.PrintError(err.Error())
 		}
@@ -93,6 +103,10 @@ var CreateEnv = cli.Command{
 			Name:  "sync_interval",
 			Usage: "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)",
 		},
+		cli.StringFlag{
+			Name:  "submissions",
+			Usage: "allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'",
+		},
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -109,7 +123,7 @@ var CreateEnv = cli.Command{
 		project := c.Args()[0]
 		env := c.Args()[1]
 
-		err := m.CreateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c))
+		err := m.CreateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c, nil))
 		if err != nil {
 			h.PrintError(err.Error())
 		}
@@ -190,6 +204,91 @@ var SyncEnv = cli.Command{
 		env := c.Args()[1]
 
 		err := m.SyncEnv(cfg.Token, env, project)
+		if err != nil {
+			h.PrintError(err.Error())
+			return nil
+		}
+
+		return nil
+	},
+}
+
+// ReviewEnv command
+// Approval for outstanding build submissions
+var ReviewEnv = cli.Command{
+	Name:        "review",
+	Aliases:     []string{"rev"},
+	Usage:       h.T("envs.review.usage"),
+	ArgsUsage:   h.T("envs.review.args"),
+	Description: h.T("envs.review.description"),
+	Flags: append([]cli.Flag{
+		cli.BoolFlag{
+			Name:  "accept, a",
+			Usage: "Accept Sync changes",
+		},
+		cli.BoolFlag{
+			Name:  "reject, r",
+			Usage: "Reject Sync changes",
+		},
+	}),
+	Action: func(c *cli.Context) error {
+		m, cfg := setup(c)
+		if cfg.Token == "" {
+			h.PrintError("You're not allowed to perform this action, please log in")
+		}
+
+		if len(c.Args()) < 1 {
+			h.PrintError("You should specify an existing project name")
+		}
+		if len(c.Args()) < 2 {
+			h.PrintError("You should specify an existing project environment")
+		}
+
+		project := c.Args()[0]
+		env := c.Args()[1]
+
+		var resolution string
+
+		if c.Bool("accept") {
+			resolution = "submission-accepted"
+		}
+
+		if c.Bool("reject") {
+			resolution = "submission-rejected"
+		}
+
+		if resolution == "" {
+			envs, err := m.ListBuilds(project, env, cfg.Token)
+			if err != nil {
+				h.PrintError(err.Error())
+			}
+
+			id1, err := m.BuildIDFromIndex(cfg.Token, project, env, strconv.Itoa(len(envs)-1))
+			if err != nil {
+				h.PrintError(err.Error())
+			}
+
+			id2, err := m.BuildIDFromIndex(cfg.Token, project, env, strconv.Itoa(len(envs)))
+			if err != nil {
+				h.PrintError(err.Error())
+			}
+
+			def1, err := m.BuildDefinitionByID(cfg.Token, project, env, id1)
+			if err != nil {
+				h.PrintError(err.Error())
+			}
+
+			def2, err := m.BuildDefinitionByID(cfg.Token, project, env, id2)
+			if err != nil {
+				h.PrintError(err.Error())
+			}
+
+			view.PrintEnvDiff(id1, id2, def1, def2)
+
+			return nil
+		}
+
+		err := m.ReviewBuild(cfg.Token, env, project, resolution)
 		if err != nil {
 			h.PrintError(err.Error())
 			return nil
@@ -662,5 +761,6 @@ var CmdEnv = cli.Command{
 		ImportEnv,
 		SyncEnv,
 		ResolveEnv,
+		ReviewEnv,
 	},
 }

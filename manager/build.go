@@ -9,11 +9,13 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 
 	"github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
+	"github.com/fatih/color"
 )
 
 // ListBuilds ...
@@ -248,6 +250,7 @@ func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[str
 	var response struct {
 		ID      string `json:"id,omitempty"`
 		Name    string `json:"name,omitempty"`
+		Status  string `json:"status,omitempty"`
 		Project string `json:"project,omitempty"`
 		Message string `json:"message,omitempty"`
 	}
@@ -264,6 +267,11 @@ func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[str
 
 	if rerr != nil {
 		return "", errors.New(response.Message)
+	}
+
+	if response.Status == "submitted" {
+		color.Green("Build has been succesfully submitted and is awaiting approval.")
+		os.Exit(0)
 	}
 
 	if monit {
@@ -303,4 +311,40 @@ func (m *Manager) dryApply(token string, payload []byte, d model.Definition) (st
 	}
 	view.EnvDry(body)
 	return "", nil
+}
+
+// ReviewBuild : Reviews a submitted build
+func (m *Manager) ReviewBuild(token, name, project, resolution string) error {
+	a := model.Action{
+		Type: "review",
+	}
+
+	a.Options.Resolution = resolution
+
+	data, err := json.Marshal(a)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(data))
+
+	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
+	if resp == nil {
+		return ErrConnectionRefused
+	}
+	if rerr != nil {
+		return rerr
+	}
+
+	err = json.Unmarshal([]byte(body), &a)
+	if err != nil {
+		return errors.New(body)
+	}
+
+	if a.Status == "done" {
+		color.Green("Sync successfully resolved!")
+		return nil
+	}
+
+	return helper.Monitorize(m.URL, "/events", token, a.ResourceID)
 }
