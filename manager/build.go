@@ -326,8 +326,6 @@ func (m *Manager) ReviewBuild(token, name, project, resolution string) error {
 		return err
 	}
 
-	fmt.Println(string(data))
-
 	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
 	if resp == nil {
 		return ErrConnectionRefused
