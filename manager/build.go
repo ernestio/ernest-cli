@@ -344,5 +344,20 @@ func (m *Manager) ReviewBuild(token, name, project, resolution string) error {
 		return nil
 	}
 
-	return helper.Monitorize(m.URL, "/events", token, a.ResourceID)
+	err = helper.Monitorize(m.URL, "/events", token, a.ResourceID)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("================\nPlatform Details\n================\n ")
+	var build model.Build
+
+	build, err = m.BuildStatusByID(token, project, name, a.ResourceID)
+	if err != nil {
+		return err
+	}
+
+	view.PrintEnvInfo(&build)
+
+	return nil
 }
