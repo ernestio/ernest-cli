@@ -9,9 +9,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
-	"os"
-	"strconv"
-	"text/tabwriter"
 	"unicode"
 
 	h "github.com/ernestio/ernest-cli/helper"
@@ -19,7 +16,6 @@ import (
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
-	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
 
@@ -36,20 +32,7 @@ var ListUsers = cli.Command{
 			h.PrintError(err.Error())
 		}
 
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Group", "Type", "Admin"})
-		for _, u := range users {
-			id := strconv.Itoa(u.ID)
-			admin := "no"
-			if u.IsAdmin() {
-				admin = "yes"
-			}
-			table.Append([]string{id, u.Username, u.GroupName, u.Type, admin})
-		}
-		table.Render()
+		view.PrintUserList(users)
 
 		return nil
 	},
