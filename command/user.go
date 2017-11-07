@@ -296,7 +296,7 @@ var EnableMFA = cli.Command{
 			h.PrintError(err.Error())
 		}
 
-		if *user.MFA {
+		if user.MFA != nil && *user.MFA {
 			fmt.Println("MFA already enabled")
 			return nil
 		}
@@ -345,7 +345,7 @@ var DisableMFA = cli.Command{
 			h.PrintError(err.Error())
 		}
 
-		if !*user.MFA {
+		if user.MFA == nil || !*user.MFA {
 			fmt.Println("MFA already disabled")
 			return nil
 		}
