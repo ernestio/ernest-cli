@@ -37,6 +37,7 @@ type Session struct {
 	Admin   *bool  `json:"admin"`
 }
 
+// IsAdmin : check if a user is an admin or not
 func (s *Session) IsAdmin() bool {
 	if s.Admin != nil {
 		return *s.Admin
