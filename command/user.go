@@ -116,11 +116,10 @@ var PasswordUser = cli.Command{
 			}
 
 			// Just change the password with the given values for the given user
-			usr, err := m.GetUserByUsername(cfg.Token, username)
-			if err = m.ChangePasswordByAdmin(cfg.Token, usr.ID, usr.Username, password); err != nil {
+			if err = m.ChangePasswordByAdmin(cfg.Token, username, password); err != nil {
 				h.PrintError(err.Error())
 			}
-			color.Green("`" + usr.Username + "` password has been changed")
+			color.Green("`" + username + "` password has been changed")
 		} else {
 			// Ask the user for credentials
 			var users []model.User
@@ -129,14 +128,6 @@ var PasswordUser = cli.Command{
 			}
 			if len(users) == 0 {
 				h.PrintError("You don’t have permissions to perform this action")
-			}
-
-			var user model.User
-			for _, u := range users {
-				if u.Username == cfg.User {
-					user = u
-					break
-				}
 			}
 
 			oldpassword := currentPassword
@@ -162,7 +153,7 @@ var PasswordUser = cli.Command{
 				h.PrintError("Aborting... New password and confirmation doesn't match.")
 			}
 
-			err = m.ChangePassword(cfg.Token, user.ID, user.Username, oldpassword, newpassword)
+			err = m.ChangePassword(cfg.Token, cfg.User, oldpassword, newpassword)
 			if err != nil {
 				h.PrintError(err.Error())
 			}
@@ -196,12 +187,7 @@ var DisableUser = cli.Command{
 			h.PrintError("You don’t have permissions to perform this action")
 		}
 
-		user, err := m.GetUserByUsername(cfg.Token, username)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		if err = m.ChangePasswordByAdmin(cfg.Token, user.ID, user.Username, randString(16)); err != nil {
+		if err = m.ChangePasswordByAdmin(cfg.Token, username, randString(16)); err != nil {
 			h.PrintError(err.Error())
 		}
 
