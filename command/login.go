@@ -43,6 +43,7 @@ var Login = cli.Command{
 		}
 		var username string
 		var password string
+		var verificationCode string
 
 		if c.String("user") == "" {
 			fmt.Printf("Username: ")
@@ -69,7 +70,17 @@ var Login = cli.Command{
 			password = c.String("password")
 		}
 
-		token, err := m.Login(username, password)
+		token, err := m.Login(username, password, "")
+		if err != nil && err.Error() == "mfa required" {
+			fmt.Printf("Verification code: ")
+			vc, _ := gopass.GetPasswdMasked()
+			verificationCode = string(vc)
+
+			token, err = m.Login(username, password, verificationCode)
+			if err != nil {
+				h.PrintError("Authentication failed")
+			}
+		}
 		if err != nil {
 			h.PrintError(err.Error())
 		}

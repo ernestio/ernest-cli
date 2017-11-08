@@ -55,7 +55,7 @@ var CmdSetup = cli.Command{
 		usr, pwd := createUser(adminToken, m)
 
 		// Login as plain user
-		if token, err = m.Login(usr, pwd); err != nil {
+		if token, err = m.Login(usr, pwd, ""); err != nil {
 			fmt.Println("Ups, something went wrong creating the plain user")
 			return nil
 		}
@@ -181,7 +181,7 @@ func adminLogin(m *manager.Manager, adminUsr, adminPass string) (token string) {
 		adminPass = string(pass)
 	}
 
-	if token, err = m.Login(adminUsr, adminPass); err != nil {
+	if token, err = m.Login(adminUsr, adminPass, ""); err != nil {
 		fmt.Println("Invalid credentials, please try again")
 		return adminLogin(m, "", "")
 	}
