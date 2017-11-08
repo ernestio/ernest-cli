@@ -4,13 +4,37 @@
 
 package command
 
-import "github.com/urfave/cli"
+import (
+	"fmt"
+
+	"github.com/urfave/cli"
+)
 
 // MapEnvOptions : maps environment options from cli context
-func MapEnvOptions(c *cli.Context) map[string]interface{} {
-	opts := make(map[string]interface{})
+func MapEnvOptions(c *cli.Context, opts map[string]interface{}) map[string]interface{} {
+	if opts == nil {
+		opts = make(map[string]interface{})
+	}
 
-	opts["sync_interval"] = c.String("sync_interval")
+	fmt.Println(c.IsSet("sync_interval"))
+
+	if c.IsSet("sync_interval") {
+		opts["sync_interval"] = c.String("sync_interval")
+
+		if c.String("sync_interval") == "" {
+			opts["sync_interval"] = nil
+		}
+	}
+
+	submissions := c.String("submissions")
+
+	if submissions == "enable" {
+		opts["submissions"] = true
+	}
+
+	if submissions == "disable" {
+		opts["submissions"] = false
+	}
 
 	return opts
 }

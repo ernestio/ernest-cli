@@ -9,9 +9,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
-	"os"
-	"strconv"
-	"text/tabwriter"
 	"unicode"
 
 	h "github.com/ernestio/ernest-cli/helper"
@@ -19,7 +16,6 @@ import (
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
-	"github.com/olekukonko/tablewriter"
 	"github.com/urfave/cli"
 )
 
@@ -36,20 +32,7 @@ var ListUsers = cli.Command{
 			h.PrintError(err.Error())
 		}
 
-		w := new(tabwriter.Writer)
-		w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-
-		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Group", "Type", "Admin"})
-		for _, u := range users {
-			id := strconv.Itoa(u.ID)
-			admin := "no"
-			if u.IsAdmin() {
-				admin = "yes"
-			}
-			table.Append([]string{id, u.Username, u.GroupName, u.Type, admin})
-		}
-		table.Render()
+		view.PrintUserList(users)
 
 		return nil
 	},
@@ -133,11 +116,10 @@ var PasswordUser = cli.Command{
 			}
 
 			// Just change the password with the given values for the given user
-			usr, err := m.GetUserByUsername(cfg.Token, username)
-			if err = m.ChangePasswordByAdmin(cfg.Token, usr.ID, usr.Username, password); err != nil {
+			if err = m.ChangePasswordByAdmin(cfg.Token, username, password); err != nil {
 				h.PrintError(err.Error())
 			}
-			color.Green("`" + usr.Username + "` password has been changed")
+			color.Green("`" + username + "` password has been changed")
 		} else {
 			// Ask the user for credentials
 			var users []model.User
@@ -146,14 +128,6 @@ var PasswordUser = cli.Command{
 			}
 			if len(users) == 0 {
 				h.PrintError("You don’t have permissions to perform this action")
-			}
-
-			var user model.User
-			for _, u := range users {
-				if u.Username == cfg.User {
-					user = u
-					break
-				}
 			}
 
 			oldpassword := currentPassword
@@ -179,7 +153,7 @@ var PasswordUser = cli.Command{
 				h.PrintError("Aborting... New password and confirmation doesn't match.")
 			}
 
-			err = m.ChangePassword(cfg.Token, user.ID, user.Username, oldpassword, newpassword)
+			err = m.ChangePassword(cfg.Token, cfg.User, oldpassword, newpassword)
 			if err != nil {
 				h.PrintError(err.Error())
 			}
@@ -213,12 +187,7 @@ var DisableUser = cli.Command{
 			h.PrintError("You don’t have permissions to perform this action")
 		}
 
-		user, err := m.GetUserByUsername(cfg.Token, username)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		if err = m.ChangePasswordByAdmin(cfg.Token, user.ID, user.Username, randString(16)); err != nil {
+		if err = m.ChangePasswordByAdmin(cfg.Token, username, randString(16)); err != nil {
 			h.PrintError(err.Error())
 		}
 
@@ -264,6 +233,67 @@ var InfoUser = cli.Command{
 	},
 }
 
+// AddAdminUser :
+var AddAdminUser = cli.Command{
+	Name:        "add",
+	Usage:       h.T("user.admin.add.usage"),
+	Description: h.T("user.admin.add.description"),
+	Action: func(c *cli.Context) error {
+
+		if len(c.Args()) < 1 {
+			h.PrintError("You must provide ernest username to be added as an admin")
+		}
+
+		m, cfg := setup(c)
+		session, err := m.GetSession(cfg.Token)
+		if err != nil {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if !session.IsAdmin() {
+			h.PrintError("You don't have permissions to perform this action")
+		}
+		username := c.Args()[0]
+
+		if err = m.SetUserAdmin(cfg.Token, username, "true"); err != nil {
+			h.PrintError(err.Error())
+		}
+
+		return nil
+	},
+}
+
+// RmAdminUser :
+var RmAdminUser = cli.Command{
+	Name:        "rm",
+	Usage:       h.T("user.admin.rm.usage"),
+	Description: h.T("user.admin.rm.description"),
+	Action: func(c *cli.Context) error {
+
+		if len(c.Args()) < 1 {
+			h.PrintError("You must provide ernest username to be added as an admin")
+		}
+
+		m, cfg := setup(c)
+		session, err := m.GetSession(cfg.Token)
+		if err != nil {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if !session.IsAdmin() {
+			h.PrintError("You don't have permissions to perform this action")
+		}
+		username := c.Args()[0]
+
+		if err = m.SetUserAdmin(cfg.Token, username, "false"); err != nil {
+			h.PrintError(err.Error())
+		}
+
+		return nil
+	},
+}
+
+// EnableMFA turns on Multi-Factor authentication
 var EnableMFA = cli.Command{
 	Name:        "enable-mfa",
 	Usage:       h.T("user.enable-mfa.usage"),
@@ -313,6 +343,7 @@ var EnableMFA = cli.Command{
 	},
 }
 
+// DisableMFA turns off Multi-Factor authentication
 var DisableMFA = cli.Command{
 	Name:        "disable-mfa",
 	Usage:       h.T("user.disable-mfa.usage"),
@@ -361,6 +392,7 @@ var DisableMFA = cli.Command{
 	},
 }
 
+// ResetMFA generates a new secret for Multi-Factor authentication
 var ResetMFA = cli.Command{
 	Name:        "reset-mfa",
 	Usage:       h.T("user.reset-mfa.usage"),
@@ -428,6 +460,16 @@ func randString(n int) string {
 	return string(bs)
 }
 
+// AdminUser ...
+var AdminUser = cli.Command{
+	Name:  "admin",
+	Usage: h.T("user.admin.usage"),
+	Subcommands: []cli.Command{
+		AddAdminUser,
+		RmAdminUser,
+	},
+}
+
 // CmdUser ...
 var CmdUser = cli.Command{
 	Name:  "user",
@@ -441,5 +483,6 @@ var CmdUser = cli.Command{
 		ListUsers,
 		PasswordUser,
 		ResetMFA,
+		AdminUser,
 	},
 }

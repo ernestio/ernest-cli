@@ -82,9 +82,9 @@ func (m *Manager) CreateUser(token string, name string, email string, user strin
 }
 
 // ChangePassword ...
-func (m *Manager) ChangePassword(token string, userid int, username string, oldpassword string, newpassword string) error {
-	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "password": "` + newpassword + `", "oldpassword": "` + oldpassword + `"}`)
-	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/json")
+func (m *Manager) ChangePassword(token, username, oldpassword, newpassword string) error {
+	payload := []byte(`{"username": "` + username + `", "password": "` + newpassword + `", "oldpassword": "` + oldpassword + `"}`)
+	body, resp, err := m.doRequest("/api/users/"+username, "PUT", payload, token, "application/json")
 	if err != nil {
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
@@ -96,9 +96,23 @@ func (m *Manager) ChangePassword(token string, userid int, username string, oldp
 }
 
 // ChangePasswordByAdmin ...
-func (m *Manager) ChangePasswordByAdmin(token string, userid int, username string, newpassword string) error {
-	payload := []byte(`{"id":` + strconv.Itoa(userid) + `, "username": "` + username + `", "password": "` + newpassword + `"}`)
-	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(userid), "PUT", payload, token, "application/json")
+func (m *Manager) ChangePasswordByAdmin(token, username, newpassword string) error {
+	payload := []byte(`{"username": "` + username + `", "password": "` + newpassword + `"}`)
+	body, resp, err := m.doRequest("/api/users/"+username, "PUT", payload, token, "application/json")
+	if err != nil {
+		if resp.StatusCode != 200 {
+			e := helper.ResponseMessage([]byte(body))
+			return errors.New(e.Message)
+		}
+		return err
+	}
+	return nil
+}
+
+// SetUserAdmin ...
+func (m *Manager) SetUserAdmin(token, username, admin string) error {
+	payload := []byte(`{"admin":` + admin + `}`)
+	body, resp, err := m.doRequest("/api/users/"+username, "PUT", payload, token, "application/json")
 	if err != nil {
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
