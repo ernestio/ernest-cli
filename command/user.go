@@ -233,6 +233,66 @@ var InfoUser = cli.Command{
 	},
 }
 
+// AddAdminUser :
+var AddAdminUser = cli.Command{
+	Name:        "add",
+	Usage:       h.T("user.admin.add.usage"),
+	Description: h.T("user.admin.add.description"),
+	Action: func(c *cli.Context) error {
+
+		if len(c.Args()) < 1 {
+			h.PrintError("You must provide ernest username to be added as an admin")
+		}
+
+		m, cfg := setup(c)
+		session, err := m.GetSession(cfg.Token)
+		if err != nil {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if !session.IsAdmin() {
+			h.PrintError("You don't have permissions to perform this action")
+		}
+		username := c.Args()[0]
+
+		if err = m.SetUserAdmin(cfg.Token, username, "true"); err != nil {
+			h.PrintError(err.Error())
+		}
+
+		return nil
+	},
+}
+
+// RmAdminUser :
+var RmAdminUser = cli.Command{
+	Name:        "rm",
+	Usage:       h.T("user.admin.rm.usage"),
+	Description: h.T("user.admin.rm.description"),
+	Action: func(c *cli.Context) error {
+
+		if len(c.Args()) < 1 {
+			h.PrintError("You must provide ernest username to be added as an admin")
+		}
+
+		m, cfg := setup(c)
+		session, err := m.GetSession(cfg.Token)
+		if err != nil {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+
+		if !session.IsAdmin() {
+			h.PrintError("You don't have permissions to perform this action")
+		}
+		username := c.Args()[0]
+
+		if err = m.SetUserAdmin(cfg.Token, username, "false"); err != nil {
+			h.PrintError(err.Error())
+		}
+
+		return nil
+	},
+}
+
 // generate random string
 func randString(n int) string {
 	g := big.NewInt(0)
@@ -251,6 +311,16 @@ func randString(n int) string {
 	return string(bs)
 }
 
+// AdminUser ...
+var AdminUser = cli.Command{
+	Name:  "admin",
+	Usage: h.T("user.admin.usage"),
+	Subcommands: []cli.Command{
+		AddAdminUser,
+		RmAdminUser,
+	},
+}
+
 // CmdUser ...
 var CmdUser = cli.Command{
 	Name:  "user",
@@ -261,5 +331,6 @@ var CmdUser = cli.Command{
 		PasswordUser,
 		DisableUser,
 		InfoUser,
+		AdminUser,
 	},
 }
