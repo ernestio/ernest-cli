@@ -41,6 +41,7 @@ var Login = cli.Command{
 		if m == nil {
 			os.Exit(1)
 		}
+
 		var username string
 		var password string
 		var verificationCode string
@@ -71,6 +72,8 @@ var Login = cli.Command{
 		}
 
 		token, err := m.Login(username, password, "")
+
+		// MFA check
 		if err != nil && err.Error() == "mfa required" {
 			fmt.Printf("Verification code: ")
 			vc, _ := gopass.GetPasswdMasked()
@@ -81,16 +84,21 @@ var Login = cli.Command{
 				h.PrintError("Authentication failed")
 			}
 		}
+
 		if err != nil {
 			h.PrintError(err.Error())
 		}
+
 		cfg.Token = token
 		cfg.User = username
+
 		err = model.SaveConfig(cfg)
 		if err != nil {
 			h.PrintError("Can't write config file")
 		}
+
 		color.Green("Welcome back " + username)
+
 		return nil
 	},
 }

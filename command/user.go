@@ -223,7 +223,7 @@ var InfoUser = cli.Command{
 			username = cfg.User
 		}
 
-		user, err := m.GetUserByUsername(cfg.Token, username)
+		user, err := m.GetUser(cfg.Token, username)
 		if err != nil {
 			h.PrintError(err.Error())
 		}

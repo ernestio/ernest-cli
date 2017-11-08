@@ -123,7 +123,7 @@ func (m *Manager) SetUserAdmin(token, username, admin string) error {
 	return nil
 }
 
-// ToggleMFA
+// ToggleMFA enables/disables MFA authentication services for a user
 func (m *Manager) ToggleMFA(token string, toggle bool, id int) (string, error) {
 	payload := []byte(`{"id":` + strconv.Itoa(id) + `, "mfa": ` + strconv.FormatBool(toggle) + `}`)
 	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(id), "PUT", payload, token, "application/json")
