@@ -20,6 +20,22 @@ en:
 
       Example:
           $ ernest user list
+    admin:
+      usage: "Add or remove admin users"
+      add:
+        usage: "Adds a specific user as ernest admin"
+        description: |
+          Adds a specific user as ernest admin
+
+        Example:
+            $ ernest user admin add john
+      rm:
+        usage: "Removes a specific user as ernest admin"
+        description: |
+          Removes a specific user as ernest admin
+
+        Example:
+            $ ernest user admin rm john
     create:
       usage: "Create a new user."
       args: "<username> <password>"
