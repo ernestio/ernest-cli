@@ -339,6 +339,11 @@ func (m *Manager) ReviewBuild(token, name, project, resolution string) error {
 		return errors.New(body)
 	}
 
+	if a.Error != "" {
+		color.Red(a.Error)
+		return nil
+	}
+
 	if a.Status == "done" {
 		color.Green("Submission successfully rejected!")
 		return nil
