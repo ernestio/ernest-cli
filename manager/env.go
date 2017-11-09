@@ -317,6 +317,11 @@ func (m *Manager) ResolveEnv(token, name, project, resolution string) error {
 		return errors.New(body)
 	}
 
+	if a.Error != "" {
+		color.Red(a.Error)
+		return nil
+	}
+
 	if a.Status == "done" {
 		color.Green("Sync successfully resolved!")
 		return nil

@@ -11,6 +11,7 @@ type Action struct {
 	Status       string `json:"status,omitempty"`
 	ResourceID   string `json:"resource_id,omitempty"`
 	ResourceType string `json:"resource_type,omitempty"`
+	Error        string `json:"error,omitempty"`
 	Options      struct {
 		Filters     []string `json:"filters,omitempty"`
 		BuildID     string   `json:"build_id,omitempty"`
