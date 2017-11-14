@@ -70,6 +70,30 @@ en:
         Example:
           $ ernest user info
           $ ernest user info --user <user-name>
+    enable-mfa:
+      usage: "Enable Multi-Factor Authentication."
+      args: "[--user-name]"
+      description: |
+        Enables Multi-Factor Authentication for a user.
+
+        Example:
+          $ ernest user enable-mfa
+    disable-mfa:
+      usage: "Disable Multi-Factor Authentication."
+      args: "[--user-name]"
+      description: |
+        Disable Multi-Factor Authentication for a user.
+
+        Example:
+          $ ernest user disable-mfa
+    reset-mfa:
+      usage: "Reset Multi-Factor Authentication."
+      args: "[--user-name]"
+      description: |
+        Generates a new Multi-Factor Authentication token for a user.
+
+        Example:
+          $ ernest user reset-mfa
   aws:
     create:
       usage: "Create a new aws project."

@@ -7,6 +7,7 @@ package manager
 import (
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/ernestio/ernest-cli/helper"
@@ -48,7 +49,7 @@ func (m *Manager) GetUserByUsername(token string, name string) (user model.User,
 
 // GetUser ...
 func (m *Manager) GetUser(token string, userid string) (user model.User, err error) {
-	body, resp, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+userid, "GET", nil, token, "application/json")
 	if err != nil {
 		if resp == nil {
 			return user, ErrConnectionRefused
@@ -83,7 +84,7 @@ func (m *Manager) CreateUser(token string, name string, email string, user strin
 // ChangePassword ...
 func (m *Manager) ChangePassword(token, username, oldpassword, newpassword string) error {
 	payload := []byte(`{"username": "` + username + `", "password": "` + newpassword + `", "oldpassword": "` + oldpassword + `"}`)
-	body, resp, err := m.doRequest("/api/users/"+username, "PUT", payload, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+username, "PUT", payload, token, "application/json")
 	if err != nil {
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
@@ -97,7 +98,7 @@ func (m *Manager) ChangePassword(token, username, oldpassword, newpassword strin
 // ChangePasswordByAdmin ...
 func (m *Manager) ChangePasswordByAdmin(token, username, newpassword string) error {
 	payload := []byte(`{"username": "` + username + `", "password": "` + newpassword + `"}`)
-	body, resp, err := m.doRequest("/api/users/"+username, "PUT", payload, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+username, "PUT", payload, token, "application/json")
 	if err != nil {
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
@@ -111,7 +112,7 @@ func (m *Manager) ChangePasswordByAdmin(token, username, newpassword string) err
 // SetUserAdmin ...
 func (m *Manager) SetUserAdmin(token, username, admin string) error {
 	payload := []byte(`{"admin":` + admin + `}`)
-	body, resp, err := m.doRequest("/api/users/"+username, "PUT", payload, token, "application/yaml")
+	body, resp, err := m.doRequest("/api/users/"+username, "PUT", payload, token, "application/json")
 	if err != nil {
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
@@ -120,4 +121,26 @@ func (m *Manager) SetUserAdmin(token, username, admin string) error {
 		return err
 	}
 	return nil
+}
+
+// ToggleMFA enables/disables MFA authentication services for a user
+func (m *Manager) ToggleMFA(token string, toggle bool, id int) (string, error) {
+	payload := []byte(`{"id":` + strconv.Itoa(id) + `, "mfa": ` + strconv.FormatBool(toggle) + `}`)
+	body, resp, err := m.doRequest("/api/users/"+strconv.Itoa(id), "PUT", payload, token, "application/json")
+	if err != nil {
+		if resp.StatusCode != 200 {
+			e := helper.ResponseMessage([]byte(body))
+			return "", errors.New(e.Message)
+		}
+		return "", err
+	}
+
+	user := &model.User{}
+	err = json.Unmarshal([]byte(body), &user)
+
+	if toggle {
+		return user.MFASecret, nil
+	} else {
+		return "", nil
+	}
 }

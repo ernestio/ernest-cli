@@ -18,11 +18,11 @@ import (
 // ********************* Login *******************
 
 // Login does a login action against the api
-func (m *Manager) Login(username string, password string) (token string, err error) {
+func (m *Manager) Login(username, password, verificationCode string) (token string, err error) {
 	var t Token
 
 	url := m.URL + "/auth"
-	body := []byte(`{"username": "` + username + `", "password": "` + password + `"}`)
+	body := []byte(`{"username": "` + username + `", "password": "` + password + `", "verification_code": "` + verificationCode + `"}`)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("User-Agent", "Ernest/"+m.Version)

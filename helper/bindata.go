@@ -66,6 +66,22 @@ var _langEnYml = []byte(`en:
 
       Example:
           $ ernest user list
+    admin:
+      usage: "Add or remove admin users"
+      add:
+        usage: "Adds a specific user as ernest admin"
+        description: |
+          Adds a specific user as ernest admin
+
+        Example:
+            $ ernest user admin add john
+      rm:
+        usage: "Removes a specific user as ernest admin"
+        description: |
+          Removes a specific user as ernest admin
+
+        Example:
+            $ ernest user admin rm john
     create:
       usage: "Create a new user."
       args: "<username> <password>"
@@ -100,6 +116,30 @@ var _langEnYml = []byte(`en:
         Example:
           $ ernest user info
           $ ernest user info --user <user-name>
+    enable-mfa:
+      usage: "Enable Multi-Factor Authentication."
+      args: "[--user-name]"
+      description: |
+        Enables Multi-Factor Authentication for a user.
+
+        Example:
+          $ ernest user enable-mfa
+    disable-mfa:
+      usage: "Disable Multi-Factor Authentication."
+      args: "[--user-name]"
+      description: |
+        Disable Multi-Factor Authentication for a user.
+
+        Example:
+          $ ernest user disable-mfa
+    reset-mfa:
+      usage: "Reset Multi-Factor Authentication."
+      args: "[--user-name]"
+      description: |
+        Generates a new Multi-Factor Authentication token for a user.
+
+        Example:
+          $ ernest user reset-mfa
   aws:
     create:
       usage: "Create a new aws project."
@@ -560,7 +600,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 16997, mode: os.FileMode(420), modTime: time.Unix(1509731486, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 18130, mode: os.FileMode(420), modTime: time.Unix(1510247663, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
