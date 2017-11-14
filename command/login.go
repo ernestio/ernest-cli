@@ -81,7 +81,7 @@ var Login = cli.Command{
 
 			token, err = m.Login(username, password, verificationCode)
 			if err != nil {
-				h.PrintError("Authentication failed")
+				h.PrintError(err.Error())
 			}
 		}
 
