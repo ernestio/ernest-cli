@@ -35,6 +35,11 @@ var Login = cli.Command{
 			Value: "",
 			Usage: "Password credentials",
 		},
+		cli.StringFlag{
+			Name:  "verification-code",
+			Value: "",
+			Usage: "MFA verification code",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)
@@ -71,7 +76,9 @@ var Login = cli.Command{
 			password = c.String("password")
 		}
 
-		token, err := m.Login(username, password, "")
+		verificationCode = c.String("verification-code")
+
+		token, err := m.Login(username, password, verificationCode)
 
 		// MFA check
 		if err != nil && err.Error() == "mfa required" {
