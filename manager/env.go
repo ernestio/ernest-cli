@@ -17,6 +17,8 @@ import (
 	"github.com/fatih/color"
 )
 
+var NILRESPONSE = "null"
+
 // ListEnvs ...
 func (m *Manager) ListEnvs(token string) (envs []model.Env, err error) {
 	body, resp, err := m.doRequest("/api/envs/", "GET", []byte(""), token, "")
@@ -33,8 +35,7 @@ func (m *Manager) ListEnvs(token string) (envs []model.Env, err error) {
 	return envs, err
 }
 
-// EnvStatus ...
-func (m *Manager) EnvStatus(token, project, env string) (environment model.Env, err error) {
+func (m *Manager) getEnv(token, project, env string) (environment model.Env, err error) {
 	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env, "GET", []byte(""), token, "")
 	if err != nil {
 		if resp == nil {
@@ -48,12 +49,26 @@ func (m *Manager) EnvStatus(token, project, env string) (environment model.Env, 
 		}
 		return environment, err
 	}
-	if body == "null" {
+	if body == NILRESPONSE {
 		return environment, errors.New("Unexpected endpoint response : " + string(body))
 	}
 	err = json.Unmarshal([]byte(body), &environment)
 
 	return environment, err
+}
+
+// EnvSchedules : gets a list of environment schedules
+func (m *Manager) EnvSchedules(token, project, env string) (schedules map[string]interface{}, err error) {
+	environment, err := m.getEnv(token, project, env)
+	if err != nil {
+		return schedules, err
+	}
+	return environment.Schedules, err
+}
+
+// EnvStatus ...
+func (m *Manager) EnvStatus(token, project, env string) (environment model.Env, err error) {
+	return m.getEnv(token, project, env)
 }
 
 // ResetEnv ...
@@ -159,11 +174,12 @@ func (m *Manager) ForceDestroy(token, project, env string) error {
 }
 
 // UpdateEnv : Updates credentials on a specific environment
-func (m *Manager) UpdateEnv(token, name, project string, credentials, options map[string]interface{}) error {
+func (m *Manager) UpdateEnv(token, name, project string, credentials, options, schedules map[string]interface{}) error {
 	e := model.Env{
 		Name:        name,
 		Credentials: credentials,
 		Options:     options,
+		Schedules:   schedules,
 	}
 
 	payload, err := json.Marshal(e)
