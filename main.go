@@ -30,7 +30,6 @@ func main() {
 		command.CmdEnv,
 		command.CmdPreferences,
 		command.CmdDocs,
-		command.CmdComponents,
 		command.CmdLog,
 		command.CmdUsage,
 		command.CmdNotification,

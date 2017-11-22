@@ -192,15 +192,6 @@ var _langEnYml = []byte(`en:
 
         Example:
           $ ernest project update azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
-  components:
-    find:
-      usage: "List components on your project."
-      args: ""
-      description: |
-        List all components on your project.
-
-        Example:
-          $ ernest component list my_project ebs --environment=my_env
   docs:
     usage: "Open docs in the default browser."
     args: ""
@@ -523,16 +514,6 @@ var _langEnYml = []byte(`en:
         Example:
           $ ernest roles set -u john -r owner -p my_project
           $ ernest roles set -u john -r reader -p my_project -e my_environment
-  setup:
-    usage: "Use it to setup your ernest instance"
-    description: |
-      This command will help you to setup your ernest instance by:
-      - [ ] configure ernest-cli target
-      - [ ] create a plain user
-      - [ ] create a group
-      - [ ] link the user to the group
-      - [ ] login as the newly created user.
-      - [ ] create a new project (optional)
   target:
     usage: "Configure Ernest target instance."
     args: "<ernest_url>"
@@ -600,7 +581,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 18130, mode: os.FileMode(420), modTime: time.Unix(1510247663, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 17517, mode: os.FileMode(420), modTime: time.Unix(1511351654, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
