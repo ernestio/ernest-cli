@@ -50,6 +50,10 @@ var CreateUser = cli.Command{
 			Value: "",
 			Usage: "Email for the user",
 		},
+		cli.BoolFlag{
+			Name:  "mfa",
+			Usage: "Enable MFA",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
@@ -60,14 +64,23 @@ var CreateUser = cli.Command{
 		}
 
 		usr := c.Args()[0]
-		email := c.String("email")
 		pwd := c.Args()[1]
+		email := c.String("email")
+		mfa := c.Bool("mfa")
 		m, cfg := setup(c)
-		err := m.CreateUser(cfg.Token, usr, email, usr, pwd)
+
+		mfaSecret, err := m.CreateUser(cfg.Token, usr, email, usr, pwd, mfa)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
-		color.Green("User " + usr + " successfully created")
+
+		color.Green("User %s successfully created\n\n", usr)
+
+		if mfa {
+			color.Green("MFA enabled")
+			fmt.Printf("Account name: Ernest (%s)\nKey: %s\n", usr, mfaSecret)
+		}
+
 		return nil
 	},
 }
