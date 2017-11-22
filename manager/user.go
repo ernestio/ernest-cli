@@ -62,23 +62,31 @@ func (m *Manager) GetUser(token string, userid string) (user model.User, err err
 }
 
 // CreateUser ...
-func (m *Manager) CreateUser(token string, name string, email string, user string, password string) error {
-	payload := []byte(`{"username": "` + user + `", "email": "` + email + `", "password": "` + password + `"}`)
+func (m *Manager) CreateUser(token string, name string, email string, user string, password string, mfa bool) (string, error) {
+	payload := []byte(`{"username": "` + user + `", "email": "` + email + `", "password": "` + password + `", "mfa": ` + strconv.FormatBool(mfa) + `}`)
 	body, resp, err := m.doRequest("/api/users/", "POST", payload, token, "")
 	if err != nil {
 		if resp == nil {
-			return ErrConnectionRefused
+			return "", ErrConnectionRefused
 		}
 		if resp.StatusCode != 200 {
 			e := helper.ResponseMessage([]byte(body))
 			if strings.Contains(e.Message, "invalid jwt") {
-				return errors.New("You're not allowed to perform this action, please log in")
+				return "", errors.New("You're not allowed to perform this action, please log in")
 			}
-			return errors.New(e.Message)
+			return "", errors.New(e.Message)
 		}
-		return err
+		return "", err
 	}
-	return nil
+
+	u := &model.User{}
+	err = json.Unmarshal([]byte(body), &u)
+
+	if mfa {
+		return u.MFASecret, nil
+	} else {
+		return "", nil
+	}
 }
 
 // ChangePassword ...
