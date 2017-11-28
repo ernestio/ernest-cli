@@ -47,7 +47,7 @@ var MonitorEnv = cli.Command{
 			h.PrintError(err.Error())
 		}
 
-		build, err := m.BuildStatus(cfg.Token, project, env, id)
+		build, err := m.BuildStatusByID(cfg.Token, project, env, id)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
