@@ -40,6 +40,15 @@ func (m *Manager) SetLogger(token string, logger model.Logger) (err error) {
 		if resp.StatusCode == 403 {
 			return errors.New("You're not allowed to perform this action, please log in with an admin account")
 		}
+		if resp.StatusCode == 500 {
+			var r struct {
+				Msg string `json:"message"`
+			}
+			if json.Unmarshal([]byte(body), &r) == nil {
+				return errors.New(r.Msg)
+			}
+			return errors.New("You're not allowed to perform this action, please log in with an admin account")
+		}
 
 		return errors.New(string(body))
 	}
