@@ -76,7 +76,7 @@ var UpdateEnv = cli.Command{
 			h.PrintError("Environment does not exist!")
 		}
 
-		err = m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c, e.Options))
+		err = m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c, e.Options), e.Schedules)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
@@ -762,5 +762,6 @@ var CmdEnv = cli.Command{
 		SyncEnv,
 		ResolveEnv,
 		ReviewEnv,
+		ScheduleEnv,
 	},
 }

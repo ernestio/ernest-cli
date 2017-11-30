@@ -341,6 +341,31 @@ var _langEnYml = []byte(`en:
 
         Examples:
           $ ernest env import my_project my_env
+    schedule:
+      list:
+        usage: "List environment schedules."
+        args: " "
+        description: |
+          Lists the schedules for a scpecific environment
+
+          Example:
+            $ ernest env schedule list
+      add:
+        usage: "Adds a new schedule for a specific environment."
+        args: "--action <[power_on|power_off|sync]]> --instance_type <type_a> --sync_interval '0 0 * * * *' <project> <env> <my_schedule>"
+        description: |
+          Creates a new schedule for a specific environment
+
+          Example:
+            $ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --sync_interval '0 0 * * * *' <project> <env> <my_schedule>
+      rm:
+        usage: "Removes a schedule on the specified environment."
+        args: "<project> <env> <my_schedule>"
+        description: |
+          Removes an existing schedule from a specific environment
+
+          Example:
+            $ ernest env schedule rm <project> <env> <my_schedule>
   log:
     usage: "Inline display of ernest logs."
     args: " "
@@ -581,7 +606,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 17517, mode: os.FileMode(420), modTime: time.Unix(1511351654, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 18524, mode: os.FileMode(420), modTime: time.Unix(1512030489, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
