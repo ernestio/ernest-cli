@@ -37,19 +37,14 @@ var CreateVcloudProject = cli.Command{
 			Usage: "Your vCloud Organization",
 		},
 		cli.StringFlag{
-			Name:  "vse-url",
+			Name:  "vdc",
 			Value: "",
-			Usage: "VSE URL",
+			Usage: "Your vCloud vDC",
 		},
 		cli.StringFlag{
 			Name:  "vcloud-url",
 			Value: "",
 			Usage: "VCloud URL",
-		},
-		cli.StringFlag{
-			Name:  "public-network",
-			Value: "",
-			Usage: "Public Network",
 		},
 		cli.StringFlag{
 			Name:  "template",
@@ -73,7 +68,7 @@ var CreateVcloudProject = cli.Command{
 		}
 
 		name := c.Args()[0]
-		var url, network, user, org, password, username string
+		var url, user, password, org, vdc, username string
 		var fake bool
 
 		template := c.String("template")
@@ -83,17 +78,15 @@ var CreateVcloudProject = cli.Command{
 				h.PrintError(err.Error())
 			}
 			url = t.URL
-			network = t.Network
 			user = t.User
 			org = t.Org
+			vdc = t.Vdc
 			password = t.Password
 			fake = t.Fake
 		}
+
 		if c.String("vcloud-url") != "" {
 			url = c.String("vcloud-url")
-		}
-		if c.String("public-network") != "" {
-			network = c.String("public-network")
 		}
 		if c.String("user") != "" {
 			user = c.String("user")
@@ -112,22 +105,24 @@ var CreateVcloudProject = cli.Command{
 		if url == "" {
 			errs = append(errs, "Specify a valid VCloud URL with --vcloud-url flag")
 		}
-		if network == "" {
-			errs = append(errs, "Specify a valid public network with --public-network flag")
-		}
 		if user == "" {
 			errs = append(errs, "Specify a valid user name with --user")
 		}
 		if org == "" {
 			errs = append(errs, "Specify a valid organization with --org")
 		}
+		if vdc == "" {
+			errs = append(errs, "Specify a valid VCloud vDC with --vdc flag")
+		}
 		if password == "" {
 			errs = append(errs, "Specify a valid password with --password")
 		}
+
 		rtype := "vcloud"
 		if fake {
 			rtype = "vcloud-fake"
 		}
+
 		if len(errs) > 0 {
 			msgs := []string{"Please, fix the error shown below to continue"}
 			for _, e := range errs {
@@ -136,12 +131,13 @@ var CreateVcloudProject = cli.Command{
 			h.PrintError(strings.Join(msgs, "\n"))
 		}
 
-		body, err := m.CreateVcloudProject(cfg.Token, name, rtype, username, password, url, network, c.String("vse-url"))
+		body, err := m.CreateVcloudProject(cfg.Token, name, rtype, username, password, url, vdc)
 		if err != nil {
 			h.PrintError(body)
 		} else {
 			color.Green("Project '" + name + "' successfully created ")
 		}
+
 		return nil
 	},
 }
@@ -167,6 +163,7 @@ var DeleteProject = cli.Command{
 		if err != nil {
 			h.PrintError(err.Error())
 		}
+
 		color.Green("Project " + name + " successfully removed")
 
 		return nil

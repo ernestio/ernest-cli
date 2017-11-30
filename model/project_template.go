@@ -9,6 +9,7 @@ type ProjectTemplate struct {
 	URL      string `yaml:"vcloud-url"`
 	Network  string `yaml:"public-network"`
 	Org      string `yaml:"org"`
+	Vdc      string `yaml:"vdc"`
 	Password string `yaml:"password"`
 	User     string `yaml:"user"`
 	Token    string `yaml:"secret_access_key"`
