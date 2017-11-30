@@ -306,12 +306,12 @@ en:
             $ ernest env schedule list
       add:
         usage: "Adds a new schedule for a specific environment."
-        args: "--action <[power_on|power_off|sync]]> --instance_type <type_a> --sync_interval '0 0 * * * *' <project> <env> <my_schedule>"
+        args: "--action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>"
         description: |
           Creates a new schedule for a specific environment
 
           Example:
-            $ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --sync_interval '0 0 * * * *' <project> <env> <my_schedule>
+            $ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>
       rm:
         usage: "Removes a schedule on the specified environment."
         args: "<project> <env> <my_schedule>"
