@@ -53,18 +53,18 @@ func PrintProjectList(projects []model.Project) {
 		fmt.Println("")
 		fmt.Println("VCloud Projects")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Type", "Url", "External Network", "Org"})
+		table.SetHeader([]string{"ID", "Name", "Type", "Vdc", "Org", "Url"})
 		for _, d := range vcloud {
 			id := strconv.Itoa(d.ID)
 			vcloudURL, _ := d.Credentials["vcloud_url"].(string)
-			extNetwork, _ := d.Credentials["external_network"].(string)
+			vdc, _ := d.Credentials["vdc"].(string)
 			username, _ := d.Credentials["username"].(string)
 			parts := strings.Split(username, "@")
 			org := ""
 			if len(parts) == 2 {
 				org = parts[1]
 			}
-			table.Append([]string{id, d.Name, d.Type, vcloudURL, extNetwork, org})
+			table.Append([]string{id, d.Name, d.Type, vdc, org, vcloudURL})
 		}
 		table.Render()
 	}

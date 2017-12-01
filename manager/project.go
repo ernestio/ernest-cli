@@ -12,8 +12,8 @@ import (
 )
 
 // CreateVcloudProject : Creates a VCloud project
-func (m *Manager) CreateVcloudProject(token string, name string, rtype string, user string, password string, url string, network string, vseURL string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "credentials":{"region": "", "username":"` + user + `", "password":"` + password + `", "external_network":"` + network + `", "vcloud_url":"` + url + `", "vse_url":"` + vseURL + `"}}`)
+func (m *Manager) CreateVcloudProject(token, name, rtype, user, password, url, vdc string) (string, error) {
+	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "credentials":{"vdc": "` + vdc + `", "username":"` + user + `", "password":"` + password + `", "vcloud_url":"` + url + `"}}`)
 	body, res, err := m.doRequest("/api/projects/", "POST", payload, token, "")
 	if err != nil {
 		if res == nil {
