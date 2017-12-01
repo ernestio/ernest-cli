@@ -94,6 +94,9 @@ var CreateVcloudProject = cli.Command{
 		if c.String("org") != "" {
 			org = c.String("org")
 		}
+		if c.String("vdc") != "" {
+			vdc = c.String("vdc")
+		}
 		if c.String("password") != "" {
 			password = c.String("password")
 		}
