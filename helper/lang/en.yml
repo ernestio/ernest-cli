@@ -519,7 +519,7 @@ en:
         Create a new vcloud project on the targeted instance of Ernest.
 
         Example:
-          $ ernest project create vcloud --user username --password xxxx --org MY-ORG-NAME --vse-url http://vse.url --vcloud-url https://myernest.com --public-network MY-PUBLIC-NETWORK myproject
+          $ ernest project create vcloud --user username --password xxxx --org MY-ORG-NAME --vdc MY-VDC-NAME --vcloud-url https://myernest.com myproject
 
         Template example:
           $ ernest project create vcloud --template myproject.yml myproject
@@ -527,11 +527,10 @@ en:
             ---
             fake: true
             org: org
-            password: pwd
-            public-network: MY-NETWORK
             user: bla
+            password: pwd
+            vdc: MY-VDC
             vcloud-url: "http://ss.com"
-            vse-url: "http://ss.com"
     delete:
       usage: "Deletes the specified project."
       args: "<project-name>"

@@ -352,12 +352,12 @@ var _langEnYml = []byte(`en:
             $ ernest env schedule list
       add:
         usage: "Adds a new schedule for a specific environment."
-        args: "--action <[power_on|power_off|sync]]> --instance_type <type_a> --sync_interval '0 0 * * * *' <project> <env> <my_schedule>"
+        args: "--action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>"
         description: |
           Creates a new schedule for a specific environment
 
           Example:
-            $ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --sync_interval '0 0 * * * *' <project> <env> <my_schedule>
+            $ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>
       rm:
         usage: "Removes a schedule on the specified environment."
         args: "<project> <env> <my_schedule>"
@@ -565,7 +565,7 @@ var _langEnYml = []byte(`en:
         Create a new vcloud project on the targeted instance of Ernest.
 
         Example:
-          $ ernest project create vcloud --user username --password xxxx --org MY-ORG-NAME --vse-url http://vse.url --vcloud-url https://myernest.com --public-network MY-PUBLIC-NETWORK myproject
+          $ ernest project create vcloud --user username --password xxxx --org MY-ORG-NAME --vdc MY-VDC-NAME --vcloud-url https://myernest.com myproject
 
         Template example:
           $ ernest project create vcloud --template myproject.yml myproject
@@ -573,11 +573,10 @@ var _langEnYml = []byte(`en:
             ---
             fake: true
             org: org
-            password: pwd
-            public-network: MY-NETWORK
             user: bla
+            password: pwd
+            vdc: MY-VDC
             vcloud-url: "http://ss.com"
-            vse-url: "http://ss.com"
     delete:
       usage: "Deletes the specified project."
       args: "<project-name>"
@@ -606,7 +605,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 18524, mode: os.FileMode(420), modTime: time.Unix(1512030489, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 18420, mode: os.FileMode(420), modTime: time.Unix(1512139838, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
