@@ -272,6 +272,7 @@ var AddAdminUser = cli.Command{
 			h.PrintError(err.Error())
 		}
 
+		color.Green("Admin privileges assigned to user " + username)
 		return nil
 	},
 }
@@ -302,6 +303,7 @@ var RmAdminUser = cli.Command{
 			h.PrintError(err.Error())
 		}
 
+		color.Green("Admin privileges revoked from user " + username)
 		return nil
 	},
 }
