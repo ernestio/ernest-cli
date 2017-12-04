@@ -54,6 +54,10 @@ var CreateUser = cli.Command{
 			Name:  "mfa",
 			Usage: "Enable MFA",
 		},
+		cli.BoolFlag{
+			Name:  "admin",
+			Usage: "User will be created as admin",
+		},
 	},
 	Action: func(c *cli.Context) error {
 		if len(c.Args()) < 1 {
@@ -67,6 +71,7 @@ var CreateUser = cli.Command{
 		pwd := c.Args()[1]
 		email := c.String("email")
 		mfa := c.Bool("mfa")
+		admin := c.Bool("admin")
 		m, cfg := setup(c)
 
 		mfaSecret, err := m.CreateUser(cfg.Token, usr, email, usr, pwd, mfa)
@@ -79,6 +84,13 @@ var CreateUser = cli.Command{
 		if mfa {
 			color.Green("MFA enabled")
 			fmt.Printf("Account name: Ernest (%s)\nKey: %s\n", usr, mfaSecret)
+		}
+
+		if admin {
+			if err = m.SetUserAdmin(cfg.Token, usr, "true"); err != nil {
+				color.Red("It was not possible to set this user as admin: " + err.Error())
+				color.Red("Please fix any errors and try again with 'user admin add ...' command")
+			}
 		}
 
 		return nil
@@ -272,6 +284,7 @@ var AddAdminUser = cli.Command{
 			h.PrintError(err.Error())
 		}
 
+		color.Green("Admin privileges assigned to user " + username)
 		return nil
 	},
 }
@@ -302,6 +315,7 @@ var RmAdminUser = cli.Command{
 			h.PrintError(err.Error())
 		}
 
+		color.Green("Admin privileges revoked from user " + username)
 		return nil
 	},
 }
