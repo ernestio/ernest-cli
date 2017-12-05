@@ -63,7 +63,15 @@ func (m *Manager) EnvSchedules(token, project, env string) (schedules map[string
 	if err != nil {
 		return schedules, err
 	}
-	return environment.Schedules, err
+	sch := environment.Schedules
+	if environment.Options["sync_interval"] != nil {
+		sch["sync"] = map[string]interface{}{
+			"action":        "sync",
+			"instance_type": "",
+			"interval":      environment.Options["sync_interval"],
+		}
+	}
+	return sch, err
 }
 
 // EnvStatus ...
