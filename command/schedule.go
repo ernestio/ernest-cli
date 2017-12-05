@@ -78,20 +78,25 @@ var EnvAddSchedule = cli.Command{
 				h.PrintError("Missing required flag " + flag)
 			}
 		}
-		schedule := make(map[string]string, 0)
-		schedule["name"] = name
-		schedule["action"] = c.String("action")
-		schedule["interval"] = c.String("schedule")
-		schedule["instance_type"] = c.String("instance_type")
 
 		e, err := m.EnvStatus(cfg.Token, project, env)
 		if err != nil {
 			h.PrintError("Environment does not exist!")
 		}
-		if e.Schedules == nil {
-			e.Schedules = make(map[string]interface{}, 0)
+
+		if c.String("action") == "sync" {
+			e.Options["sync_interval"] = c.String("schedule")
+		} else {
+			schedule := make(map[string]string, 0)
+			schedule["name"] = name
+			schedule["action"] = c.String("action")
+			schedule["interval"] = c.String("schedule")
+			schedule["instance_type"] = c.String("instance_type")
+			if e.Schedules == nil {
+				e.Schedules = make(map[string]interface{}, 0)
+			}
+			e.Schedules[name] = schedule
 		}
-		e.Schedules[name] = schedule
 
 		err = m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), e.Options, e.Schedules)
 		if err != nil {
@@ -130,9 +135,14 @@ var EnvRmSchedule = cli.Command{
 		if err != nil {
 			h.PrintError("Environment does not exist!")
 		}
-		delete(e.Schedules, name)
 
-		err = m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c, e.Options), e.Schedules)
+		if name == "sync" {
+			e.Options["sync_interval"] = nil
+		} else {
+			delete(e.Schedules, name)
+		}
+
+		err = m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), e.Options, e.Schedules)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
