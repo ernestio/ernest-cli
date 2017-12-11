@@ -12,9 +12,68 @@ import (
 	"github.com/ernestio/ernest-cli/manager"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/urfave/cli"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
+const (
+	// NonEmptuTokenVal ...
+	NonEmptuTokenVal = "non_empty_token"
+	// NonAdminVal ...
+	NonAdminVal = "non_admin"
+)
+
+// NoValidation ...
+var NoValidation = []string{}
+
+// AuthUsersValidation ...
+var AuthUsersValidation = []string{NonEmptuTokenVal}
+
+// NonAdminValidation ...
+var NonAdminValidation = []string{NonEmptuTokenVal, NonAdminVal}
+
+type validation func(*manager.Client)
+
+var validations = map[string]validation{
+	NonEmptuTokenVal: func(client *manager.Client) {
+		if client.Config().Token == "" {
+			h.PrintError("You're not allowed to perform this action, please log in")
+		}
+	},
+	NonAdminVal: func(client *manager.Client) {
+		session := client.Session().Get()
+		if !session.IsAdmin() {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+	},
+}
+
+var session *emodels.Session
+
+// esetup ...
+func esetup(c *cli.Context, vals []string) *manager.Client {
+	session = nil
+	config := model.GetConfig()
+	if config == nil {
+		config = &model.Config{}
+		if c.Command.Name != "target" && c.Command.Name != "setup" {
+			h.PrintError("Environment not configured, please use target command")
+		}
+	}
+
+	client := manager.New(config)
+	for _, v := range vals {
+		if fn, ok := validations[v]; ok {
+			fn(client)
+		}
+	}
+
+	return client
+
+}
+
 // setup ...
+// TODO : Deprecate this to use "esetup"
 func setup(c *cli.Context) (*manager.Manager, *model.Config) {
 	config := model.GetConfig()
 	if config == nil {
@@ -25,6 +84,19 @@ func setup(c *cli.Context) (*manager.Manager, *model.Config) {
 	}
 	m := manager.Manager{URL: config.URL, Version: c.App.Version}
 	return &m, config
+}
+
+func stringWithDefault(c *cli.Context, key, def string) (val string) {
+	if val = c.String(key); val == "" {
+		val = def
+	}
+	return
+}
+
+func paramsLenValidation(c *cli.Context, number int, translationKey string) {
+	if len(c.Args()) < number {
+		h.PrintError("Please provide required parameters:\n" + h.T(translationKey))
+	}
 }
 
 // askForConfirmation uses Scanln to parse user input. A user must type in "yes" or "no" and

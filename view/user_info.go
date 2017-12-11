@@ -3,11 +3,11 @@ package view
 import (
 	"fmt"
 
-	"github.com/ernestio/ernest-cli/model"
+	"github.com/ernestio/ernest-go-sdk/models"
 )
 
 // PrintUserInfo : ...
-func PrintUserInfo(u model.User) {
+func PrintUserInfo(u *models.User) {
 	fmt.Println("Username: ", u.Username)
 	fmt.Println("Type:     ", u.Type)
 	fmt.Println("Projects:")

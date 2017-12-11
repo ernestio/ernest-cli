@@ -70,6 +70,7 @@ var _langEnYml = []byte(`en:
       usage: "Add or remove admin users"
       add:
         usage: "Adds a specific user as ernest admin"
+        args: "$ ernest user admin add <username>"
         description: |
           Adds a specific user as ernest admin
 
@@ -77,6 +78,7 @@ var _langEnYml = []byte(`en:
             $ ernest user admin add john
       rm:
         usage: "Removes a specific user as ernest admin"
+        args: "$ ernest user admin rm <username>"
         description: |
           Removes a specific user as ernest admin
 
@@ -84,7 +86,7 @@ var _langEnYml = []byte(`en:
             $ ernest user admin rm john
     create:
       usage: "Create a new user."
-      args: "<username> <password>"
+      args: "$ ernest user create <username> <password>"
       description: |
         Create a new user on the targeted instance of Ernest.
         Example:
@@ -104,7 +106,7 @@ var _langEnYml = []byte(`en:
           $ ernest user change-password --user <username> --current-password <current-password> --password <new-password>
     disable:
       usage: "Disable available users."
-      args: "<username>"
+      args: "$ ernest user disable <username>"
       description: |
         Disable available users.
 
@@ -118,7 +120,7 @@ var _langEnYml = []byte(`en:
           $ ernest user info --user <user-name>
     enable-mfa:
       usage: "Enable Multi-Factor Authentication."
-      args: "[--user-name]"
+      args: "$ ernest user enable-mfa [--user-name]"
       description: |
         Enables Multi-Factor Authentication for a user.
 
@@ -126,7 +128,7 @@ var _langEnYml = []byte(`en:
           $ ernest user enable-mfa
     disable-mfa:
       usage: "Disable Multi-Factor Authentication."
-      args: "[--user-name]"
+      args: "$ ernest user disable-mfa [--user-name]"
       description: |
         Disable Multi-Factor Authentication for a user.
 
@@ -134,7 +136,7 @@ var _langEnYml = []byte(`en:
           $ ernest user disable-mfa
     reset-mfa:
       usage: "Reset Multi-Factor Authentication."
-      args: "[--user-name]"
+      args: "$ ernest user reset-mfa [--user-name]"
       description: |
         Generates a new Multi-Factor Authentication token for a user.
 
@@ -155,10 +157,10 @@ var _langEnYml = []byte(`en:
             access_key_id : AKIAIOSFODNN7EXAMPLE
             secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
             region: us-west-2
-      args: "<project-name>"
+      args: "$ ernest project create aws --region us-west-2 --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_project"
     update:
       usage: "Updates the specified AWS project."
-      args: "<project-name>"
+      args: "$ ernest project update aws --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_project"
       description: |
         Updates the specified AWS project.
       Example:
@@ -166,7 +168,7 @@ var _langEnYml = []byte(`en:
   azure:
     create:
       usage: "Create a new azure project."
-      args: "<project-name>"
+      args: "$ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
       description: |
         Create a new Azure project on the targeted instance of Ernest.
 
@@ -186,7 +188,7 @@ var _langEnYml = []byte(`en:
           environment: public
     update:
       usage: "Updates the specified Azure project."
-      args: "<project-name>"
+      args: "$ ernest project update azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
       description: |
         Updates the specified Azure project.
 
@@ -211,7 +213,7 @@ var _langEnYml = []byte(`en:
           $ ernest environment list
     update:
       usage: "Creates an empty environment based on a specific project"
-      args: "<project> <environment>"
+      args: "$ ernest env update <project> <environment> [--credentials credentials.yml]"
       description: |
         You must be logged in to execute this command.
 
@@ -219,7 +221,7 @@ var _langEnYml = []byte(`en:
           $ ernest env update --credentials project.yml my_project my_environment
     create:
       usage: "Creates an empty environment based on a specific project"
-      args: "<project> <environment>"
+      args: "$ ernest env create <project> <environment> [--credentials project.yml]"
       description: |
         You must be logged in to execute this command.
 
@@ -228,7 +230,7 @@ var _langEnYml = []byte(`en:
           $ ernest env create --credentials project.yml my_project my_environment
     apply:
       usage: "Builds or changes infrastructure."
-      args: "<file.yml>"
+      args: "$ ernest env apply <file.yml>"
       description: |
         Sends an environment YAML description file to Ernest to be executed.
         You must be logged in to execute this command.
@@ -240,7 +242,7 @@ var _langEnYml = []byte(`en:
           $ ernest env apply --dry myenvironment.yml
     destroy:
       usage: "Destroy an environment."
-      args: "<project> <environment_name>"
+      args: "$ ernest env delete <my_project> <my_environment>"
       description: |
         Destroys an environment by name.
 
@@ -248,7 +250,7 @@ var _langEnYml = []byte(`en:
           $ ernest env delete <my_project> <my_environment>
     history:
       usage: "Shows the history of an environment, a list of builds"
-      args: "ernest-cli env history <my_project> <my_env>"
+      args: "$ ernest env history <my_project> <my_env>"
       description: |
         Shows the history of an environment, a list of builds and its status and basic information.
 
@@ -256,7 +258,7 @@ var _langEnYml = []byte(`en:
           $ ernest env history <my_project> <my_env>
     reset:
       usage: "Reset an in progress environment."
-      args: "<env_name>"
+      args: "$ ernest env reset <my_env>"
       description: |
         Reseting an environment creation may cause problems, please make sure you know what are you doing.
 
@@ -264,7 +266,7 @@ var _langEnYml = []byte(`en:
           $ ernest env reset <my_env>
     revert:
       usage: "Reverts an environment to a previous state"
-      args: "<project> <env_name> <build_id>"
+      args: "$ ernest env revert <project> <env_name> <build_id>"
       description: |
         Reverts an environment to a previous known state using a build ID from 'ernest env history'.
 
@@ -273,7 +275,7 @@ var _langEnYml = []byte(`en:
           $ ernest env revert --dry <project> <env_name> <build_id>
     definition:
       usage: "Show the current definition of an environment by its name"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env definition <my_project> <my_env>"
       description: |
         Show the current definition of an environment by its name getting the definition about the build.
 
@@ -281,7 +283,7 @@ var _langEnYml = []byte(`en:
           $ ernest env definition <my_project> <my_env>
     info:
       usage: "$ ernest env info <my_env> --build <specific build>"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env definition <my_project> <my_env>"
       description: |
         Will show detailed information of the last build of a specified environment.
         In case you specify --build option you will be able to output the detailed information of specific build of an environment.
@@ -291,7 +293,7 @@ var _langEnYml = []byte(`en:
           $ ernest env definition <my_project> <my_env> --build build1
     sync:
       usage: "$ ernest env sync <my_project> <my_env>"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env sync <my_project> <my_env>"
       description: |
         Will sync ernest's environment state from a provider.
         Any changes detected can then be resolved using the 'resolve' command.
@@ -300,7 +302,7 @@ var _langEnYml = []byte(`en:
           $ ernest env sync <my_project> <my_env>
     resolve:
       usage: "$ ernest env resolve --[accept|reject|ignore] <my_project> <my_env>"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env resolve --[accept|reject|ignore] <my_project> <my_env>"
       description: |
         Provides the ability to manage changes detected by a sync.
         Options:
@@ -314,7 +316,7 @@ var _langEnYml = []byte(`en:
           $ ernest env resolve --ignore <my_project> <my_env>
     review:
       usage: "$ ernest env review --[accept|reject] <my_project> <my_env>"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env review --[accept|reject] <my_project> <my_env>"
       description: |
         Provides the ability to review submitted builds. Running without any flags will show the diff of the submitted build with the prior environment state.
         Options:
@@ -327,7 +329,7 @@ var _langEnYml = []byte(`en:
           $ ernest env review --reject <my_project> <my_env>
     diff:
       usage: "$ ernest env diff <project_name> <env_name> <build_a> <build_b>"
-      args: "<env_aname> <build_a> <build_b>"
+      args: "$ ernest env diff <project_name> <env_name> <build_a> <build_b>"
       description: |
         Will display the diff between two different builds
 
@@ -335,7 +337,7 @@ var _langEnYml = []byte(`en:
           $ ernest env diff <my_project> <my_env> 1 2
     import:
       usage: "$ ernest env import <my_project> <my_env>"
-      args: "<env_name>"
+      args: "$ ernest env import <my_project> <my_env>"
       description : |
         Will import the environment <my_env> from project <project_name>
 
@@ -352,7 +354,7 @@ var _langEnYml = []byte(`en:
             $ ernest env schedule list
       add:
         usage: "Adds a new schedule for a specific environment."
-        args: "--action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>"
+        args: "$ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>"
         description: |
           Creates a new schedule for a specific environment
 
@@ -360,7 +362,7 @@ var _langEnYml = []byte(`en:
             $ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>
       rm:
         usage: "Removes a schedule on the specified environment."
-        args: "<project> <env> <my_schedule>"
+        args: "$ ernest env schedule rm <project> <env> <my_schedule>"
         description: |
           Removes an existing schedule from a specific environment
 
@@ -398,7 +400,7 @@ var _langEnYml = []byte(`en:
         $ ernest logout
   monitor:
     usage: "Monitor an environment creation."
-    args: "<project_name> <env_name>"
+    args: "$ ernest monitor <project_name> <env_name>"
     description: |
       Monitors an environment while it is being built by its name.
 
@@ -415,7 +417,7 @@ var _langEnYml = []byte(`en:
           $ ernest notification list
     delete:
       usage: "Deletes an existing notify."
-      args: "<notify_name>"
+      args: "$ ernest notify delete <notify_name>"
       description: |
         Deletes an existing notify on the targeted instance of Ernest.
 
@@ -427,7 +429,7 @@ var _langEnYml = []byte(`en:
         $ ernest notify delete my_notify
     update:
       usage: "Update a new notify."
-      args: "<notify_name> <notify_config>"
+      args: "$ ernest notify update <notify_name> <notify_config>"
       description: |
         Update an existing notify on the targeted instance of Ernest.
 
@@ -440,7 +442,7 @@ var _langEnYml = []byte(`en:
     service:
       add:
         usage: "Add environment to an existing notify."
-        args: "<notification_name> <project_name> [<env_name>]"
+        args: "$ ernest notify add <notification_name> <project_name> [<env_name>]"
         description: |
           Adds a environment to an existing notify.
 
@@ -453,7 +455,7 @@ var _langEnYml = []byte(`en:
           $ ernest notify add my_notify my_project my_env
       rm:
         usage: "Removes an environment to an existing notify."
-        args: "<notify_name> <project_name> [<env_name>]"
+        args: "$ ernest notify remove <notify_name> <project_name> [<env_name>]"
         description: |
           Removes an environment to an existing notify.
 
@@ -466,7 +468,7 @@ var _langEnYml = []byte(`en:
           $ ernest notify remove my_notify my_project my_env
     create:
       usage: "Create a new notify."
-      args: "<notify_name> <notify_type> <notify_config>"
+      args: "$ ernest notify create <notify_name> <notify_type> <notify_config>"
       description: |
         Create a new notify on the targeted instance of Ernest.
 
@@ -487,7 +489,7 @@ var _langEnYml = []byte(`en:
           $ ernest preferences logger list
     set:
       usage: "Creates / updates a logger based on its type."
-      args: " "
+      args: "$ ernest preferences logger add [basic|logstash|rollbar]"
       description: |
         Creates / updates a logger based on its types.
 
@@ -497,7 +499,7 @@ var _langEnYml = []byte(`en:
           $ ernest preferences logger add rollbar --token MY_ROLLBAR_TOKEN
     del:
       usage: "Deletes a logger based on its type."
-      args: " "
+      args: "$ ernest preferences logger delete [basic|logstash|rollbar]"
       description: |
         Deletes a logger based on its types.
 
@@ -514,7 +516,7 @@ var _langEnYml = []byte(`en:
           $ ernest project list
     info:
       usage: "Project information"
-      args: " "
+      args: "$ ernest project info <my_project>"
       description: |
         Display specific project information.
 
@@ -523,7 +525,7 @@ var _langEnYml = []byte(`en:
   roles:
     set:
       usage: "ernest role set -u john -r owner -p project"
-      args: " "
+      args: "$ ernest roles set -u john -r owner -p my_project [-e my_environment]"
       description: |
         Set permissions for a user on a specific resource
 
@@ -532,7 +534,7 @@ var _langEnYml = []byte(`en:
           $ ernest roles set -u john -r reader -p my_project -e my_environment
     unset:
       usage: "ernest role unset -u john -r owner -p my_project"
-      args: " "
+      args: "$ ernest roles set -u john -r reader -p my_project [-e my_environment]"
       description: |
         Set permissions for a user on a specific resource
 
@@ -541,7 +543,7 @@ var _langEnYml = []byte(`en:
           $ ernest roles set -u john -r reader -p my_project -e my_environment
   target:
     usage: "Configure Ernest target instance."
-    args: "<ernest_url>"
+    args: "$ ernest target <ernest_url>"
     description: |
       Sets up ernest instance target.
 
@@ -560,7 +562,7 @@ var _langEnYml = []byte(`en:
   vcloud:
     create:
       usage: "Create a new vcloud project."
-      args: "<project-name>"
+      args: "$ ernest project create vcloud [--template myproject.yml] <project-name>"
       description: |
         Create a new vcloud project on the targeted instance of Ernest.
 
@@ -579,7 +581,7 @@ var _langEnYml = []byte(`en:
             vcloud-url: "http://ss.com"
     delete:
       usage: "Deletes the specified project."
-      args: "<project-name>"
+      args: "$ ernest project delete <project-name>"
       description: |
         Deletes the name specified project.
 
@@ -587,7 +589,7 @@ var _langEnYml = []byte(`en:
           $ ernest project delete my_project
     update:
       usage: "Updates the specified VCloud project."
-      args: "<project-name>"
+      args: "$ ernest project update vcloud [--user <me>] [--org <org>] [--password <secret>] <project-name>"
       description: |
         Updates the specified VCloud project.
 
@@ -605,7 +607,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 18420, mode: os.FileMode(420), modTime: time.Unix(1512139838, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 20206, mode: os.FileMode(420), modTime: time.Unix(1513155046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
