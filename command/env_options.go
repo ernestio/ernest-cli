@@ -28,6 +28,11 @@ func MapEnvOptions(c *cli.Context, opts map[string]interface{}) map[string]inter
 
 	submissions := c.String("submissions")
 
+	// default submissions to true
+	if !c.IsSet("submissions") && opts["submissions"] == nil {
+		opts["submissions"] = true
+	}
+
 	if submissions == "enable" {
 		opts["submissions"] = true
 	}
