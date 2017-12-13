@@ -14,6 +14,7 @@ type Client struct {
 	user         *User
 	session      *Session
 	notification *Notification
+	role         *Role
 }
 
 // New : ...
@@ -24,7 +25,7 @@ func New(config *model.Config) *Client {
 	return &Client{cli: client, cfg: config}
 }
 
-// User ...
+// User : User wrapper lazy load
 func (c *Client) User() *User {
 	if c.user == nil {
 		c.user = &User{cli: c.cli}
@@ -32,7 +33,7 @@ func (c *Client) User() *User {
 	return c.user
 }
 
-// Session : ...
+// Session : Session wrapper lazy load
 func (c *Client) Session() *Session {
 	if c.session == nil {
 		c.session = &Session{cli: c.cli}
@@ -40,7 +41,7 @@ func (c *Client) Session() *Session {
 	return c.session
 }
 
-// Notification : ...
+// Notification : Notification wrapper lazy load
 func (c *Client) Notification() *Notification {
 	if c.notification == nil {
 		c.notification = &Notification{cli: c.cli}
@@ -48,7 +49,15 @@ func (c *Client) Notification() *Notification {
 	return c.notification
 }
 
-// Cli ...
+// Role : Role wrapper lazy load
+func (c *Client) Role() *Role {
+	if c.role == nil {
+		c.role = &Role{cli: c.cli}
+	}
+	return c.role
+}
+
+// Cli : gets the internal eclient.Client
 func (c *Client) Cli() *eclient.Client {
 	return c.cli
 }

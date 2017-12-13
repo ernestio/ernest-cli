@@ -7,6 +7,7 @@ package command
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/manager"
@@ -96,6 +97,18 @@ func stringWithDefault(c *cli.Context, key, def string) (val string) {
 func paramsLenValidation(c *cli.Context, number int, translationKey string) {
 	if len(c.Args()) < number {
 		h.PrintError("Please provide required parameters:\n" + h.T(translationKey))
+	}
+}
+
+func requiredFlags(c *cli.Context, flags []string) {
+	errs := []string{}
+	for _, flag := range flags {
+		if c.String(flag) == "" {
+			errs = append(errs, "Please provide a "+flag+" with --"+flag+" flag")
+		}
+	}
+	if len(errs) > 0 {
+		h.PrintError(strings.Join(errs, "\n"))
 	}
 }
 

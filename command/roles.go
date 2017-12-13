@@ -6,10 +6,42 @@ package command
 
 // CmdUser subcommand
 import (
-	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
+
+	h "github.com/ernestio/ernest-cli/helper"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
+
+func rolesManager(c *cli.Context, set bool) {
+	requiredFlags(c, []string{"role", "user", "project"})
+	client := esetup(c, AuthUsersValidation)
+	rType := "project"
+	rID := c.String("project")
+	if c.String("environment") != "" {
+		rType = "environment"
+		rID = c.String("project") + "/" + c.String("environment")
+	}
+
+	role := &emodels.Role{
+		ID:       rID,
+		User:     c.String("user"),
+		Role:     c.String("role"),
+		Resource: rType,
+	}
+	if set {
+		client.Role().Create(role)
+		verb := "own"
+		if c.String("role") == "reader" {
+			verb = "read"
+		}
+		color.Green("User '" + c.String("user") + "' has been authorized to " + verb + " resource " + rID)
+	} else {
+		client.Role().Delete(role)
+		color.Green("User '" + c.String("user") + "' has been unauthorized as " + rID + " " + c.String("role"))
+	}
+
+}
 
 // CmdRolesSet :
 var CmdRolesSet = cli.Command{
@@ -40,35 +72,7 @@ var CmdRolesSet = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		r := c.String("role")
-		u := c.String("user")
-		p := c.String("project")
-		e := c.String("environment")
-		if r == "" {
-			h.PrintError("Please provide a role with --role flag")
-		}
-		if u == "" {
-			h.PrintError("Please provide a user with --user flag")
-		}
-		if p == "" {
-			h.PrintError("Please provide a project with --project flag")
-		}
-
-		m, cfg := setup(c)
-		body, err := m.SetRole(cfg.Token, u, p, e, r)
-		if err != nil {
-			h.PrintError(body)
-		}
-		resource := p
-		if e != "" {
-			resource = p + " / " + e
-		}
-		verb := "own"
-		if r == "reader" {
-			verb = "read"
-		}
-		color.Green("User '" + u + "' has been authorized to " + verb + " resource " + resource)
-
+		rolesManager(c, true)
 		return nil
 	},
 }
@@ -102,33 +106,7 @@ var CmdRolesUnset = cli.Command{
 		},
 	},
 	Action: func(c *cli.Context) error {
-		r := c.String("role")
-		u := c.String("user")
-		p := c.String("project")
-		e := c.String("environment")
-		if r == "" {
-			h.PrintError("Please provide a role with --role flag")
-		}
-		if u == "" {
-			h.PrintError("Please provide a user with --user flag")
-		}
-		if p == "" {
-			h.PrintError("Please provide a project with --project flag")
-		}
-
-		m, cfg := setup(c)
-		body, err := m.UnsetRole(cfg.Token, u, p, e, r)
-		if err != nil {
-			h.PrintError(body)
-			return nil
-		}
-
-		resource := p
-		if e != "" {
-			resource = p + " / " + e
-		}
-		color.Green("User '" + u + "' has been unauthorized as " + resource + " " + r)
-
+		rolesManager(c, false)
 		return nil
 	},
 }

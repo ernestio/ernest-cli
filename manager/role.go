@@ -5,64 +5,26 @@
 package manager
 
 import (
-	"encoding/json"
-	"errors"
+	h "github.com/ernestio/ernest-cli/helper"
+	eclient "github.com/ernestio/ernest-go-sdk/client"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
-type roleObj struct {
-	ID       string `json:"resource_id"`
-	User     string `json:"user_id"`
-	Role     string `json:"role"`
-	Resource string `json:"resource_type"`
+// Role : ernest-go-sdk Roles wrapper
+type Role struct {
+	cli *eclient.Client
 }
 
-type respErr struct {
-	Message string `json:"message"`
+// Create : Creates a new role
+func (c *Role) Create(role *emodels.Role) {
+	if err := c.cli.Roles.Create(role); err != nil {
+		h.PrintError(err.Error())
+	}
 }
 
-// SetRole : ...
-func (m *Manager) SetRole(token, user, project, env, role string) (body string, err error) {
-	return m.roleRequest(token, "POST", user, project, env, role)
-}
-
-// UnsetRole : ...
-func (m *Manager) UnsetRole(token, user, project, env, role string) (body string, err error) {
-	return m.roleRequest(token, "DELETE", user, project, env, role)
-}
-
-func (m *Manager) roleRequest(token, verb, user, project, env, role string) (body string, err error) {
-	rType := "project"
-	rID := project
-	if env != "" {
-		rType = "environment"
-		rID = project + "/" + env
+// Delete : Deletes a role and all its relations
+func (c *Role) Delete(role *emodels.Role) {
+	if err := c.cli.Roles.Delete(role); err != nil {
+		h.PrintError(err.Error())
 	}
-	r := roleObj{
-		ID:       rID,
-		User:     user,
-		Resource: rType,
-		Role:     role,
-	}
-
-	req, err := json.Marshal(r)
-	if err != nil {
-		return body, errors.New("Invalid input")
-	}
-
-	body, resp, err := m.doRequest("/api/roles/", verb, req, token, "")
-	if err != nil {
-		if resp.StatusCode == 403 {
-			return "You're not allowed to perform this action, please contact the resource owner", err
-		}
-		if resp.StatusCode == 400 {
-			return "You're not allowed to perform this action, please log in", err
-		}
-		var rerr respErr
-		err := json.Unmarshal([]byte(body), &rerr)
-		if err == nil {
-			body = rerr.Message
-		}
-	}
-
-	return
 }
