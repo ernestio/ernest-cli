@@ -10,6 +10,8 @@ import (
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // ListNotifications ...
@@ -19,14 +21,8 @@ var ListNotifications = cli.Command{
 	ArgsUsage:   h.T("notification.list.args"),
 	Description: h.T("notification.list.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-		notifications, err := m.ListNotifications(cfg.Token)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
+		client := esetup(c, AuthUsersValidation)
+		notifications := client.Notification().List()
 
 		view.PrintNotificationList(notifications)
 
@@ -41,16 +37,11 @@ var DeleteNotification = cli.Command{
 	ArgsUsage:   h.T("notification.delete.args"),
 	Description: h.T("notification.delete.description"),
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify a valid name")
-		}
-
+		paramsLenValidation(c, 1, "notification.delete.args")
 		name := c.Args()[0]
-		m, cfg := setup(c)
-		err := m.DeleteNotification(cfg.Token, name)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
+		client := esetup(c, AuthUsersValidation)
+
+		client.Notification().Delete(name)
 		color.Green("Notify " + name + " successfully delete")
 		return nil
 	},
@@ -63,21 +54,14 @@ var UpdateNotification = cli.Command{
 	ArgsUsage:   h.T("notification.update.args"),
 	Description: h.T("notification.update.description"),
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify a valid name")
-		}
-
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify a notify config options")
-		}
-
+		paramsLenValidation(c, 2, "notification.update.args")
+		client := esetup(c, AuthUsersValidation)
 		name := c.Args()[0]
 		notifyConfig := c.Args()[1]
-		m, cfg := setup(c)
-		err := m.UpdateNotification(cfg.Token, name, notifyConfig)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
+
+		n := client.Notification().Get(name)
+		n.Config = notifyConfig
+		client.Notification().Update(n)
 		color.Green("Notify " + name + " successfully updated")
 		return nil
 	},
@@ -90,29 +74,20 @@ var AddEntityToNotification = cli.Command{
 	ArgsUsage:   h.T("notification.service.add.args"),
 	Description: h.T("notification.service.add.description"),
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify a valid notify name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify a valid project name")
+		paramsLenValidation(c, 2, "notification.service.add.args")
+
+		notification := c.Args()[0]
+		project := c.Args()[1]
+		client := esetup(c, AuthUsersValidation)
+		entity := project
+		if len(c.Args()) > 2 {
+			entity = entity + "/" + c.Args()[2]
+			client.Notification().AddEnv(notification, project, c.Args()[2])
+		} else {
+			client.Notification().AddProject(notification, project)
 		}
 
-		project := c.Args()[1]
-		env := ""
-		if len(c.Args()) > 2 {
-			env = c.Args()[2]
-		}
-		notify := c.Args()[0]
-		m, cfg := setup(c)
-		err := m.AddEntityToNotification(cfg.Token, project, env, notify, false)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-		entity := project
-		if env != "" {
-			entity = entity + "/" + env
-		}
-		color.Green("Environment " + entity + " successfully attached to " + notify + " notify")
+		color.Green("Environment " + entity + " successfully attached to " + notification + " notify")
 		return nil
 	},
 }
@@ -124,29 +99,20 @@ var RmEntityToNotification = cli.Command{
 	ArgsUsage:   h.T("notification.service.rm.args"),
 	Description: h.T("notification.service.rm.description"),
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify a valid notify name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify a valid project name")
+		paramsLenValidation(c, 2, "notification.service.rm.args")
+
+		notification := c.Args()[0]
+		project := c.Args()[1]
+		client := esetup(c, AuthUsersValidation)
+		entity := project
+		if len(c.Args()) > 2 {
+			entity = entity + "/" + c.Args()[2]
+			client.Notification().RmEnv(notification, project, c.Args()[2])
+		} else {
+			client.Notification().RmProject(notification, project)
 		}
 
-		notify := c.Args()[0]
-		project := c.Args()[1]
-		env := ""
-		if len(c.Args()) > 2 {
-			env = c.Args()[2]
-		}
-		m, cfg := setup(c)
-		err := m.AddEntityToNotification(cfg.Token, project, env, notify, true)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-		entity := project
-		if env != "" {
-			entity = entity + "/" + env
-		}
-		color.Green("Environment " + entity + " successfully removed from " + notify + " notify")
+		color.Green("Environment " + entity + " successfully removed from " + notification + " notify")
 		return nil
 	},
 }
@@ -158,25 +124,18 @@ var CreateNotification = cli.Command{
 	ArgsUsage:   h.T("notification.create.args"),
 	Description: h.T("notification.create.description"),
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify a valid name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify a notify type")
-		}
-
-		if len(c.Args()) < 3 {
-			h.PrintError("You should specify a notify config options")
-		}
+		paramsLenValidation(c, 3, "notification.create.args")
+		client := esetup(c, AuthUsersValidation)
 
 		name := c.Args()[0]
 		notifyType := c.Args()[1]
 		notifyConfig := c.Args()[2]
-		m, cfg := setup(c)
-		_, err := m.CreateNotification(cfg.Token, name, notifyType, notifyConfig)
-		if err != nil {
-			h.PrintError(err.Error())
+		notification := emodels.Notification{
+			Name:   name,
+			Type:   notifyType,
+			Config: notifyConfig,
 		}
+		client.Notification().Create(&notification)
 		color.Green("Notify " + name + " successfully created")
 		return nil
 	},

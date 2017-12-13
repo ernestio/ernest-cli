@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/olekukonko/tablewriter"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // PrintNotificationList : Pretty print for notification model
-func PrintNotificationList(notifications []model.Notification) {
+func PrintNotificationList(notifications []*emodels.Notification) {
 	if len(notifications) == 0 {
 		fmt.Println("\nThere are no notifications created yet")
 		fmt.Println("")

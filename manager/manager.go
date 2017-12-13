@@ -7,7 +7,6 @@ package manager
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -26,23 +25,6 @@ type Manager struct {
 // Token holds the JWT token that is received when authenticating
 type Token struct {
 	Token string `json:"token"`
-}
-
-// Session ...
-type Session struct {
-	ID       int    `json:"id"`
-	GroupID  int    `json:"group_id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Admin    *bool  `json:"admin"`
-}
-
-// IsAdmin : check if a user is an admin or not
-func (s *Session) IsAdmin() bool {
-	if s.Admin != nil {
-		return *s.Admin
-	}
-	return false
 }
 
 // ErrConnectionRefused is the error response given
@@ -84,8 +66,8 @@ func (m *Manager) doRequestWithQuery(url, method string, payload []byte, token s
 	}
 
 	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			println(err.Error())
+		if errX := resp.Body.Close(); errX != nil {
+			println(errX.Error())
 		}
 	}()
 	responseBody, err := ioutil.ReadAll(resp.Body)
@@ -98,18 +80,4 @@ func (m *Manager) doRequestWithQuery(url, method string, payload []byte, token s
 		return body, resp, errors.New(resp.Status)
 	}
 	return body, resp, nil
-}
-
-// GetSession ..
-func (m *Manager) GetSession(token string) (session Session, err error) {
-	body, resp, err := m.doRequest("/api/session/", "GET", nil, token, "application/yaml")
-	if err != nil {
-		if resp == nil {
-			return session, ErrConnectionRefused
-		}
-		return session, err
-	}
-	err = json.Unmarshal([]byte(body), &session)
-
-	return session, err
 }

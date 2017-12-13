@@ -10,12 +10,13 @@ import (
 	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
-type user struct {
+// User : ernest-go-sdk User wrapper
+type User struct {
 	cli *eclient.Client
 }
 
 // Get : ...
-func (c *user) Get(username string) *emodels.User {
+func (c *User) Get(username string) *emodels.User {
 	user, err := c.cli.Users.Get(username)
 	if err != nil {
 		h.PrintError(err.Error())
@@ -24,21 +25,21 @@ func (c *user) Get(username string) *emodels.User {
 }
 
 // Update : ...
-func (c *user) Update(user *emodels.User) {
+func (c *User) Update(user *emodels.User) {
 	if err := c.cli.Users.Update(user); err != nil {
 		h.PrintError(err.Error())
 	}
 }
 
 // Create : ...
-func (c *user) Create(user *emodels.User) {
+func (c *User) Create(user *emodels.User) {
 	if err := c.cli.Users.Create(user); err != nil {
 		h.PrintError(err.Error())
 	}
 }
 
 // List : ...
-func (c *user) List() []*emodels.User {
+func (c *User) List() []*emodels.User {
 	users, err := c.cli.Users.List()
 	if err != nil {
 		h.PrintError(err.Error())
@@ -47,7 +48,7 @@ func (c *user) List() []*emodels.User {
 }
 
 // Promote : ...
-func (c *user) Promote(user *emodels.User) {
+func (c *User) Promote(user *emodels.User) {
 	user.Admin = true
 	if err := c.cli.Users.Update(user); err != nil {
 		str1 := "It was not possible to set this user as admin: "
@@ -57,7 +58,7 @@ func (c *user) Promote(user *emodels.User) {
 }
 
 // ToggleMFA : ...
-func (c *user) ToggleMFA(user *emodels.User, toggle bool) (res string) {
+func (c *User) ToggleMFA(user *emodels.User, toggle bool) (res string) {
 	user.MFA = &toggle
 	c.Update(user)
 

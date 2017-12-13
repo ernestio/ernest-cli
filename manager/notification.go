@@ -5,150 +5,79 @@
 package manager
 
 import (
-	"encoding/json"
-	"errors"
-
-	"github.com/ernestio/ernest-cli/model"
+	h "github.com/ernestio/ernest-cli/helper"
+	eclient "github.com/ernestio/ernest-go-sdk/client"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
-// CreateNotification : Creates a notification
-func (m *Manager) CreateNotification(token string, name string, ntype string, config string) (string, error) {
-	mPayload := make(map[string]string)
-	mPayload["name"] = name
-	mPayload["type"] = ntype
-	mPayload["config"] = config
-	payload, err := json.Marshal(mPayload)
-	if err != nil {
-		return "Internal error processing your input", err
-	}
-
-	// payload := []byte(`{"name": "` + name + `", "type":"` + ntype + `", "` + config + `"}`)
-	body, res, err := m.doRequest("/api/notifications/", "POST", payload, token, "")
-	if err != nil {
-		if res == nil {
-			return "", ErrConnectionRefused
-		}
-		if res.StatusCode == 409 {
-			return "Notification '" + name + "' already exists, please specify a different name", err
-		}
-		if res.StatusCode == 403 {
-			return body, errors.New(body)
-		}
-		return body, err
-	}
-	return body, err
+// Notification : ernest-go-sdk Notification wrapper
+type Notification struct {
+	cli *eclient.Client
 }
 
-// ListNotifications : Lists all notifications on your account
-func (m *Manager) ListNotifications(token string) (notifications []model.Notification, err error) {
-	body, res, err := m.doRequest("/api/notifications/", "GET", []byte(""), token, "")
+// Get : Gets a notification by name
+func (c *Notification) Get(id string) *emodels.Notification {
+	notification, err := c.cli.Notifications.Get(id)
 	if err != nil {
-		if res == nil {
-			return nil, ErrConnectionRefused
-		}
-		if res.StatusCode == 403 {
-			return nil, errors.New(body)
-		}
-		return nil, err
+		h.PrintError(err.Error())
 	}
-	err = json.Unmarshal([]byte(body), &notifications)
-	if err != nil {
-		return nil, err
-	}
-	return notifications, err
+	return notification
 }
 
-// DeleteNotification : Deletes an existing notification by its name
-func (m *Manager) DeleteNotification(token string, name string) (err error) {
-	body, res, err := m.doRequest("/api/notifications/"+name, "DELETE", []byte(""), token, "")
-	if err != nil {
-		if res == nil {
-			return ErrConnectionRefused
-		}
-		if res.StatusCode == 404 {
-			return errors.New("Notification '" + name + "' does not exist, please specify a different notification name")
-		}
-		if res.StatusCode == 400 {
-			return errors.New(body)
-		}
-		if res.StatusCode == 403 {
-			return errors.New(body)
-		}
-
-		return err
+// Update : Updates a notification
+func (c *Notification) Update(notification *emodels.Notification) {
+	if err := c.cli.Notifications.Update(notification); err != nil {
+		h.PrintError(err.Error())
 	}
-	return nil
 }
 
-// UpdateNotification : updates notification details
-func (m *Manager) UpdateNotification(token, name, config string) (err error) {
-	mPayload := make(map[string]string)
-	mPayload["name"] = name
-	mPayload["config"] = config
-	payload, err := json.Marshal(mPayload)
-	if err != nil {
-		return errors.New("Internal error processing your input")
+// Create : Creates a new notification
+func (c *Notification) Create(notification *emodels.Notification) {
+	if err := c.cli.Notifications.Create(notification); err != nil {
+		h.PrintError(err.Error())
 	}
-
-	body, res, err := m.doRequest("/api/notifications/"+name, "PUT", payload, token, "")
-	if err != nil {
-		if res == nil {
-			return ErrConnectionRefused
-		}
-		if res.StatusCode == 404 {
-			return errors.New("Notification '" + name + "' does not exist, please specify a different notification name")
-		}
-		if res.StatusCode == 400 {
-			return errors.New(body)
-		}
-		if res.StatusCode == 403 {
-			return errors.New(body)
-		}
-
-		return err
-	}
-
-	return nil
 }
 
-// AddEntityToNotification : updates notification details
-func (m *Manager) AddEntityToNotification(token, project, env, name string, delete bool) (err error) {
-	method := "POST"
-	if delete {
-		method = "DELETE"
-	}
-	url := "/api/notifications/" + name + "/projects/" + project
-	if env != "" {
-		url = "/api/notifications/" + name + "/projects/" + project + "/envs/" + env
-	}
-	body, res, err := m.doRequest(url, method, nil, token, "")
+// List : Lists all notifications on the system
+func (c *Notification) List() []*emodels.Notification {
+	notifications, err := c.cli.Notifications.List()
 	if err != nil {
-		if res == nil {
-			return ErrConnectionRefused
-		}
-		if res.StatusCode == 400 {
-			return errors.New(body)
-		}
-		if res.StatusCode == 403 {
-			return errors.New(body)
-		}
-
-		return err
+		h.PrintError(err.Error())
 	}
-
-	return nil
+	return notifications
 }
 
-func (m *Manager) getNotificationByName(token string, name string) (d model.Notification, err error) {
-	notifications, err := m.ListNotifications(token)
-	if err != nil {
-		return d, err
+// Delete : Deletes a notification and all its relations
+func (c *Notification) Delete(notification string) {
+	if err := c.cli.Notifications.Delete(notification); err != nil {
+		h.PrintError(err.Error())
 	}
+}
 
-	for _, d := range notifications {
-		if name == d.Name {
-			return d, nil
-		}
+// AddProject : Adds a project to a notification
+func (c *Notification) AddProject(notification, project string) {
+	if err := c.cli.Notifications.AddProject(notification, project); err != nil {
+		h.PrintError(err.Error())
 	}
-	return d, errors.New("Notify does not exist")
+}
+
+// RmProject : Removes a project from a notification
+func (c *Notification) RmProject(notification, project string) {
+	if err := c.cli.Notifications.RemoveProject(notification, project); err != nil {
+		h.PrintError(err.Error())
+	}
+}
+
+// AddEnv : Adds an environment to a notification
+func (c *Notification) AddEnv(notification, project, env string) {
+	if err := c.cli.Notifications.AddEnv(notification, project, env); err != nil {
+		h.PrintError(err.Error())
+	}
+}
+
+// RmEnv : Removes an environment from a notification
+func (c *Notification) RmEnv(notification, project, env string) {
+	if err := c.cli.Notifications.RemoveEnv(notification, project, env); err != nil {
+		h.PrintError(err.Error())
+	}
 }

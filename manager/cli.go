@@ -9,10 +9,11 @@ import (
 
 // Client : ...
 type Client struct {
-	cli     *eclient.Client
-	cfg     *model.Config
-	user    *user
-	session *session
+	cli          *eclient.Client
+	cfg          *model.Config
+	user         *User
+	session      *Session
+	notification *Notification
 }
 
 // New : ...
@@ -24,19 +25,27 @@ func New(config *model.Config) *Client {
 }
 
 // User ...
-func (c *Client) User() *user {
+func (c *Client) User() *User {
 	if c.user == nil {
-		c.user = &user{cli: c.cli}
+		c.user = &User{cli: c.cli}
 	}
 	return c.user
 }
 
 // Session : ...
-func (c *Client) Session() *session {
+func (c *Client) Session() *Session {
 	if c.session == nil {
-		c.session = &session{cli: c.cli}
+		c.session = &Session{cli: c.cli}
 	}
 	return c.session
+}
+
+// Notification : ...
+func (c *Client) Notification() *Notification {
+	if c.notification == nil {
+		c.notification = &Notification{cli: c.cli}
+	}
+	return c.notification
 }
 
 // Cli ...

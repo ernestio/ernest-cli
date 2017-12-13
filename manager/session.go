@@ -10,12 +10,13 @@ import (
 	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
-type session struct {
+// Session : ernest-go-sdk Session wrapper
+type Session struct {
 	cli *eclient.Client
 }
 
 // Get : ..
-func (c *session) Get() *emodels.Session {
+func (c *Session) Get() *emodels.Session {
 	ses, err := c.cli.Sessions.Get()
 	if err != nil {
 		h.PrintError("You don’t have permissions to perform this action")

@@ -17,6 +17,7 @@ import (
 	"github.com/fatih/color"
 )
 
+// NILRESPONSE : received response for nil
 var NILRESPONSE = "null"
 
 // ListEnvs ...
