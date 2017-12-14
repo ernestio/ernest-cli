@@ -11,12 +11,12 @@ import (
 	"math/big"
 	"unicode"
 
-	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	"github.com/urfave/cli"
 
+	h "github.com/ernestio/ernest-cli/helper"
 	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 

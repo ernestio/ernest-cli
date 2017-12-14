@@ -112,6 +112,64 @@ func requiredFlags(c *cli.Context, flags []string) {
 	}
 }
 
+func stringFlag(name, value, usage string) cli.StringFlag {
+	return cli.StringFlag{
+		Name:  name,
+		Value: value,
+		Usage: usage,
+	}
+}
+
+func boolFlag(name, usage string) cli.BoolFlag {
+	return cli.BoolFlag{
+		Name:  name,
+		Usage: usage,
+	}
+}
+
+type flagDef struct {
+	typ string
+	def interface{}
+}
+
+func parseTemplateFlags(c *cli.Context, keys map[string]flagDef) map[string]interface{} {
+	var err error
+	errs := []string{}
+	flags := make(map[string]interface{})
+	t := c.String("template")
+	if t != "" {
+		flags, err = getProjectTemplateAsMap(t)
+		h.EvaluateError(err)
+	}
+	for k, t := range keys {
+		if t.def != nil {
+			flags[k] = t.def
+		}
+		if t.typ == "string" {
+			if c.String(k) != "" {
+				flags[k] = c.String(k)
+			}
+		} else {
+			if c.Bool(k) != false {
+				flags[k] = c.Bool(k)
+			}
+		}
+		if _, ok := flags[k]; !ok {
+			errs = append(errs, "Specify a valid --"+k+" flag")
+		}
+	}
+
+	if len(errs) > 0 {
+		msgs := []string{"Please, fix the error shown below to continue"}
+		for _, e := range errs {
+			msgs = append(msgs, "  - "+e)
+		}
+		h.PrintError(strings.Join(msgs, "\n"))
+	}
+
+	return flags
+}
+
 // askForConfirmation uses Scanln to parse user input. A user must type in "yes" or "no" and
 // then press enter. It has fuzzy matching, so "y", "Y", "yes", "YES", and "Yes" all count as
 // confirmations. If the input is not recognized, it will ask again. The function does not return

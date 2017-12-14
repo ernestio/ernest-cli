@@ -15,6 +15,7 @@ type Client struct {
 	session      *Session
 	notification *Notification
 	role         *Role
+	project      *Project
 }
 
 // New : ...
@@ -55,6 +56,14 @@ func (c *Client) Role() *Role {
 		c.role = &Role{cli: c.cli}
 	}
 	return c.role
+}
+
+// Project : Project wrapper lazy load
+func (c *Client) Project() *Project {
+	if c.project == nil {
+		c.project = &Project{cli: c.cli}
+	}
+	return c.project
 }
 
 // Cli : gets the internal eclient.Client

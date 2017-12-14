@@ -9,7 +9,46 @@ import (
 	"errors"
 
 	"github.com/ernestio/ernest-cli/model"
+
+	h "github.com/ernestio/ernest-cli/helper"
+	eclient "github.com/ernestio/ernest-go-sdk/client"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
+
+// Project : ernest-go-sdk Project wrapper
+type Project struct {
+	cli *eclient.Client
+}
+
+// Create : ...
+func (c *Project) Create(project *emodels.Project) {
+	if err := c.cli.Projects.Create(project); err != nil {
+		h.PrintError(err.Error())
+	}
+}
+
+// Delete : Deletes a project and all its relations
+func (c *Project) Delete(project string) {
+	if err := c.cli.Projects.Delete(project); err != nil {
+		h.PrintError(err.Error())
+	}
+}
+
+// Get : Gets a project by name
+func (c *Project) Get(id string) *emodels.Project {
+	project, err := c.cli.Projects.Get(id)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+	return project
+}
+
+// Update : Updates a notification
+func (c *Project) Update(project *emodels.Project) {
+	if err := c.cli.Projects.Update(project); err != nil {
+		h.PrintError(err.Error())
+	}
+}
 
 // CreateVcloudProject : Creates a VCloud project
 func (m *Manager) CreateVcloudProject(token, name, rtype, user, password, url, vdc string) (string, error) {

@@ -111,3 +111,15 @@ func getProjectTemplate(template string, t *model.ProjectTemplate) (err error) {
 	}
 	return err
 }
+
+func getProjectTemplateAsMap(template string) (map[string]interface{}, error) {
+	flags := make(map[string]interface{}, 0)
+	payload, err := ioutil.ReadFile(template)
+	if err != nil {
+		return flags, errors.New("Template file '" + template + "' not found")
+	}
+	if yaml.Unmarshal(payload, &flags) != nil {
+		return flags, errors.New("Template file '" + template + "' is not valid yaml file")
+	}
+	return flags, nil
+}

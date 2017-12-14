@@ -15,3 +15,10 @@ func PrintError(msg string) {
 	color.Red(msg)
 	os.Exit(1)
 }
+
+// EvaluateError : Evaluates an error and exits program
+func EvaluateError(err error) {
+	if err != nil {
+		PrintError(err.Error())
+	}
+}
