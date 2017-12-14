@@ -50,26 +50,10 @@ var CmdRolesSet = cli.Command{
 	ArgsUsage:   h.T("roles.set.args"),
 	Description: h.T("roles.set.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user, u",
-			Value: "",
-			Usage: "User to be authorized over the given resource",
-		},
-		cli.StringFlag{
-			Name:  "project, p",
-			Value: "",
-			Usage: "Project to authorize",
-		},
-		cli.StringFlag{
-			Name:  "role, r",
-			Value: "",
-			Usage: "Role type [owner, reader]",
-		},
-		cli.StringFlag{
-			Name:  "environment, e",
-			Value: "",
-			Usage: "Environment to authorize",
-		},
+		stringFlag("user, u", "", "User to be authorized over the given resource"),
+		stringFlag("project, p", "", "Project to authorize"),
+		stringFlag("role, r", "", "Role type [owner, reader]"),
+		stringFlag("environment, e", "", "Environment to authorize"),
 	},
 	Action: func(c *cli.Context) error {
 		rolesManager(c, true)
@@ -84,26 +68,10 @@ var CmdRolesUnset = cli.Command{
 	ArgsUsage:   h.T("roles.unset.args"),
 	Description: h.T("roles.unset.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user, u",
-			Value: "",
-			Usage: "User to be authorized over the given resource",
-		},
-		cli.StringFlag{
-			Name:  "project, p",
-			Value: "",
-			Usage: "Project to authorize",
-		},
-		cli.StringFlag{
-			Name:  "role, r",
-			Value: "",
-			Usage: "Role type [owner, reader]",
-		},
-		cli.StringFlag{
-			Name:  "environment, e",
-			Value: "",
-			Usage: "Environment to authorize",
-		},
+		stringFlag("user, u", "", "User to be authorized over the given resource"),
+		stringFlag("project, p", "", "Project to authorize"),
+		stringFlag("role, r", "", "Role type [owner, reader]"),
+		stringFlag("environment, e", "", "Environment to authorize"),
 	},
 	Action: func(c *cli.Context) error {
 		rolesManager(c, false)

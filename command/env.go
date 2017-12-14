@@ -6,7 +6,6 @@ package command
 
 // CmdProject subcommand
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -711,17 +710,6 @@ var ImportEnv = cli.Command{
 		}
 		return nil
 	},
-}
-
-func getEnvUUID(output []byte) (string, error) {
-	var env struct {
-		ID string `json:"id"`
-	}
-	err := json.Unmarshal(output, &env)
-	if err != nil {
-		return "", err
-	}
-	return env.ID, nil
 }
 
 // posString returns the first index of element in slice.

@@ -6,140 +6,53 @@ package command
 
 // CmdProject subcommand
 import (
-	"strings"
-
-	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
+
+	h "github.com/ernestio/ernest-cli/helper"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // CreateAzureProject : Creates an AWS project
 var CreateAzureProject = cli.Command{
 	Name:        "azure",
-	Usage:       h.T("azure.project.create.usage"),
-	Description: h.T("azure.project.create.description"),
-	ArgsUsage:   h.T("azure.project.create.args"),
+	Usage:       h.T("azure.create.usage"),
+	Description: h.T("azure.create.description"),
+	ArgsUsage:   h.T("azure.create.args"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "region, r",
-			Value: "",
-			Usage: "Project region",
-		},
-		cli.StringFlag{
-			Name:  "subscription_id, s",
-			Value: "",
-			Usage: "Azure subscription id",
-		},
-		cli.StringFlag{
-			Name:  "client_id, c",
-			Value: "",
-			Usage: "Azure client id",
-		},
-		cli.StringFlag{
-			Name:  "client_secret, p",
-			Value: "",
-			Usage: "Azure client secret",
-		},
-		cli.StringFlag{
-			Name:  "tenant_id, t",
-			Value: "",
-			Usage: "Azure tenant_id",
-		},
-		cli.StringFlag{
-			Name:  "environment, e",
-			Value: "",
-			Usage: "Azure environment. Supported values are public(default), usgovernment, german and chine",
-		},
-		cli.BoolFlag{
-			Name:  "fake, f",
-			Usage: "Fake project",
-		},
+		stringFlag("region, r", "", "Project region"),
+		stringFlag("subscription_id, s", "", "Azure subscription id"),
+		stringFlag("client_id, c", "", "Azure client id"),
+		stringFlag("client_secret, p", "", "Azure client secret"),
+		stringFlag("tenant_id, t", "", "Azure tenant_id"),
+		stringFlag("environment, e", "", "Azure environment. Supported values are public(default), usgovernment, german and chine"),
+		boolFlag("fake, f", "Fake project"),
 	},
 	Action: func(c *cli.Context) error {
-		var errs []string
-		var region, subscriptionID, clientID, clientSecret, tenantID, environment string
-		var fake bool
-		m, cfg := setup(c)
-
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify the project name")
-		}
-
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-		name := c.Args()[0]
-
-		template := c.String("template")
-		if template != "" {
-			/*
-				var t model.ProjectTemplate
-				if err := getProjectTemplate(template, &t); err != nil {
-					color.Red(err.Error())
-					return nil
-				}
-				accessKeyID = t.Token
-				secretAccessKey = t.Secret
-				region = t.Region
-				fake = t.Fake
-			*/
-		}
-		if c.String("region") != "" {
-			region = c.String("region")
-		}
-		if c.String("subscription_id") != "" {
-			subscriptionID = c.String("subscription_id")
-		}
-		if c.String("client_id") != "" {
-			clientID = c.String("client_id")
-		}
-		if c.String("client_secret") != "" {
-			clientSecret = c.String("client_secret")
-		}
-		if c.String("tenant_id") != "" {
-			tenantID = c.String("tenant_id")
-		}
-		if c.String("environment") != "" {
-			environment = c.String("environment")
-		}
-		if !fake {
-			fake = c.Bool("fake")
-		}
-
-		if subscriptionID == "" {
-			errs = append(errs, "Specify a valid subscription id with --subscription_id flag")
-		}
-		if clientID == "" {
-			errs = append(errs, "Specify a valid client id with --client_id flag")
-		}
-		if region == "" {
-			errs = append(errs, "Specify a valid region with --region flag")
-		}
-		if tenantID == "" {
-			errs = append(errs, "Specify a valid tenant id with --tenant_id flag")
-		}
-		if environment == "" {
-			environment = "public"
-		}
-
-		if len(errs) > 0 {
-			msgs := []string{"Please, fix the error shown below to continue"}
-			for _, e := range errs {
-				msgs = append(msgs, "  - "+e)
-			}
-			h.PrintError(strings.Join(msgs, "\n"))
-		}
+		paramsLenValidation(c, 1, "azure.create.args")
+		client := esetup(c, AuthUsersValidation)
+		creds := parseTemplateFlags(c, map[string]flagDef{
+			"region":          flagDef{typ: "string", mapto: "region", req: true},
+			"subscription_id": flagDef{typ: "string", mapto: "azure_subscription_id", req: true},
+			"client_id":       flagDef{typ: "string", mapto: "azure_client_id", req: true},
+			"client_secret":   flagDef{typ: "string", mapto: "azure_client_secret", req: true},
+			"tenant_id":       flagDef{typ: "string", mapto: "azure_tenant_id", req: true},
+			"environment":     flagDef{typ: "string", mapto: "azure_environment", def: "default", req: true},
+			"fake":            flagDef{typ: "bool", def: false},
+		})
 		rtype := "azure"
-
-		if fake {
+		if creds["fake"].(bool) {
 			rtype = "azure-fake"
 		}
-		body, err := m.CreateAzureProject(cfg.Token, name, rtype, region, subscriptionID, clientID, clientSecret, tenantID, environment)
-		if err != nil {
-			h.PrintError(body)
-		} else {
-			color.Green("Project '" + name + "' successfully created ")
+
+		p := &emodels.Project{
+			Name:        c.Args()[0],
+			Type:        rtype,
+			Credentials: creds,
 		}
+		client.Project().Create(p)
+		color.Green("Project '" + p.Name + "' successfully created ")
+
 		return nil
 	},
 }
@@ -147,96 +60,33 @@ var CreateAzureProject = cli.Command{
 // UpdateAzureProject : Updates the specified VCloud project
 var UpdateAzureProject = cli.Command{
 	Name:        "azure",
-	Usage:       h.T("azure.project.update.usage"),
-	Description: h.T("azure.project.update.description"),
-	ArgsUsage:   h.T("azure.project.update.args"),
+	Usage:       h.T("azure.update.usage"),
+	Description: h.T("azure.update.description"),
+	ArgsUsage:   h.T("azure.update.args"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "subscription_id, s",
-			Value: "",
-			Usage: "Azure subscription id",
-		},
-		cli.StringFlag{
-			Name:  "client_id, c",
-			Value: "",
-			Usage: "Azure client id",
-		},
-		cli.StringFlag{
-			Name:  "client_secret, p",
-			Value: "",
-			Usage: "Azure client secret",
-		},
-		cli.StringFlag{
-			Name:  "tenant_id, t",
-			Value: "",
-			Usage: "Azure tenant_id",
-		},
-		cli.StringFlag{
-			Name:  "environment, e",
-			Value: "",
-			Usage: "Azure environment. Supported values are public(default), usgovernment, german and chine",
-		},
+		stringFlag("subscription_id, s", "", "Azure subscription id"),
+		stringFlag("client_id, c", "", "Azure client id"),
+		stringFlag("client_secret, p", "", "Azure client secret"),
+		stringFlag("tenant_id, t", "", "Azure tenant_id"),
+		stringFlag("environment, e", "", "Azure environment. Supported values are public(default), usgovernment, german and chine"),
 	},
 	Action: func(c *cli.Context) error {
-		var errs []string
-		var subscriptionID, clientID, clientSecret, tenantID, environment string
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
-		}
+		paramsLenValidation(c, 1, "azure.update.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if len(c.Args()) == 0 {
-			color.Red("You should specify the project name")
-			return nil
-		}
-		name := c.Args()[0]
-		if c.String("subscription_id") != "" {
-			subscriptionID = c.String("subscription_id")
-		}
-		if c.String("client_id") != "" {
-			clientID = c.String("client_id")
-		}
-		if c.String("client_secret") != "" {
-			clientSecret = c.String("client_secret")
-		}
-		if c.String("tenant_id") != "" {
-			tenantID = c.String("tenant_id")
-		}
-		if c.String("environment") != "" {
-			environment = c.String("environment")
-		}
+		creds := parseTemplateFlags(c, map[string]flagDef{
+			"subscription_id": flagDef{typ: "string", mapto: "azure_subscription_id"},
+			"client_id":       flagDef{typ: "string", mapto: "azure_client_id"},
+			"client_secret":   flagDef{typ: "string", mapto: "azure_client_secret"},
+			"tenant_id":       flagDef{typ: "string", mapto: "azure_tenant_id"},
+			"environment":     flagDef{typ: "string", mapto: "azure_environment"},
+			"region":          flagDef{typ: "string", mapto: "region"},
+		})
 
-		if subscriptionID == "" {
-			errs = append(errs, "Specify a valid subscription id with --subscription_id flag")
-		}
-		if clientID == "" {
-			errs = append(errs, "Specify a valid client id with --client_id flag")
-		}
-		if clientSecret == "" {
-			errs = append(errs, "Specify a valid client secret with --client_secret flag")
-		}
-		if tenantID == "" {
-			errs = append(errs, "Specify a valid tenant id with --tenant_id flag")
-		}
-		if environment == "" {
-			errs = append(errs, "Specify a valid environment with --environment flag")
-		}
-
-		if len(errs) > 0 {
-			msgs := []string{"Please, fix the error shown below to continue"}
-			for _, e := range errs {
-				msgs = append(msgs, "  - "+e)
-			}
-			h.PrintError(strings.Join(msgs, "\n"))
-		}
-
-		err := m.UpdateAzureProject(cfg.Token, name, subscriptionID, clientID, clientSecret, tenantID, environment)
-		if err != nil {
-			color.Red(err.Error())
-			return nil
-		}
-		color.Green("Project " + name + " successfully updated")
+		n := client.Project().Get(c.Args()[0])
+		n.Credentials = creds
+		client.Project().Update(n)
+		color.Green("Project " + n.Name + " successfully updated")
 
 		return nil
 	},

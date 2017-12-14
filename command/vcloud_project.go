@@ -31,29 +31,25 @@ var CreateVcloudProject = cli.Command{
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 1, "vcloud.create.args")
 		client := esetup(c, AuthUsersValidation)
-		flags := parseTemplateFlags(c, map[string]flagDef{
-			"vcloud-url": flagDef{typ: "string"},
-			"user":       flagDef{typ: "string"},
-			"org":        flagDef{typ: "string"},
-			"vdc":        flagDef{typ: "string"},
-			"password":   flagDef{typ: "string"},
+		creds := parseTemplateFlags(c, map[string]flagDef{
+			"vcloud-url": flagDef{typ: "string", mapto: "vcloud_url", req: true},
+			"user":       flagDef{typ: "string", req: true},
+			"org":        flagDef{typ: "string", req: true},
+			"vdc":        flagDef{typ: "string", req: true},
+			"password":   flagDef{typ: "string", req: true},
 			"fake":       flagDef{typ: "bool", def: false},
 		})
+		creds["username"] = creds["user"].(string) + "@" + creds["org"].(string)
 
 		rtype := "vcloud"
-		if flags["fake"].(bool) {
+		if creds["fake"].(bool) {
 			rtype = "vcloud-fake"
 		}
 
 		p := &emodels.Project{
-			Name: c.Args()[0],
-			Type: rtype,
-			Credentials: map[string]interface{}{
-				"vdc":        flags["vdc"].(string),
-				"username":   flags["user"].(string) + "@" + flags["org"].(string),
-				"password":   flags["password"].(string),
-				"vcloud_url": flags["vcloud-url"].(string),
-			},
+			Name:        c.Args()[0],
+			Type:        rtype,
+			Credentials: creds,
 		}
 		client.Project().Create(p)
 		color.Green("Project '" + p.Name + "' successfully created ")
@@ -95,15 +91,16 @@ var UpdateVCloudProject = cli.Command{
 		paramsLenValidation(c, 1, "vcloud.update.args")
 		client := esetup(c, AuthUsersValidation)
 
-		flags := parseTemplateFlags(c, map[string]flagDef{
+		creds := parseTemplateFlags(c, map[string]flagDef{
 			"user":     flagDef{typ: "string"},
 			"org":      flagDef{typ: "string"},
 			"password": flagDef{typ: "string"},
 		})
+		creds["user"] = creds["user"].(string) + "@" + creds["org"].(string)
 
 		n := client.Project().Get(c.Args()[0])
-		n.Credentials["user"] = flags["user"].(string) + "@" + flags["org"].(string)
-		n.Credentials["passwrord"] = flags["password"].(string)
+		n.Credentials["user"] = creds["user"].(string)
+		n.Credentials["passwrord"] = creds["password"].(string)
 		client.Project().Update(n)
 		color.Green("Project " + n.Name + " successfully updated")
 

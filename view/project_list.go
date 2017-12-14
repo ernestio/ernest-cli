@@ -10,20 +10,21 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/olekukonko/tablewriter"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // PrintProjectList : Pretty print for a project list
-func PrintProjectList(projects []model.Project) {
+func PrintProjectList(projects []*emodels.Project) {
 	if len(projects) == 0 {
 		fmt.Println("There are no projects created yet.")
 		return
 	}
 
-	var aws []model.Project
-	var vcloud []model.Project
-	var azure []model.Project
+	var aws []*emodels.Project
+	var vcloud []*emodels.Project
+	var azure []*emodels.Project
 
 	for _, d := range projects {
 		switch d.Type {

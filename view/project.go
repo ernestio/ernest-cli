@@ -6,11 +6,12 @@ package view
 
 import (
 	"fmt"
-	"github.com/ernestio/ernest-cli/model"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // PrintProjectInfo : Pretty print for a project
-func PrintProjectInfo(project model.Project) {
+func PrintProjectInfo(project *emodels.Project) {
 	fmt.Println("Name: ", project.Name)
 	fmt.Println("Provider: ")
 	fmt.Println("  Type: ", project.Type)

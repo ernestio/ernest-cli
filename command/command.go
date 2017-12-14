@@ -5,7 +5,9 @@
 package command
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strings"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/ernestio/ernest-cli/manager"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/urfave/cli"
+	yaml "gopkg.in/yaml.v2"
 
 	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
@@ -112,6 +115,13 @@ func requiredFlags(c *cli.Context, flags []string) {
 	}
 }
 
+func stringFlagND(name, usage string) cli.StringFlag {
+	return cli.StringFlag{
+		Name:  name,
+		Usage: usage,
+	}
+}
+
 func stringFlag(name, value, usage string) cli.StringFlag {
 	return cli.StringFlag{
 		Name:  name,
@@ -128,8 +138,10 @@ func boolFlag(name, usage string) cli.BoolFlag {
 }
 
 type flagDef struct {
-	typ string
-	def interface{}
+	typ   string
+	def   interface{}
+	mapto string
+	req   bool
 }
 
 func parseTemplateFlags(c *cli.Context, keys map[string]flagDef) map[string]interface{} {
@@ -142,20 +154,26 @@ func parseTemplateFlags(c *cli.Context, keys map[string]flagDef) map[string]inte
 		h.EvaluateError(err)
 	}
 	for k, t := range keys {
+		mapto := k
+		if t.mapto != "" {
+			mapto = t.mapto
+		}
 		if t.def != nil {
-			flags[k] = t.def
+			flags[mapto] = t.def
 		}
 		if t.typ == "string" {
 			if c.String(k) != "" {
-				flags[k] = c.String(k)
+				flags[mapto] = c.String(k)
 			}
 		} else {
 			if c.Bool(k) != false {
-				flags[k] = c.Bool(k)
+				flags[mapto] = c.Bool(k)
 			}
 		}
-		if _, ok := flags[k]; !ok {
-			errs = append(errs, "Specify a valid --"+k+" flag")
+		if t.req {
+			if _, ok := flags[mapto]; !ok {
+				errs = append(errs, "Specify a valid --"+k+" flag")
+			}
 		}
 	}
 
@@ -168,6 +186,18 @@ func parseTemplateFlags(c *cli.Context, keys map[string]flagDef) map[string]inte
 	}
 
 	return flags
+}
+
+func getProjectTemplateAsMap(template string) (map[string]interface{}, error) {
+	flags := make(map[string]interface{}, 0)
+	payload, err := ioutil.ReadFile(template)
+	if err != nil {
+		return flags, errors.New("Template file '" + template + "' not found")
+	}
+	if yaml.Unmarshal(payload, &flags) != nil {
+		return flags, errors.New("Template file '" + template + "' is not valid yaml file")
+	}
+	return flags, nil
 }
 
 // askForConfirmation uses Scanln to parse user input. A user must type in "yes" or "no" and

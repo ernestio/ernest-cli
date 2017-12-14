@@ -22,3 +22,11 @@ func EvaluateError(err error) {
 		PrintError(err.Error())
 	}
 }
+
+// EvaluateErrorMsg : Evaluates an error and exits program with
+// a specific message
+func EvaluateErrorMsg(err error, s string) {
+	if err != nil {
+		PrintError(s)
+	}
+}
