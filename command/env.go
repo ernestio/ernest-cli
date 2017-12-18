@@ -8,6 +8,7 @@ package command
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"strconv"
 	"strings"
 
@@ -152,22 +153,45 @@ var ApplyEnv = cli.Command{
 		},
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
+		var d model.Definition
+
 		file := "ernest.yml"
 		if len(c.Args()) == 1 {
 			file = c.Args()[0]
 		}
+
 		m, cfg := setup(c)
 		if cfg.Token == "" {
 			h.PrintError("You're not allowed to perform this action, please log in")
 		}
 
-		var err error
+		credentials := ProviderFlagsToSlice(c)
+
+		payload, err := ioutil.ReadFile(file)
+		if err != nil {
+			h.PrintError("You should specify a valid template path or store an ernest.yml on the current folder")
+		}
+
+		err = d.Load(payload)
+		if err != nil {
+			h.PrintError("Could not process definition yaml")
+		}
+
+		_, err = m.EnvStatus(cfg.Token, d.Project, d.Name)
+		if err != nil {
+			err = m.CreateEnv(cfg.Token, d.Name, d.Project, credentials, MapEnvOptions(c, nil))
+			if err != nil {
+				h.PrintError(err.Error())
+			}
+		}
+
 		dry := c.Bool("dry")
 		monit := true
 		if dry == true {
 			monit = false
 		}
-		response, err := m.Apply(cfg.Token, file, ProviderFlagsToSlice(c), monit, dry)
+
+		response, err := m.Apply(cfg.Token, file, credentials, monit, dry)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
@@ -704,11 +728,20 @@ var ImportEnv = cli.Command{
 
 		project := c.Args()[0]
 		name := c.Args()[1]
-		_, err = m.Import(cfg.Token, name, project, filters)
 
+		_, err = m.EnvStatus(cfg.Token, project, name)
+		if err != nil {
+			err = m.CreateEnv(cfg.Token, name, project, nil, MapEnvOptions(c, nil))
+			if err != nil {
+				h.PrintError(err.Error())
+			}
+		}
+
+		_, err = m.Import(cfg.Token, name, project, filters)
 		if err != nil {
 			h.PrintError(err.Error())
 		}
+
 		return nil
 	},
 }
