@@ -48,18 +48,9 @@ var EnvAddSchedule = cli.Command{
 	ArgsUsage:   h.T("envs.schedules.add.args"),
 	Description: h.T("envs.schedules.add.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "action",
-			Usage: "defines what action should be scheduled possible values are [power_on, power_off, sync]",
-		},
-		cli.StringFlag{
-			Name:  "instance_type",
-			Usage: "power_on and power_off accept an instance_type to be powered on an off",
-		},
-		cli.StringFlag{
-			Name:  "schedule",
-			Usage: "sets the automatic schedule. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)",
-		},
+		stringFlagND("action", "defines what action should be scheduled possible values are [power_on, power_off, sync]"),
+		stringFlagND("instance_type", "power_on and power_off accept an instance_type to be powered on an off"),
+		stringFlagND("schedule", "sets the automatic schedule. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)"),
 	},
 	Action: func(c *cli.Context) error {
 		m, cfg := setup(c)

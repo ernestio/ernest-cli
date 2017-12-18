@@ -8,12 +8,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/olekukonko/tablewriter"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // PrintEnvList : Pretty print for a build list
-func PrintEnvList(envs []model.Env) {
+func PrintEnvList(envs []*emodels.Environment) {
 	if len(envs) == 0 {
 		fmt.Println("\nThere are no environments created yet")
 		fmt.Println("")

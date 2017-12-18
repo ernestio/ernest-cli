@@ -115,6 +115,13 @@ func requiredFlags(c *cli.Context, flags []string) {
 	}
 }
 
+func intFlag(name, usage string) cli.IntFlag {
+	return cli.IntFlag{
+		Name:  name,
+		Usage: usage,
+	}
+}
+
 func stringFlagND(name, usage string) cli.StringFlag {
 	return cli.StringFlag{
 		Name:  name,

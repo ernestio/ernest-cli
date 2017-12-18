@@ -7,6 +7,8 @@ package command
 // CmdProject subcommand
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 
@@ -15,6 +17,8 @@ import (
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // ListEnvs ...
@@ -24,16 +28,10 @@ var ListEnvs = cli.Command{
 	ArgsUsage:   h.T("envs.list.args"),
 	Description: h.T("envs.list.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-		envs, err := m.ListEnvs(cfg.Token)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		client := esetup(c, AuthUsersValidation)
+		envs := client.Environment().ListAll()
 		view.PrintEnvList(envs)
+
 		return nil
 	},
 }
@@ -46,40 +44,16 @@ var UpdateEnv = cli.Command{
 	ArgsUsage:   h.T("envs.update.args"),
 	Description: h.T("envs.update.description"),
 	Flags: append([]cli.Flag{
-		cli.StringFlag{
-			Name:  "sync_interval",
-			Usage: "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)",
-		},
-		cli.StringFlag{
-			Name:  "submissions",
-			Usage: "allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'",
-		},
+		stringFlagND("sync_interval", "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)"),
+		stringFlagND("submissions", "allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'"),
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if len(c.Args()) < 1 {
-			h.PrintError("You must provide the project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You must provide the new environment name")
-		}
-		project := c.Args()[0]
-		env := c.Args()[1]
-
-		e, err := m.EnvStatus(cfg.Token, project, env)
-		if err != nil {
-			h.PrintError("Environment does not exist!")
-		}
-
-		err = m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c, e.Options), e.Schedules)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		paramsLenValidation(c, 2, "envs.update.args")
+		client := esetup(c, AuthUsersValidation)
+		env := client.Environment().Get(c.Args()[0], c.Args()[1])
+		env.Credentials = ProviderFlagsToSlice(c)
+		env.Options = MapEnvOptions(c, env.Options)
+		client.Environment().Update(c.Args()[0], env)
 		color.Green("Environment successfully updated")
 
 		return nil
@@ -94,42 +68,45 @@ var CreateEnv = cli.Command{
 	ArgsUsage:   h.T("envs.create.args"),
 	Description: h.T("envs.create.description"),
 	Flags: append([]cli.Flag{
-		cli.StringFlag{
-			Name:  "credentials",
-			Usage: "will override project information",
-		},
-		cli.StringFlag{
-			Name:  "sync_interval",
-			Usage: "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)",
-		},
-		cli.StringFlag{
-			Name:  "submissions",
-			Usage: "allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'",
-		},
+		stringFlagND("credentials", "will override project information"),
+		stringFlagND("sync_interval", "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)"),
+		stringFlagND("submissions", "allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'"),
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		paramsLenValidation(c, 2, "envs.create.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if len(c.Args()) < 1 {
-			h.PrintError("You must provide the project name")
+		env := emodels.Environment{
+			Name:        c.Args()[1],
+			Project:     c.Args()[0],
+			Credentials: ProviderFlagsToSlice(c),
+			Options:     MapEnvOptions(c, nil),
 		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You must provide the new environment name")
-		}
-		project := c.Args()[0]
-		env := c.Args()[1]
-
-		err := m.CreateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), MapEnvOptions(c, nil))
-		if err != nil {
-			h.PrintError(err.Error())
-		}
+		client.Environment().Create(c.Args()[0], &env)
 		color.Green("Environment successfully created")
 
 		return nil
 	},
+}
+
+func mapDefinition(c *cli.Context) *model.Definition {
+	file := "ernest.yml"
+	if len(c.Args()) == 1 {
+		file = c.Args()[0]
+	}
+	payload, err := ioutil.ReadFile(file)
+	if err != nil {
+		h.PrintError("You should specify a valid template path or store an ernest.yml on the current folder")
+	}
+	def := model.Definition{}
+	if err := def.Load(payload); err != nil {
+		h.PrintError("Could not process definition yaml")
+	}
+	if err := def.LoadFileImports(); err != nil {
+		h.PrintError(err.Error())
+	}
+
+	return &def
 }
 
 // ApplyEnv command
@@ -141,38 +118,44 @@ var ApplyEnv = cli.Command{
 	ArgsUsage:   h.T("envs.apply.args"),
 	Description: h.T("envs.apply.description"),
 	Flags: append([]cli.Flag{
-		cli.BoolFlag{
-			Name:  "dry",
-			Usage: "print the changes to be applied on an environment intead of applying them",
-		},
-		cli.StringFlag{
-			Name:  "credentials",
-			Usage: "will override project information",
-		},
+		boolFlag("dry", "print the changes to be applied on an environment intead of applying them"),
+		stringFlagND("credentials", "will override project information"),
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
-		file := "ernest.yml"
-		if len(c.Args()) == 1 {
-			file = c.Args()[0]
+		paramsLenValidation(c, 1, "envs.apply.args")
+		client := esetup(c, AuthUsersValidation)
+		def := mapDefinition(c)
+
+		if _, err := client.Cli().Environments.Get(def.Project, def.Name); err != nil {
+			env := emodels.Environment{
+				Name:        def.Name,
+				Project:     def.Project,
+				Credentials: ProviderFlagsToSlice(c),
+				Options:     MapEnvOptions(c, nil),
+			}
+			client.Environment().Create(def.Project, &env)
 		}
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
+		payload, err := def.Save()
+		if err != nil {
+			h.PrintError("Could not finalize definition yaml")
+		}
+		if c.Bool("dry") == true {
+			view.EnvDryII(*client.Build().Dry(payload))
+			return nil
+		}
+		build := client.Build().Create(payload)
+		if build.Status == "submitted" {
+			color.Green("Build has been succesfully submitted and is awaiting approval.")
+			os.Exit(0)
 		}
 
-		var err error
-		dry := c.Bool("dry")
-		monit := true
-		if dry == true {
-			monit = false
-		}
-		response, err := m.Apply(cfg.Token, file, ProviderFlagsToSlice(c), monit, dry)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-		if dry == true {
-			fmt.Println(string(response))
-		}
+		h.MonitorizeII(client.Build().Stream(build.ID))
+		view.PrintEnvInfoII(
+			client.Project().Get(def.Project),
+			client.Environment().Get(def.Project, def.Name),
+			client.Build().Get(def.Project, def.Name, build.GetID()),
+		)
+
 		return nil
 	},
 }
@@ -187,29 +170,21 @@ var SyncEnv = cli.Command{
 	Description: h.T("envs.sync.description"),
 	Flags:       append([]cli.Flag{}),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify an existing project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify an existing project environment")
-		}
-
-		project := c.Args()[0]
-		env := c.Args()[1]
-
-		err := m.SyncEnv(cfg.Token, env, project)
-		if err != nil {
-			h.PrintError(err.Error())
-			return nil
-		}
+		paramsLenValidation(c, 2, "envs.sync.args")
+		client := esetup(c, AuthUsersValidation)
+		client.Environment().Sync(c.Args()[0], c.Args()[1])
 
 		return nil
 	},
+}
+
+func buildIDFromIndex(builds []*emodels.Build, index string) *emodels.Build {
+	num, _ := strconv.Atoi(index)
+	if num < 1 || num > len(builds) {
+		h.PrintError("Invalid build ID")
+	}
+	num = len(builds) - num
+	return builds[num]
 }
 
 // ReviewEnv command
@@ -221,78 +196,37 @@ var ReviewEnv = cli.Command{
 	ArgsUsage:   h.T("envs.review.args"),
 	Description: h.T("envs.review.description"),
 	Flags: append([]cli.Flag{
-		cli.BoolFlag{
-			Name:  "accept, a",
-			Usage: "Accept Sync changes",
-		},
-		cli.BoolFlag{
-			Name:  "reject, r",
-			Usage: "Reject Sync changes",
-		},
+		boolFlag("accept, a", "Accept Sync changes"),
+		boolFlag("reject, r", "Reject Sync changes"),
 	}),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify an existing project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify an existing project environment")
-		}
+		paramsLenValidation(c, 2, "envs.review.args")
+		client := esetup(c, AuthUsersValidation)
 
 		project := c.Args()[0]
 		env := c.Args()[1]
 
 		var resolution string
-
 		if c.Bool("accept") {
 			resolution = "submission-accepted"
 		}
-
 		if c.Bool("reject") {
 			resolution = "submission-rejected"
 		}
 
 		if resolution == "" {
-			envs, err := m.ListBuilds(project, env, cfg.Token)
-			if err != nil {
-				h.PrintError(err.Error())
-			}
+			builds := client.Build().List(project, env)
 
-			id1, err := m.BuildIDFromIndex(cfg.Token, project, env, strconv.Itoa(len(envs)-1))
-			if err != nil {
-				h.PrintError(err.Error())
-			}
+			b1 := buildIDFromIndex(builds, strconv.Itoa(len(builds)-1))
+			b2 := buildIDFromIndex(builds, strconv.Itoa(len(builds)))
+			def1 := client.Build().Definition(project, env, b1.ID)
+			def2 := client.Build().Definition(project, env, b2.ID)
 
-			id2, err := m.BuildIDFromIndex(cfg.Token, project, env, strconv.Itoa(len(envs)))
-			if err != nil {
-				h.PrintError(err.Error())
-			}
-
-			def1, err := m.BuildDefinitionByID(cfg.Token, project, env, id1)
-			if err != nil {
-				h.PrintError(err.Error())
-			}
-
-			def2, err := m.BuildDefinitionByID(cfg.Token, project, env, id2)
-			if err != nil {
-				h.PrintError(err.Error())
-			}
-
-			view.PrintEnvDiff(id1, id2, def1, def2)
+			view.PrintEnvDiff(b1.ID, b2.ID, []byte(def1), []byte(def2))
 
 			return nil
 		}
-
-		err := m.ReviewBuild(cfg.Token, env, project, resolution)
-		if err != nil {
-			h.PrintError(err.Error())
-			return nil
-		}
-
+		client.Environment().Resolve(project, env, resolution)
 		return nil
 	},
 }
@@ -306,42 +240,21 @@ var ResolveEnv = cli.Command{
 	ArgsUsage:   h.T("envs.resolve.args"),
 	Description: h.T("envs.resolve.description"),
 	Flags: append([]cli.Flag{
-		cli.BoolFlag{
-			Name:  "accept, a",
-			Usage: "Accept Sync changes",
-		},
-		cli.BoolFlag{
-			Name:  "reject, r",
-			Usage: "Reject Sync changes",
-		},
-		cli.BoolFlag{
-			Name:  "ignore, i",
-			Usage: "Ignore Sync changes",
-		},
+		boolFlag("accept, a", "Accept Sync changes"),
+		boolFlag("reject, r", "Reject Sync changes"),
+		boolFlag("ignore, i", "Ignore Sync changes"),
 	}),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify an existing project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify an existing project environment")
-		}
+		paramsLenValidation(c, 2, "envs.resolve.args")
+		client := esetup(c, AuthUsersValidation)
 
 		var resolution string
-
 		if c.Bool("accept") {
 			resolution = "accept-changes"
 		}
-
 		if c.Bool("reject") {
 			resolution = "reject-changes"
 		}
-
 		if c.Bool("ignore") {
 			resolution = "ignore-changes"
 		}
@@ -349,16 +262,7 @@ var ResolveEnv = cli.Command{
 		if resolution == "" {
 			h.PrintError("You should specify a valid resolution [accept|reject|ignore]")
 		}
-
-		project := c.Args()[0]
-		env := c.Args()[1]
-
-		err := m.ResolveEnv(cfg.Token, env, project, resolution)
-		if err != nil {
-			h.PrintError(err.Error())
-			return nil
-		}
-
+		client.Environment().Resolve(c.Args()[0], c.Args()[1], resolution)
 		return nil
 	},
 }
@@ -371,50 +275,24 @@ var DestroyEnv = cli.Command{
 	ArgsUsage:   h.T("envs.destroy.args"),
 	Description: h.T("envs.destroy.description"),
 	Flags: []cli.Flag{
-		cli.BoolFlag{
-			Name:  "force,f",
-			Usage: "Hard ernest env removal.",
-		},
-		cli.BoolFlag{
-			Name:  "yes,y",
-			Usage: "Destroy an environment without prompting confirmation.",
-		},
+		boolFlag("force,f", "Hard ernest env removal."),
+		boolFlag("yes,y", "Destroy an environment without prompting confirmation."),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify an existing project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify an existing project environment")
-		}
-		project := c.Args()[0]
-		env := c.Args()[1]
+		paramsLenValidation(c, 2, "envs.destroy.args")
+		client := esetup(c, AuthUsersValidation)
 
 		if c.Bool("force") {
-			err := m.ForceDestroy(cfg.Token, project, env)
-			if err != nil {
-				h.PrintError(err.Error())
-			}
+			client.Environment().ForceDeletion(c.Args()[0], c.Args()[1])
 		} else {
 			if c.Bool("yes") {
-				err := m.Destroy(cfg.Token, project, env, true)
-				if err != nil {
-					h.PrintError(err.Error())
-				}
+				client.Environment().Delete(c.Args()[0], c.Args()[1])
 			} else {
 				fmt.Print("Do you really want to destroy this environment? (Y/n) ")
 				if askForConfirmation() == false {
 					return nil
 				}
-				err := m.Destroy(cfg.Token, project, env, true)
-				if err != nil {
-					h.PrintError(err.Error())
-				}
+				client.Environment().Delete(c.Args()[0], c.Args()[1])
 			}
 		}
 		color.Green("Environment successfully removed")
@@ -430,23 +308,10 @@ var HistoryEnv = cli.Command{
 	ArgsUsage:   h.T("envs.history.args"),
 	Description: h.T("envs.history.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify an existing project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify an existing environment name")
-		}
-
-		project := c.Args()[0]
-		env := c.Args()[1]
-
-		envs, _ := m.ListBuilds(project, env, cfg.Token)
-		view.PrintEnvHistory(env, envs)
+		paramsLenValidation(c, 2, "envs.history.args")
+		client := esetup(c, AuthUsersValidation)
+		envs := client.Build().List(c.Args()[0], c.Args()[1])
+		view.PrintEnvHistory(c.Args()[1], envs)
 		return nil
 	},
 }
@@ -458,24 +323,10 @@ var ResetEnv = cli.Command{
 	ArgsUsage:   h.T("envs.reset.args"),
 	Description: h.T("envs.reset.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify the project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify the environment name")
-		}
-		project := c.Args()[0]
-		env := c.Args()[1]
-		err := m.ResetEnv(project, env, cfg.Token)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-		color.Red("You've successfully resetted the environment '" + project + " / " + env + "'")
+		paramsLenValidation(c, 2, "envs.reset.args")
+		client := esetup(c, AuthUsersValidation)
+		client.Environment().Reset(c.Args()[0], c.Args()[1])
+		color.Red("You've successfully resetted the environment '" + c.Args()[0] + " / " + c.Args()[1] + "'")
 
 		return nil
 	},
@@ -488,31 +339,24 @@ var RevertEnv = cli.Command{
 	ArgsUsage:   h.T("envs.revert.args"),
 	Description: h.T("envs.revert.description"),
 	Flags: []cli.Flag{
-		cli.BoolFlag{
-			Name:  "dry",
-			Usage: "print the changes to be applied on an environment intead of applying them",
-		},
+		boolFlag("dry", "print the changes to be applied on an environment intead of applying them"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		paramsLenValidation(c, 3, "envs.revert.args")
+		client := esetup(c, AuthUsersValidation)
+		build := client.Build().Get(c.Args()[0], c.Args()[1], c.Args()[2])
+		def := client.Build().Definition(c.Args()[0], c.Args()[1], c.Args()[2])
 
-		if len(c.Args()) < 3 {
-			h.PrintError("Please specify a project, environment and build ID")
-		}
-		project := c.Args()[0]
-		env := c.Args()[1]
-		buildID := c.Args()[2]
-		dry := c.Bool("dry")
+		if c.Bool("dry") == true {
+			view.EnvDryII(*client.Build().Dry([]byte(def)))
+		} else {
+			client.Build().Create([]byte(def))
+			if build.Status == "submitted" {
+				color.Green("Build has been succesfully submitted and is awaiting approval.")
+				os.Exit(0)
+			}
 
-		response, err := m.RevertEnv(project, env, buildID, cfg.Token, dry)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-		if dry == true {
-			fmt.Println(string(response))
+			h.MonitorizeII(client.Build().Stream(build.ID))
 		}
 
 		return nil
@@ -528,40 +372,16 @@ var DefinitionEnv = cli.Command{
 	ArgsUsage:   h.T("envs.definition.args"),
 	Description: h.T("envs.definition.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "build",
-			Value: "",
-			Usage: "Build ID",
-		},
+		stringFlag("build", "", "Build ID"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		paramsLenValidation(c, 2, "envs.definition.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify the project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify the env name")
-		}
-		project := c.Args()[0]
-		env := c.Args()[1]
-		if c.String("build") != "" {
-			definition, err := m.BuildDefinitionFromIndex(cfg.Token, project, env, c.String("build"))
-			if err != nil {
-				h.PrintError(err.Error())
-			}
-			fmt.Println(string(definition))
-		} else {
-			definition, err := m.LatestBuildDefinition(cfg.Token, project, env)
-			if err != nil {
-				h.PrintError(err.Error())
-			}
+		build := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], c.String("build"))
+		def := client.Build().Definition(c.Args()[0], c.Args()[1], build.ID)
+		fmt.Println(def)
 
-			fmt.Println(string(definition))
-		}
 		return nil
 	},
 }
@@ -574,41 +394,18 @@ var InfoEnv = cli.Command{
 	ArgsUsage:   h.T("envs.info.args"),
 	Description: h.T("envs.info.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "build",
-			Value: "",
-			Usage: "Build ID",
-		},
+		stringFlag("build", "", "Build ID"),
 	},
 	Action: func(c *cli.Context) error {
-		var err error
-		var b model.Build
+		paramsLenValidation(c, 2, "envs.info.args")
+		client := esetup(c, AuthUsersValidation)
 
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		build := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], c.String("build"))
+		build = client.Build().Get(c.Args()[0], c.Args()[1], build.ID)
+		env := client.Environment().Get(c.Args()[0], c.Args()[1])
+		project := client.Project().Get(c.Args()[0])
+		view.PrintEnvInfoII(project, env, build)
 
-		if len(c.Args()) == 0 {
-			h.PrintError("You should specify an existing project name")
-		}
-		if len(c.Args()) == 1 {
-			h.PrintError("You should specify an existing env name")
-		}
-
-		project := c.Args()[0]
-		env := c.Args()[1]
-		if c.String("build") != "" {
-			build := c.String("build")
-			b, err = m.BuildStatus(cfg.Token, project, env, build)
-		} else {
-			b, err = m.LatestBuildStatus(cfg.Token, project, env)
-		}
-
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-		view.PrintEnvInfo(&b)
 		return nil
 	},
 }
@@ -621,42 +418,14 @@ var DiffEnv = cli.Command{
 	ArgsUsage:   h.T("envs.diff.args"),
 	Description: h.T("envs.diff.description"),
 	Action: func(c *cli.Context) error {
-		var err error
+		paramsLenValidation(c, 4, "envs.diff.args")
+		client := esetup(c, AuthUsersValidation)
 
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if len(c.Args()) < 4 {
-			h.PrintError("You should specify the project and env names and two build ids to compare them")
-		}
-
-		project := c.Args()[0]
-		env := c.Args()[1]
-		b1 := c.Args()[2]
-		b2 := c.Args()[3]
-
-		id1, err := m.BuildIDFromIndex(cfg.Token, project, env, b1)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-		id2, err := m.BuildIDFromIndex(cfg.Token, project, env, b2)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		def1, err := m.BuildDefinitionByID(cfg.Token, project, env, id1)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		def2, err := m.BuildDefinitionByID(cfg.Token, project, env, id2)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		view.PrintEnvDiff(id1, id2, def1, def2)
+		build1 := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], c.Args()[2])
+		build2 := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], c.Args()[3])
+		def1 := client.Build().Definition(c.Args()[0], c.Args()[1], build1.GetID())
+		def2 := client.Build().Definition(c.Args()[0], c.Args()[1], build2.GetID())
+		view.PrintEnvDiff(build1.GetID(), build2.GetID(), []byte(def1), []byte(def2))
 
 		return nil
 	},
@@ -670,44 +439,21 @@ var ImportEnv = cli.Command{
 	ArgsUsage:   h.T("envs.import.args"),
 	Description: h.T("envs.import.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "project",
-			Value: "",
-			Usage: "Project name",
-		},
-		cli.StringFlag{
-			Name:  "filters",
-			Value: "",
-			Usage: "Import filters comma delimited list",
-		},
+		stringFlag("project", "", "Project name"),
+		stringFlag("filters", "", "Import filters comma delimited list"),
 	},
 	Action: func(c *cli.Context) error {
-		var err error
+		paramsLenValidation(c, 2, "envs.import.args")
+		client := esetup(c, AuthUsersValidation)
+
 		var filters []string
-
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if len(c.Args()) == 0 {
-			h.PrintError("You should specify an existing project name")
-		}
-		if len(c.Args()) == 1 {
-			h.PrintError("You should specify a valid environment name")
-		}
-
 		if c.String("filters") != "" {
 			filters = strings.Split(c.String("filters"), ",")
 		}
 
-		project := c.Args()[0]
-		name := c.Args()[1]
-		_, err = m.Import(cfg.Token, name, project, filters)
+		a := client.Environment().Import(c.Args()[0], c.Args()[1], filters)
+		h.MonitorizeII(client.Build().Stream(a.ResourceID))
 
-		if err != nil {
-			h.PrintError(err.Error())
-		}
 		return nil
 	},
 }

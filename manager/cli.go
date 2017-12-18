@@ -16,6 +16,9 @@ type Client struct {
 	notification *Notification
 	role         *Role
 	project      *Project
+	env          *Environment
+	build        *Build
+	logger       *Logger
 }
 
 // New : ...
@@ -64,6 +67,30 @@ func (c *Client) Project() *Project {
 		c.project = &Project{cli: c.cli}
 	}
 	return c.project
+}
+
+// Environment : Environment wrapper lazy load
+func (c *Client) Environment() *Environment {
+	if c.env == nil {
+		c.env = &Environment{cli: c.cli}
+	}
+	return c.env
+}
+
+// Build : Build wrapper lazy load
+func (c *Client) Build() *Build {
+	if c.build == nil {
+		c.build = &Build{cli: c.cli}
+	}
+	return c.build
+}
+
+// Logger : Logger wrapper lazy load
+func (c *Client) Logger() *Logger {
+	if c.logger == nil {
+		c.logger = &Logger{cli: c.cli}
+	}
+	return c.logger
 }
 
 // Cli : gets the internal eclient.Client

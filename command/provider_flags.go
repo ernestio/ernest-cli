@@ -6,89 +6,29 @@ import (
 
 // ProviderVCloudFlags : ..
 var ProviderVCloudFlags = []cli.Flag{
-	cli.StringFlag{
-		Name:  "user",
-		Value: "",
-		Usage: "Your VCloud valid user name",
-	},
-	cli.StringFlag{
-		Name:  "password",
-		Value: "",
-		Usage: "Your VCloud valid password",
-	},
-	cli.StringFlag{
-		Name:  "org",
-		Value: "",
-		Usage: "Your vCloud Organization",
-	},
-	cli.StringFlag{
-		Name:  "vse-url",
-		Value: "",
-		Usage: "VSE URL",
-	},
-	cli.StringFlag{
-		Name:  "vcloud-url",
-		Value: "",
-		Usage: "VCloud URL",
-	},
-	cli.StringFlag{
-		Name:  "public-network",
-		Value: "",
-		Usage: "Public Network",
-	},
-	cli.StringFlag{
-		Name:  "vcloud-region, reg",
-		Value: "",
-		Usage: "Project region",
-	},
+	stringFlag("user", "", "Your VCloud valid user name"),
+	stringFlag("password", "", "Your VCloud valid password"),
+	stringFlag("org", "", "Your vCloud Organization"),
+	stringFlag("vse-url", "", "VSE URL"),
+	stringFlag("vcloud-url", "", "VCloud URL"),
+	stringFlag("public-network", "", "Public Network"),
+	stringFlag("vcloud-region, reg", "", "Project region"),
 }
 
 // ProviderAWSFlags : ...
 var ProviderAWSFlags = []cli.Flag{
-	cli.StringFlag{
-		Name:  "access_key_id, k",
-		Value: "",
-		Usage: "AWS access key id",
-	},
-	cli.StringFlag{
-		Name:  "secret_access_key, sak",
-		Value: "",
-		Usage: "AWS Secret access key",
-	},
-	cli.StringFlag{
-		Name:  "region, r",
-		Value: "",
-		Usage: "Project region",
-	},
+	stringFlag("access_key_id, k", "", "AWS access key id"),
+	stringFlag("secret_access_key, sak", "", "AWS Secret access key"),
+	stringFlag("region, r", "", "Project region"),
 }
 
 // ProviderAzureFlags : ...
 var ProviderAzureFlags = []cli.Flag{
-	cli.StringFlag{
-		Name:  "subscription_id, s",
-		Value: "",
-		Usage: "Azure subscription id",
-	},
-	cli.StringFlag{
-		Name:  "client_id, c",
-		Value: "",
-		Usage: "Azure client id",
-	},
-	cli.StringFlag{
-		Name:  "client_secret, p",
-		Value: "",
-		Usage: "Azure client secret",
-	},
-	cli.StringFlag{
-		Name:  "tenant_id, t",
-		Value: "",
-		Usage: "Azure tenant_id",
-	},
-	cli.StringFlag{
-		Name:  "environment, e",
-		Value: "",
-		Usage: "Azure environment. Supported values are public(default), usgovernment, german and chine",
-	},
+	stringFlag("subscription_id, s", "", "Azure subscription id"),
+	stringFlag("client_id, c", "", "Azure client id"),
+	stringFlag("client_secret, p", "", "Azure client secret"),
+	stringFlag("tenant_id, t", "", "Azure tenant_id"),
+	stringFlag("environment, e", "", "Azure environment. Supported values are public(default), usgovernment, german and chine"),
 }
 
 // AWSVCloudFlags : All aws vcloud provider flags

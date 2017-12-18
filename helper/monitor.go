@@ -46,6 +46,32 @@ func Monitorize(host, endpoint, token, stream string) error {
 	return h.subscribe()
 }
 
+// MonitorizeII opens a websocket connection to get input messages
+func MonitorizeII(stream chan *sse.Event) error {
+	h := buildhandler{
+		writer: uilive.New(),
+		stream: stream,
+	}
+
+	h.writer.Start()
+	defer h.writer.Stop()
+
+	return h.subscribe()
+}
+
+// PrintLogsII : prints logs inline
+func PrintLogsII(stream chan *sse.Event) error {
+	h := loghandler{stream: stream}
+	return h.subscribe()
+}
+
+// PrintRawLogsII : prints logs inline
+func PrintRawLogsII(stream chan *sse.Event) error {
+	h := rawhandler{stream: stream}
+	return h.subscribe()
+}
+
+// TODO : Deprecate this
 // PrintLogs : prints logs inline
 func PrintLogs(host, endpoint, token, stream string) error {
 	h := loghandler{
@@ -55,6 +81,7 @@ func PrintLogs(host, endpoint, token, stream string) error {
 	return h.subscribe()
 }
 
+// TODO : Deprecate this
 // PrintRawLogs : prints logs inline
 func PrintRawLogs(host, endpoint, token, stream string) error {
 	h := rawhandler{

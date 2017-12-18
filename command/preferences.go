@@ -6,11 +6,12 @@ package command
 
 // CmdDatacenter subcommand
 import (
-	h "github.com/ernestio/ernest-cli/helper"
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
+
+	h "github.com/ernestio/ernest-cli/helper"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // ListLoggers : Lists all loggers confured on ernest
@@ -20,15 +21,9 @@ var ListLoggers = cli.Command{
 	ArgsUsage:   h.T("logger.list.args"),
 	Description: h.T("logger.list.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-		loggers, err := m.ListLoggers(cfg.Token)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
+		client := esetup(c, NonAdminValidation)
 
+		loggers := client.Logger().List()
 		view.PrintLoggerList(loggers)
 
 		return nil
@@ -42,42 +37,18 @@ var SetLogger = cli.Command{
 	ArgsUsage:   h.T("logger.set.args"),
 	Description: h.T("logger.set.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "logfile",
-			Usage: "Specify the path for the loging file",
-		},
-		cli.StringFlag{
-			Name:  "token",
-			Usage: "Rollbar token",
-		},
-		cli.StringFlag{
-			Name:  "env",
-			Usage: "Rollbar environment",
-		},
-		cli.StringFlag{
-			Name:  "hostname",
-			Usage: "Logstash hostname",
-		},
-		cli.IntFlag{
-			Name:  "port",
-			Usage: "Logstash port",
-		},
-		cli.IntFlag{
-			Name:  "timeout",
-			Usage: "Logstash timeout",
-		},
+		stringFlagND("logfile", "Specify the path for the loging file"),
+		stringFlagND("token", "Rollbar token"),
+		stringFlagND("env", "Rollbar environment"),
+		stringFlagND("hostname", "Logstash hostname"),
+		intFlag("port", "Logstash port"),
+		intFlag("timeout", "Logstash timeout"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		paramsLenValidation(c, 1, "logger.set.args")
+		client := esetup(c, NonAdminValidation)
 
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify the logger type (basic | logstash)")
-		}
-
-		logger := model.Logger{
+		logger := emodels.Logger{
 			Type:        c.Args()[0],
 			Logfile:     c.String("logfile"),
 			Hostname:    c.String("hostname"),
@@ -100,7 +71,6 @@ var SetLogger = cli.Command{
 			if logger.Timeout == 0 {
 				h.PrintError("You should specify a logstash timeout with --timeout flag")
 			}
-
 		} else if logger.Type == "rollbar" {
 			if logger.Token == "" {
 				h.PrintError("You should specify a rollbar token with --token flag")
@@ -113,11 +83,7 @@ var SetLogger = cli.Command{
 			return nil
 		}
 
-		err := m.SetLogger(cfg.Token, logger)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		client.Logger().Create(&logger)
 		color.Green("Logger successfully set up")
 
 		return nil
@@ -131,24 +97,10 @@ var DelLogger = cli.Command{
 	ArgsUsage:   h.T("logger.del.args"),
 	Description: h.T("logger.del.description"),
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify the logger type (basic | logstash | rollbar)")
-		}
+		paramsLenValidation(c, 1, "logger.del.args")
+		client := esetup(c, NonAdminValidation)
 
-		logger := model.Logger{
-			Type: c.Args()[0],
-		}
-
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		err := m.DelLogger(cfg.Token, logger)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		client.Logger().Delete(c.Args()[0])
 		color.Green("Logger successfully deleted")
 
 		return nil
