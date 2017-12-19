@@ -25,28 +25,11 @@ var Login = cli.Command{
 	ArgsUsage:   h.T("login.args"),
 	Description: h.T("login.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user",
-			Value: "",
-			Usage: "User credentials",
-		},
-		cli.StringFlag{
-			Name:  "password",
-			Value: "",
-			Usage: "Password credentials",
-		},
-		cli.StringFlag{
-			Name:  "verification-code",
-			Value: "",
-			Usage: "MFA verification code",
-		},
+		stringFlag("user", "", "User credentials"),
+		stringFlag("password", "", "Password credentials"),
+		stringFlag("verification-code", "", "MFA verification code"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if m == nil {
-			os.Exit(1)
-		}
-
 		var username string
 		var password string
 		var verificationCode string
@@ -77,8 +60,8 @@ var Login = cli.Command{
 		}
 
 		verificationCode = c.String("verification-code")
-
-		token, err := m.Login(username, password, verificationCode)
+		client := elogin(username, password, verificationCode)
+		token, err := client.Cli().Authenticate()
 
 		// MFA check
 		if err != nil && err.Error() == "mfa required" {
@@ -86,21 +69,18 @@ var Login = cli.Command{
 			vc, _ := gopass.GetPasswdMasked()
 			verificationCode = string(vc)
 
-			token, err = m.Login(username, password, verificationCode)
-			if err != nil {
-				h.PrintError(err.Error())
-			}
+			client = elogin(username, password, verificationCode)
+			token, err = client.Cli().Authenticate()
 		}
 
 		if err != nil {
 			h.PrintError(err.Error())
 		}
 
+		cfg := client.Config()
 		cfg.Token = token
-		cfg.User = username
 
-		err = model.SaveConfig(cfg)
-		if err != nil {
+		if err := model.SaveConfig(client.Config()); err != nil {
 			h.PrintError("Can't write config file")
 		}
 

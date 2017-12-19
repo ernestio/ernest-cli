@@ -38,9 +38,9 @@ var CmdLog = cli.Command{
 		})
 
 		if c.Bool("raw") {
-			_ = helper.PrintRawLogsII(client.Build().Stream(uuid))
+			_ = helper.PrintRawLogs(client.Build().Stream(uuid))
 		} else {
-			_ = helper.PrintLogsII(client.Build().Stream(uuid))
+			_ = helper.PrintLogs(client.Build().Stream(uuid))
 		}
 
 		defer func() {

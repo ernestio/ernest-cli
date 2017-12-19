@@ -19,6 +19,15 @@ type Client struct {
 	env          *Environment
 	build        *Build
 	logger       *Logger
+	report       *Report
+}
+
+// NewFromCreds ...
+func NewFromCreds(config *model.Config) *Client {
+	client := eclient.New(
+		econfig.New(config.URL).WithCredentials(config.User, config.Password),
+	)
+	return &Client{cli: client, cfg: config}
 }
 
 // New : ...
@@ -91,6 +100,14 @@ func (c *Client) Logger() *Logger {
 		c.logger = &Logger{cli: c.cli}
 	}
 	return c.logger
+}
+
+// Report : Report wrapper lazy load
+func (c *Client) Report() *Report {
+	if c.report == nil {
+		c.report = &Report{cli: c.cli}
+	}
+	return c.report
 }
 
 // Cli : gets the internal eclient.Client

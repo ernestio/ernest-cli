@@ -76,18 +76,18 @@ func esetup(c *cli.Context, vals []string) *manager.Client {
 
 }
 
-// setup ...
-// TODO : Deprecate this to use "esetup"
-func setup(c *cli.Context) (*manager.Manager, *model.Config) {
+// elogin ...
+func elogin(usr, pwd, vc string) *manager.Client {
+	session = nil
 	config := model.GetConfig()
 	if config == nil {
 		config = &model.Config{}
-		if c.Command.Name != "target" && c.Command.Name != "setup" {
-			h.PrintError("Environment not configured, please use target command")
-		}
 	}
-	m := manager.Manager{URL: config.URL, Version: c.App.Version}
-	return &m, config
+	config.User = usr
+	config.Password = pwd
+	config.Verification = vc
+
+	return manager.NewFromCreds(config)
 }
 
 func stringWithDefault(c *cli.Context, key, def string) (val string) {

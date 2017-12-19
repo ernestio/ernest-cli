@@ -140,7 +140,7 @@ var ApplyEnv = cli.Command{
 			h.PrintError("Could not finalize definition yaml")
 		}
 		if c.Bool("dry") == true {
-			view.EnvDryII(*client.Build().Dry(payload))
+			view.EnvDry(*client.Build().Dry(payload))
 			return nil
 		}
 		build := client.Build().Create(payload)
@@ -149,8 +149,8 @@ var ApplyEnv = cli.Command{
 			os.Exit(0)
 		}
 
-		h.MonitorizeII(client.Build().Stream(build.ID))
-		view.PrintEnvInfoII(
+		h.Monitorize(client.Build().Stream(build.ID))
+		view.PrintEnvInfo(
 			client.Project().Get(def.Project),
 			client.Environment().Get(def.Project, def.Name),
 			client.Build().Get(def.Project, def.Name, build.GetID()),
@@ -348,7 +348,7 @@ var RevertEnv = cli.Command{
 		def := client.Build().Definition(c.Args()[0], c.Args()[1], c.Args()[2])
 
 		if c.Bool("dry") == true {
-			view.EnvDryII(*client.Build().Dry([]byte(def)))
+			view.EnvDry(*client.Build().Dry([]byte(def)))
 		} else {
 			client.Build().Create([]byte(def))
 			if build.Status == "submitted" {
@@ -356,7 +356,7 @@ var RevertEnv = cli.Command{
 				os.Exit(0)
 			}
 
-			h.MonitorizeII(client.Build().Stream(build.ID))
+			h.Monitorize(client.Build().Stream(build.ID))
 		}
 
 		return nil
@@ -404,7 +404,7 @@ var InfoEnv = cli.Command{
 		build = client.Build().Get(c.Args()[0], c.Args()[1], build.ID)
 		env := client.Environment().Get(c.Args()[0], c.Args()[1])
 		project := client.Project().Get(c.Args()[0])
-		view.PrintEnvInfoII(project, env, build)
+		view.PrintEnvInfo(project, env, build)
 
 		return nil
 	},
@@ -452,7 +452,7 @@ var ImportEnv = cli.Command{
 		}
 
 		a := client.Environment().Import(c.Args()[0], c.Args()[1], filters)
-		h.MonitorizeII(client.Build().Stream(a.ResourceID))
+		h.Monitorize(client.Build().Stream(a.ResourceID))
 
 		return nil
 	},

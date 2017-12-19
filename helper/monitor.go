@@ -5,11 +5,6 @@
 package helper
 
 import (
-	"crypto/tls"
-	"fmt"
-	"net/http"
-	"os"
-
 	"github.com/fatih/color"
 	"github.com/gosuri/uilive"
 	"github.com/r3labs/sse"
@@ -34,20 +29,7 @@ var (
 )
 
 // Monitorize opens a websocket connection to get input messages
-func Monitorize(host, endpoint, token, stream string) error {
-	h := buildhandler{
-		writer: uilive.New(),
-		stream: OpenStream(host, endpoint, token, stream),
-	}
-
-	h.writer.Start()
-	defer h.writer.Stop()
-
-	return h.subscribe()
-}
-
-// MonitorizeII opens a websocket connection to get input messages
-func MonitorizeII(stream chan *sse.Event) error {
+func Monitorize(stream chan *sse.Event) error {
 	h := buildhandler{
 		writer: uilive.New(),
 		stream: stream,
@@ -59,59 +41,14 @@ func MonitorizeII(stream chan *sse.Event) error {
 	return h.subscribe()
 }
 
-// PrintLogsII : prints logs inline
-func PrintLogsII(stream chan *sse.Event) error {
+// PrintLogs : prints logs inline
+func PrintLogs(stream chan *sse.Event) error {
 	h := loghandler{stream: stream}
 	return h.subscribe()
 }
 
-// PrintRawLogsII : prints logs inline
-func PrintRawLogsII(stream chan *sse.Event) error {
+// PrintRawLogs : prints logs inline
+func PrintRawLogs(stream chan *sse.Event) error {
 	h := rawhandler{stream: stream}
 	return h.subscribe()
-}
-
-// TODO : Deprecate this
-// PrintLogs : prints logs inline
-func PrintLogs(host, endpoint, token, stream string) error {
-	h := loghandler{
-		stream: OpenStream(host, endpoint, token, stream),
-	}
-
-	return h.subscribe()
-}
-
-// TODO : Deprecate this
-// PrintRawLogs : prints logs inline
-func PrintRawLogs(host, endpoint, token, stream string) error {
-	h := rawhandler{
-		stream: OpenStream(host, endpoint, token, stream),
-	}
-
-	return h.subscribe()
-}
-
-// OpenStream : opens an sse stream
-func OpenStream(host, endpoint, token, stream string) chan *sse.Event {
-	ec := make(chan *sse.Event, 1024)
-
-	client := sse.NewClient(host + endpoint)
-
-	//client.EventID = "0"
-	client.EncodingBase64 = true
-	client.Connection.Transport = &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	client.Headers["Authorization"] = fmt.Sprintf("Bearer %s", token)
-
-	go func() {
-		err := client.SubscribeChan(stream, ec)
-		if err != nil {
-			fmt.Println("error connecting to stream: " + err.Error())
-			os.Exit(1)
-		}
-	}()
-
-	return ec
 }
