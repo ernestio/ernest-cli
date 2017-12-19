@@ -11,14 +11,23 @@ import (
 )
 
 const (
-	BUILDCREATE      = "build.create"
-	BUILDDELETE      = "build.delete"
-	BUILDIMPORT      = "build.import"
-	BUILDCREATEDONE  = "build.create.done"
-	BUILDDELETEDONE  = "build.delete.done"
-	BUILDIMPORTDONE  = "build.import.done"
+	// BUILDCREATE : build.create
+	BUILDCREATE = "build.create"
+	// BUILDDELETE : build.delete
+	BUILDDELETE = "build.delete"
+	// BUILDIMPORT :  "build.import"
+	BUILDIMPORT = "build.import"
+	//BUILDCREATEDONE : "build.create.done"
+	BUILDCREATEDONE = "build.create.done"
+	// BUILDDELETEDONE : "build.delete.done"
+	BUILDDELETEDONE = "build.delete.done"
+	// BUILDIMPORTDONE : "build.import.done"
+	BUILDIMPORTDONE = "build.import.done"
+	// BUILDCREATEERROR : "build.create.error"
 	BUILDCREATEERROR = "build.create.error"
+	// BUILDDELETEERROR : "build.delete.error"
 	BUILDDELETEERROR = "build.delete.error"
+	// BUILDIMPORTERROR : "build.import.error"
 	BUILDIMPORTERROR = "build.import.error"
 )
 
