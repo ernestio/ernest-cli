@@ -7,22 +7,27 @@ package view
 import (
 	"fmt"
 	"os"
+	"strings"
 
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/olekukonko/tablewriter"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // PrintEnvInfo : Pretty print for build info
-func PrintEnvInfo(build *model.Build) {
-	fmt.Println("Name : " + build.Name)
+func PrintEnvInfo(project *emodels.Project, env *emodels.Environment, build *emodels.Build) {
+	fmt.Println("================\nPlatform Details\n================\n ")
+	parts := strings.Split(env.Name, "/")
+	fmt.Println("Name : " + parts[1])
 	fmt.Println("Status : " + build.Status)
-	fmt.Println("Project : " + build.ProjectName)
+	fmt.Println("Project : " + project.Name)
 	fmt.Println("Provider : ")
-	fmt.Println("  Type : " + build.Provider)
+	fmt.Println("  Type : " + project.Type)
 	fmt.Println("Members:")
 	for _, m := range build.Roles {
 		fmt.Println("  " + m)
 	}
+
 	fmt.Println("Date : " + build.CreatedAt)
 
 	if len(build.VPCs) > 0 {

@@ -6,10 +6,44 @@ package command
 
 // CmdUser subcommand
 import (
-	h "github.com/ernestio/ernest-cli/helper"
+	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
+
+	h "github.com/ernestio/ernest-cli/helper"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
+
+func rolesManager(c *cli.Context, set bool) {
+	requiredFlags(c, []string{"role", "user", "project"})
+	client := esetup(c, AuthUsersValidation)
+	rType := "project"
+	rID := c.String("project")
+	if c.String("environment") != "" {
+		rType = "environment"
+		rID = c.String("project") + "/" + c.String("environment")
+	}
+
+	role := &emodels.Role{
+		ID:       rID,
+		User:     c.String("user"),
+		Role:     c.String("role"),
+		Resource: rType,
+	}
+	if set {
+		client.Role().Create(role)
+		verb := "own"
+		if c.String("role") == "reader" {
+			verb = "read"
+		}
+		color.Green(fmt.Sprintf(h.T("roles.set.success"), c.String("user"), verb, rID))
+	} else {
+		client.Role().Delete(role)
+		color.Green(fmt.Sprintf(h.T("roles.unset.success"), c.String("user"), rID, c.String("role")))
+	}
+
+}
 
 // CmdRolesSet :
 var CmdRolesSet = cli.Command{
@@ -18,57 +52,13 @@ var CmdRolesSet = cli.Command{
 	ArgsUsage:   h.T("roles.set.args"),
 	Description: h.T("roles.set.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user, u",
-			Value: "",
-			Usage: "User to be authorized over the given resource",
-		},
-		cli.StringFlag{
-			Name:  "project, p",
-			Value: "",
-			Usage: "Project to authorize",
-		},
-		cli.StringFlag{
-			Name:  "role, r",
-			Value: "",
-			Usage: "Role type [owner, reader]",
-		},
-		cli.StringFlag{
-			Name:  "environment, e",
-			Value: "",
-			Usage: "Environment to authorize",
-		},
+		tStringFlag("roles.set.flags.user"),
+		tStringFlag("roles.set.flags.project"),
+		tStringFlag("roles.set.flags.role"),
+		tStringFlag("roles.set.flags.environment"),
 	},
 	Action: func(c *cli.Context) error {
-		r := c.String("role")
-		u := c.String("user")
-		p := c.String("project")
-		e := c.String("environment")
-		if r == "" {
-			h.PrintError("Please provide a role with --role flag")
-		}
-		if u == "" {
-			h.PrintError("Please provide a user with --user flag")
-		}
-		if p == "" {
-			h.PrintError("Please provide a project with --project flag")
-		}
-
-		m, cfg := setup(c)
-		body, err := m.SetRole(cfg.Token, u, p, e, r)
-		if err != nil {
-			h.PrintError(body)
-		}
-		resource := p
-		if e != "" {
-			resource = p + " / " + e
-		}
-		verb := "own"
-		if r == "reader" {
-			verb = "read"
-		}
-		color.Green("User '" + u + "' has been authorized to " + verb + " resource " + resource)
-
+		rolesManager(c, true)
 		return nil
 	},
 }
@@ -80,55 +70,13 @@ var CmdRolesUnset = cli.Command{
 	ArgsUsage:   h.T("roles.unset.args"),
 	Description: h.T("roles.unset.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user, u",
-			Value: "",
-			Usage: "User to be authorized over the given resource",
-		},
-		cli.StringFlag{
-			Name:  "project, p",
-			Value: "",
-			Usage: "Project to authorize",
-		},
-		cli.StringFlag{
-			Name:  "role, r",
-			Value: "",
-			Usage: "Role type [owner, reader]",
-		},
-		cli.StringFlag{
-			Name:  "environment, e",
-			Value: "",
-			Usage: "Environment to authorize",
-		},
+		tStringFlag("roles.set.flags.user"),
+		tStringFlag("roles.set.flags.project"),
+		tStringFlag("roles.set.flags.role"),
+		tStringFlag("roles.set.flags.environment"),
 	},
 	Action: func(c *cli.Context) error {
-		r := c.String("role")
-		u := c.String("user")
-		p := c.String("project")
-		e := c.String("environment")
-		if r == "" {
-			h.PrintError("Please provide a role with --role flag")
-		}
-		if u == "" {
-			h.PrintError("Please provide a user with --user flag")
-		}
-		if p == "" {
-			h.PrintError("Please provide a project with --project flag")
-		}
-
-		m, cfg := setup(c)
-		body, err := m.UnsetRole(cfg.Token, u, p, e, r)
-		if err != nil {
-			h.PrintError(body)
-			return nil
-		}
-
-		resource := p
-		if e != "" {
-			resource = p + " / " + e
-		}
-		color.Green("User '" + u + "' has been unauthorized as " + resource + " " + r)
-
+		rolesManager(c, false)
 		return nil
 	},
 }

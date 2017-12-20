@@ -70,6 +70,7 @@ var _langEnYml = []byte(`en:
       usage: "Add or remove admin users"
       add:
         usage: "Adds a specific user as ernest admin"
+        args: "$ ernest user admin add <username>"
         description: |
           Adds a specific user as ernest admin
 
@@ -77,6 +78,7 @@ var _langEnYml = []byte(`en:
             $ ernest user admin add john
       rm:
         usage: "Removes a specific user as ernest admin"
+        args: "$ ernest user admin rm <username>"
         description: |
           Removes a specific user as ernest admin
 
@@ -84,7 +86,7 @@ var _langEnYml = []byte(`en:
             $ ernest user admin rm john
     create:
       usage: "Create a new user."
-      args: "<username> <password>"
+      args: "$ ernest user create <username> <password>"
       description: |
         Create a new user on the targeted instance of Ernest.
         Example:
@@ -93,6 +95,17 @@ var _langEnYml = []byte(`en:
 
         Example:
           $ ernest user create --email username@example.com <username> <password>
+      flags:
+        email:
+          alias: email
+          def:
+          desc: Email for the user
+        mfa:
+          alias: mfa
+          desc: Enable MFA
+        admin:
+          alias: admin
+          desc: User will be created as admin
     change_password:
       usage: "Change password of available users"
       description: |
@@ -102,9 +115,22 @@ var _langEnYml = []byte(`en:
           $ ernest user change-password
         or changing a change-password by being admin:
           $ ernest user change-password --user <username> --current-password <current-password> --password <new-password>
+      flags:
+        user:
+          alias: user
+          def:
+          desc: The username of the user to change password
+        password:
+          alias: password
+          def:
+          desc: The new user password
+        current-password:
+          alias: current-password
+          def:
+          desc: The current user password
     disable:
       usage: "Disable available users."
-      args: "<username>"
+      args: "$ ernest user disable <username>"
       description: |
         Disable available users.
 
@@ -116,30 +142,47 @@ var _langEnYml = []byte(`en:
         Example:
           $ ernest user info
           $ ernest user info --user <user-name>
+      flags:
+        user:
+          alias: user
+          def:
+          desc: "Username"
     enable-mfa:
       usage: "Enable Multi-Factor Authentication."
-      args: "[--user-name]"
+      args: "$ ernest user enable-mfa [--user-name]"
       description: |
         Enables Multi-Factor Authentication for a user.
 
         Example:
           $ ernest user enable-mfa
+      flags:
+        user:
+          alias: user-name
+          desc: Target user
     disable-mfa:
       usage: "Disable Multi-Factor Authentication."
-      args: "[--user-name]"
+      args: "$ ernest user disable-mfa [--user-name]"
       description: |
         Disable Multi-Factor Authentication for a user.
 
         Example:
           $ ernest user disable-mfa
+      flags:
+        user:
+          alias: user-name
+          desc: Target user
     reset-mfa:
       usage: "Reset Multi-Factor Authentication."
-      args: "[--user-name]"
+      args: "$ ernest user reset-mfa [--user-name]"
       description: |
         Generates a new Multi-Factor Authentication token for a user.
 
         Example:
           $ ernest user reset-mfa
+      flags:
+        user:
+          alias: user-name
+          desc: Target user
   aws:
     create:
       usage: "Create a new aws project."
@@ -155,18 +198,49 @@ var _langEnYml = []byte(`en:
             access_key_id : AKIAIOSFODNN7EXAMPLE
             secret_access_key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
             region: us-west-2
-      args: "<project-name>"
+      args: "$ ernest project create aws --region us-west-2 --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_project"
+      flags:
+        region:
+          alias: "region, r"
+          def: ""
+          desc: "Project region"
+        access_key_id:
+          alias: "access_key_id, k"
+          def: ""
+          desc: "AWS access key id"
+        secret_access_key:
+          alias: "secret_access_key"
+          def: ""
+          desc: "AWS Secret access key"
+        template:
+          alias: "template, t"
+          def: ""
+          desc: "Project template"
+        fake:
+          alias: "fake, f"
+          desc: "Fake project"
+      success: "Project '%s' successfully created"
     update:
       usage: "Updates the specified AWS project."
-      args: "<project-name>"
+      args: "$ ernest project update aws --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_project"
       description: |
         Updates the specified AWS project.
-      Example:
+        Example:
           $ ernest project update aws --access_key_id AKIAIOSFODNN7EXAMPLE --secret_access_key wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY my_project
+      flags:
+        access_key_id:
+          alias: "access_key_id, k"
+          def: ""
+          desc: "AWS access key id"
+        secret_access_key:
+          alias: "secret_access_key, s"
+          def: ""
+          desc: "AWS Secret access key"
+      success: "Project %s successfully updated"
   azure:
     create:
       usage: "Create a new azure project."
-      args: "<project-name>"
+      args: "$ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
       description: |
         Create a new Azure project on the targeted instance of Ernest.
 
@@ -184,14 +258,65 @@ var _langEnYml = []byte(`en:
           client_secret: PASSWORD
           tenant_id: TENANT
           environment: public
+      flags:
+        region:
+          alias: "region, r"
+          def: ""
+          desc: "Project region"
+        subscription_id:
+          alias: "subscription_id"
+          def: ""
+          desc: "Azure subscription id"
+        client_id:
+          alias: "client_id, c"
+          def: ""
+          desc: "Azure client id"
+        client_secret:
+          alias: "client_secret, p"
+          def: ""
+          desc: "Azure client secret"
+        tenant_id:
+          alias: "tenant_id, t"
+          def: ""
+          desc: "Azure tenant_id"
+        environment:
+          alias: "environment"
+          def: ""
+          desc: "Azure environment. Supported values are public(default), usgovernment, german and chine"
+        fake:
+          alias: "fake, f"
+          desc: "Fake project"
+      success: "Project '%s' successfully created"
     update:
       usage: "Updates the specified Azure project."
-      args: "<project-name>"
+      args: "$ ernest project update azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
       description: |
         Updates the specified Azure project.
 
         Example:
           $ ernest project update azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
+      flags:
+        subscription_id:
+          alias: "subscription_id"
+          def: ""
+          desc: "Azure subscription id"
+        client_id:
+          alias: "client_id, c"
+          def: ""
+          desc: "Azure client id"
+        client_secret:
+          alias: "client_secret, p"
+          def: ""
+          desc: "Azure client secret"
+        tenant_id:
+          alias: "tenant_id, t"
+          def: ""
+          desc: "Azure tenant_id"
+        environment:
+          alias: "environment"
+          def: ""
+          desc: "Azure environment. Supported values are public(default), usgovernment, german and chine"
+      success: "Project %s successfully updated"
   docs:
     usage: "Open docs in the default browser."
     args: ""
@@ -200,6 +325,7 @@ var _langEnYml = []byte(`en:
 
       Example:
         $ ernest docs
+    success: "Visit ernest.io documentation site : %s"
   envs:
     list:
       usage: "List available environments."
@@ -211,24 +337,43 @@ var _langEnYml = []byte(`en:
           $ ernest environment list
     update:
       usage: "Creates an empty environment based on a specific project"
-      args: "<project> <environment>"
+      args: "$ ernest env update <project> <environment> [--credentials credentials.yml]"
       description: |
         You must be logged in to execute this command.
 
         Examples:
           $ ernest env update --credentials project.yml my_project my_environment
+      flags:
+        sync_interval:
+          alias: sync_interval
+          desc: sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
+        submissions:
+          alias: submissions
+          desc: allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'
+
     create:
       usage: "Creates an empty environment based on a specific project"
-      args: "<project> <environment>"
+      args: "$ ernest env create <project> <environment> [--credentials project.yml]"
       description: |
         You must be logged in to execute this command.
 
         Examples:
           $ ernest env create my_project my_environment
           $ ernest env create --credentials project.yml my_project my_environment
+      flags:
+        credentials:
+          alias: credentials
+          desc: will override project information
+        sync_interval:
+          alias: sync_interval
+          desc: sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
+        submissions:
+          alias: submissions
+          desc: allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'
+
     apply:
       usage: "Builds or changes infrastructure."
-      args: "<file.yml>"
+      args: "$ ernest env apply <file.yml>"
       description: |
         Sends an environment YAML description file to Ernest to be executed.
         You must be logged in to execute this command.
@@ -238,17 +383,34 @@ var _langEnYml = []byte(`en:
         Examples:
           $ ernest env apply myenvironment.yml
           $ ernest env apply --dry myenvironment.yml
+      flags:
+        dry:
+          alias: dry
+          desc: print the changes to be applied on an environment intead of applying them
+        credentials:
+          alias: credentials
+          desc: will override project information
+
     destroy:
       usage: "Destroy an environment."
-      args: "<project> <environment_name>"
+      args: "$ ernest env delete <my_project> <my_environment>"
       description: |
         Destroys an environment by name.
 
         Example:
           $ ernest env delete <my_project> <my_environment>
+      flags:
+        force:
+          alias: "force,f"
+          desc: Hard ernest env removal.
+        yesflag:
+          alias: "yes,y"
+          desc: Destroy an environment without prompting confirmation.
+      confirmation: "Do you really want to destroy this environment? (Y/n) "
+      success: "Environment successfully removed"
     history:
       usage: "Shows the history of an environment, a list of builds"
-      args: "ernest-cli env history <my_project> <my_env>"
+      args: "$ ernest env history <my_project> <my_env>"
       description: |
         Shows the history of an environment, a list of builds and its status and basic information.
 
@@ -256,32 +418,42 @@ var _langEnYml = []byte(`en:
           $ ernest env history <my_project> <my_env>
     reset:
       usage: "Reset an in progress environment."
-      args: "<env_name>"
+      args: "$ ernest env reset <my_env>"
       description: |
         Reseting an environment creation may cause problems, please make sure you know what are you doing.
 
         Example:
           $ ernest env reset <my_env>
+      success: "You've successfully resetted the environment '%s / %s'"
     revert:
       usage: "Reverts an environment to a previous state"
-      args: "<project> <env_name> <build_id>"
+      args: "$ ernest env revert <project> <env_name> <build_id>"
       description: |
         Reverts an environment to a previous known state using a build ID from 'ernest env history'.
 
         Example:
           $ ernest env revert <project> <env_name> <build_id>
           $ ernest env revert --dry <project> <env_name> <build_id>
+      flags:
+        dry:
+          alias: "dry"
+          desc: "print the changes to be applied on an environment intead of applying them"
+      success: "Build has been succesfully submitted and is awaiting approval."
     definition:
       usage: "Show the current definition of an environment by its name"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env definition <my_project> <my_env>"
       description: |
         Show the current definition of an environment by its name getting the definition about the build.
 
         Example:
           $ ernest env definition <my_project> <my_env>
+      flags:
+        build:
+          alias: "build"
+          desc: "Build ID"
     info:
       usage: "$ ernest env info <my_env> --build <specific build>"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env definition <my_project> <my_env>"
       description: |
         Will show detailed information of the last build of a specified environment.
         In case you specify --build option you will be able to output the detailed information of specific build of an environment.
@@ -289,9 +461,13 @@ var _langEnYml = []byte(`en:
         Examples:
           $ ernest env definition <my_project> <my_env>
           $ ernest env definition <my_project> <my_env> --build build1
+      flags:
+        build:
+          alias: "build"
+          desc: "Build ID"
     sync:
       usage: "$ ernest env sync <my_project> <my_env>"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env sync <my_project> <my_env>"
       description: |
         Will sync ernest's environment state from a provider.
         Any changes detected can then be resolved using the 'resolve' command.
@@ -300,7 +476,24 @@ var _langEnYml = []byte(`en:
           $ ernest env sync <my_project> <my_env>
     resolve:
       usage: "$ ernest env resolve --[accept|reject|ignore] <my_project> <my_env>"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env resolve --[accept|reject|ignore] <my_project> <my_env>"
+      flags:
+        subscription_id:
+          alias: "subscription_id, s"
+          def: ""
+          desc: "Azure subscription id"
+        accept:
+          alias: "accept, a"
+          desc: "Accept Sync changes"
+        reject:
+          alias: "reject, r"
+          desc: "Reject Sync changes"
+        ignore:
+          alias: "ignore, i"
+          desc: "Ignore Sync changes"
+      errors:
+        non_valid: You should specify a valid resolution [accept|reject|ignore]
+
       description: |
         Provides the ability to manage changes detected by a sync.
         Options:
@@ -314,7 +507,7 @@ var _langEnYml = []byte(`en:
           $ ernest env resolve --ignore <my_project> <my_env>
     review:
       usage: "$ ernest env review --[accept|reject] <my_project> <my_env>"
-      args: "<project_name> <env_name>"
+      args: "$ ernest env review --[accept|reject] <my_project> <my_env>"
       description: |
         Provides the ability to review submitted builds. Running without any flags will show the diff of the submitted build with the prior environment state.
         Options:
@@ -325,9 +518,16 @@ var _langEnYml = []byte(`en:
           $ ernest env review <my_project> <my_env>
           $ ernest env review --accept <my_project> <my_env>
           $ ernest env review --reject <my_project> <my_env>
+      flags:
+        accept:
+          alias: accept, a
+          desc: Accept Sync changes
+        reject:
+          alias: reject, r
+          desc: Reject Sync changes
     diff:
       usage: "$ ernest env diff <project_name> <env_name> <build_a> <build_b>"
-      args: "<env_aname> <build_a> <build_b>"
+      args: "$ ernest env diff <project_name> <env_name> <build_a> <build_b>"
       description: |
         Will display the diff between two different builds
 
@@ -335,12 +535,19 @@ var _langEnYml = []byte(`en:
           $ ernest env diff <my_project> <my_env> 1 2
     import:
       usage: "$ ernest env import <my_project> <my_env>"
-      args: "<env_name>"
+      args: "$ ernest env import <my_project> <my_env>"
       description : |
         Will import the environment <my_env> from project <project_name>
 
         Examples:
           $ ernest env import my_project my_env
+      flags:
+        project:
+          alias: "project"
+          desc: "Project name"
+        filters:
+          alias: "filters"
+          desc: "Import filters comma delimited list"
     schedule:
       list:
         usage: "List environment schedules."
@@ -352,20 +559,32 @@ var _langEnYml = []byte(`en:
             $ ernest env schedule list
       add:
         usage: "Adds a new schedule for a specific environment."
-        args: "--action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>"
+        args: "$ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>"
         description: |
           Creates a new schedule for a specific environment
 
           Example:
             $ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>
+        flags:
+          action:
+            alias: action
+            desc: defines what action should be scheduled possible values are [power_on, power_off, sync]
+          instance_type:
+            alias: instance_type
+            desc: power_on and power_off accept an instance_type to be powered on an off
+          schedule:
+            alias: schedule
+            desc: sets the automatic schedule. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
+        success: Environment schedules successfully updated
       rm:
         usage: "Removes a schedule on the specified environment."
-        args: "<project> <env> <my_schedule>"
+        args: "$ ernest env schedule rm <project> <env> <my_schedule>"
         description: |
           Removes an existing schedule from a specific environment
 
           Example:
             $ ernest env schedule rm <project> <env> <my_schedule>
+        success: "Environment schedules successfully updated"
   log:
     usage: "Inline display of ernest logs."
     args: " "
@@ -375,6 +594,10 @@ var _langEnYml = []byte(`en:
       Example:
         $ ernest log
         $ ernest log --raw
+    flags:
+      raw:
+        alias: raw
+        desc: "Raw output will be displayed instead of pretty-printed"
   login:
     usage: "Login with your Ernest credentials."
     args: " "
@@ -388,6 +611,19 @@ var _langEnYml = []byte(`en:
 
       Example:
         $ ernest login --user <user> --password <password>
+    flags:
+      user:
+        alias: "user"
+        def: ""
+        desc: "User credentials"
+      password:
+        alias: "password"
+        def: ""
+        desc: "Password credentials"
+      verification:
+        alias: "verification-code"
+        def: ""
+        desc: "MFA verification code"
   logout:
     usage: "Clear local authentication credentials."
     args: " "
@@ -396,14 +632,19 @@ var _langEnYml = []byte(`en:
 
       Example:
         $ ernest logout
+    errors:
+      write: "Can't write config file"
+    success: "Bye."
   monitor:
     usage: "Monitor an environment creation."
-    args: "<project_name> <env_name>"
+    args: "$ ernest monitor <project_name> <env_name>"
     description: |
       Monitors an environment while it is being built by its name.
 
       Example:
         $ ernest monitor <my_project> <my_env>
+    success_1: "Environment has been successfully built"
+    success_2: "You can check its information running `+"`"+`ernest-cli env info %s / %s"
   notification:
     list:
       usage: "List available notifications."
@@ -415,7 +656,7 @@ var _langEnYml = []byte(`en:
           $ ernest notification list
     delete:
       usage: "Deletes an existing notify."
-      args: "<notify_name>"
+      args: "$ ernest notify delete <notify_name>"
       description: |
         Deletes an existing notify on the targeted instance of Ernest.
 
@@ -425,9 +666,10 @@ var _langEnYml = []byte(`en:
 
         Example:
         $ ernest notify delete my_notify
+      success: "Notify %s successfully delete"
     update:
       usage: "Update a new notify."
-      args: "<notify_name> <notify_config>"
+      args: "$ ernest notify update <notify_name> <notify_config>"
       description: |
         Update an existing notify on the targeted instance of Ernest.
 
@@ -437,10 +679,11 @@ var _langEnYml = []byte(`en:
 
         Example:
         $ ernest notify update my_notify '{"url":"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"}'
+      success: "Notify %s successfully updated"
     service:
       add:
         usage: "Add environment to an existing notify."
-        args: "<notification_name> <project_name> [<env_name>]"
+        args: "$ ernest notify add <notification_name> <project_name> [<env_name>]"
         description: |
           Adds a environment to an existing notify.
 
@@ -451,9 +694,10 @@ var _langEnYml = []byte(`en:
           Example:
           $ ernest notify add my_notify my_project
           $ ernest notify add my_notify my_project my_env
+        success: "Environment %s successfully attached to %s notify"
       rm:
         usage: "Removes an environment to an existing notify."
-        args: "<notify_name> <project_name> [<env_name>]"
+        args: "$ ernest notify remove <notify_name> <project_name> [<env_name>]"
         description: |
           Removes an environment to an existing notify.
 
@@ -464,9 +708,10 @@ var _langEnYml = []byte(`en:
           Example:
           $ ernest notify remove my_notify my_project
           $ ernest notify remove my_notify my_project my_env
+        success: "Environment %s successfully removed from %s notify"
     create:
       usage: "Create a new notify."
-      args: "<notify_name> <notify_type> <notify_config>"
+      args: "$ ernest notify create <notify_name> <notify_type> <notify_config>"
       description: |
         Create a new notify on the targeted instance of Ernest.
 
@@ -476,6 +721,7 @@ var _langEnYml = []byte(`en:
 
         Example:
         $ ernest notify create my_notify slack '{"url":"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"}'
+      success: "Notify %s successfully created"
   logger:
     list:
       usage: "Lists active loggers."
@@ -487,7 +733,7 @@ var _langEnYml = []byte(`en:
           $ ernest preferences logger list
     set:
       usage: "Creates / updates a logger based on its type."
-      args: " "
+      args: "$ ernest preferences logger add [basic|logstash|rollbar]"
       description: |
         Creates / updates a logger based on its types.
 
@@ -495,14 +741,43 @@ var _langEnYml = []byte(`en:
           $ ernest preferences logger add basic --logfile /tmp/ernest.log
           $ ernest preferences logger add logstash --hostname 10.50.1.1 --port 5000 --timeout 50000
           $ ernest preferences logger add rollbar --token MY_ROLLBAR_TOKEN
+      flags:
+        logfile:
+          alias: logfile
+          desc: Specify the path for the loging file
+        token:
+          alias: token
+          desc: Rollbar token
+        env:
+          alias: env
+          desc: Rollbar environment
+        hostname:
+          alias: hostname
+          desc: Logstash hostname
+        port:
+          alias: port
+          desc: Logstash port
+        timeout:
+          alias: timeout
+          desc: Logstash timeout
+      errors:
+        hostname: "You should specify a logstash hostname  with --hostname flag"
+        logfile: "You should specify a logfile with --logfile flag"
+        port: "You should specify a logstash port with --port flag"
+        timeout: "You should specify a logstash timeout with --timeout flag"
+        token: "You should specify a rollbar token with --token flag"
+        type: "Invalid type, valid types are basic and logstash"
+      success: "Logger successfully set up"
+
     del:
       usage: "Deletes a logger based on its type."
-      args: " "
+      args: "$ ernest preferences logger delete [basic|logstash|rollbar]"
       description: |
         Deletes a logger based on its types.
 
         Example:
           $ ernest preferences logger delete basic
+      success: "Logger successfully deleted"
   project:
     list:
       usage: "List available projects."
@@ -514,7 +789,7 @@ var _langEnYml = []byte(`en:
           $ ernest project list
     info:
       usage: "Project information"
-      args: " "
+      args: "$ ernest project info <my_project>"
       description: |
         Display specific project information.
 
@@ -523,25 +798,44 @@ var _langEnYml = []byte(`en:
   roles:
     set:
       usage: "ernest role set -u john -r owner -p project"
-      args: " "
+      args: "$ ernest roles set -u john -r owner -p my_project [-e my_environment]"
       description: |
         Set permissions for a user on a specific resource
 
         Example:
           $ ernest roles set -u john -r owner -p my_project
           $ ernest roles set -u john -r reader -p my_project -e my_environment
+      success: "User '%s' has been authorized to %s resource %s"
+      flags:
+        user:
+          alias: user, u
+          def:
+          desc: User to be authorized over the given resource
+        project:
+          alias: project, p
+          def:
+          desc: Project to authorize
+        role:
+          alias: role, r
+          def:
+          desc: Role type [owner, reader]
+        environment:
+          alias: environment, e
+          def:
+          desc: Environment to authorize
     unset:
       usage: "ernest role unset -u john -r owner -p my_project"
-      args: " "
+      args: "$ ernest roles set -u john -r reader -p my_project [-e my_environment]"
       description: |
         Set permissions for a user on a specific resource
 
         Example:
           $ ernest roles set -u john -r owner -p my_project
           $ ernest roles set -u john -r reader -p my_project -e my_environment
+      success: "User '%s' has been unauthorized as %s %s"
   target:
     usage: "Configure Ernest target instance."
-    args: "<ernest_url>"
+    args: "$ ernest target <ernest_url>"
     description: |
       Sets up ernest instance target.
 
@@ -557,10 +851,21 @@ var _langEnYml = []byte(`en:
 
       Example 2:
         $ ernest usage > myreport.log
+    flags:
+      from:
+        alias: from
+        desc: "the from date the report will be calculated from. Format YYYY-MM-DD"
+      to:
+        alias: to
+        desc: "the to date the report will be caluclutated to. Format YYYY-MM-DD"
+      output:
+        alias: output
+        desc: "the file path to store the report"
+    success: "A file named %s has been exported to the current folder"
   vcloud:
     create:
       usage: "Create a new vcloud project."
-      args: "<project-name>"
+      args: "$ ernest project create vcloud [--template myproject.yml] <project-name>"
       description: |
         Create a new vcloud project on the targeted instance of Ernest.
 
@@ -577,22 +882,66 @@ var _langEnYml = []byte(`en:
             password: pwd
             vdc: MY-VDC
             vcloud-url: "http://ss.com"
+      flags:
+        user:
+          alias: user
+          def:
+          desc: "Your VCloud valid user name"
+        password:
+          alias: password
+          def:
+          desc: "Your VCloud valid password"
+        org:
+          alias: org
+          def:
+          desc: "Your vCloud Organization"
+        vdc:
+          alias: vdc
+          def:
+          desc:
+        vse-url:
+          alias: vse-url
+          def:
+          desc: VSE URL
+        vcloud-url:
+          alias: vcloud-url
+          def:
+          desc: VCloud URL
+        public-network:
+          alias: public-Network
+          def:
+          desc: Public Network
+        vcloud-region:
+          alias: vcloud-region, reg
+          def:
+          desc: Project region
+        template:
+          alias: template
+          def:
+          desc: Template
+        fake:
+          alias: fake
+          def:
+          desc: Fake environment
+      success: "Project '%s' successfully created"
     delete:
       usage: "Deletes the specified project."
-      args: "<project-name>"
+      args: "$ ernest project delete <project-name>"
       description: |
         Deletes the name specified project.
 
         Example:
           $ ernest project delete my_project
+      success: "Project %s successfully removed"
     update:
       usage: "Updates the specified VCloud project."
-      args: "<project-name>"
+      args: "$ ernest project update vcloud [--user <me>] [--org <org>] [--password <secret>] <project-name>"
       description: |
         Updates the specified VCloud project.
 
         Example:
           $ ernest project update vcloud --user <me> --org <org> --password <secret> my_project
+      success: "Project %s successfully updated"
 `)
 
 func langEnYmlBytes() ([]byte, error) {
@@ -605,7 +954,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 18420, mode: os.FileMode(420), modTime: time.Unix(1512139838, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 30870, mode: os.FileMode(420), modTime: time.Unix(1513773336, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

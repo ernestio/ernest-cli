@@ -5,351 +5,98 @@
 package manager
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"time"
-
-	"github.com/ernestio/ernest-cli/helper"
-	"github.com/ernestio/ernest-cli/model"
-	"github.com/ernestio/ernest-cli/view"
-	"github.com/fatih/color"
+	h "github.com/ernestio/ernest-cli/helper"
+	eclient "github.com/ernestio/ernest-go-sdk/client"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
-var NILRESPONSE = "null"
-
-// ListEnvs ...
-func (m *Manager) ListEnvs(token string) (envs []model.Env, err error) {
-	body, resp, err := m.doRequest("/api/envs/", "GET", []byte(""), token, "")
-	if err != nil {
-		if resp == nil {
-			return nil, ErrConnectionRefused
-		}
-		return nil, err
-	}
-	err = json.Unmarshal([]byte(body), &envs)
-	if err != nil {
-		return nil, err
-	}
-	return envs, err
+// Environment : ernest-go-sdk Environment wrapper
+type Environment struct {
+	cli *eclient.Client
 }
 
-func (m *Manager) getEnv(token, project, env string) (environment model.Env, err error) {
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env, "GET", []byte(""), token, "")
-	if err != nil {
-		if resp == nil {
-			return environment, ErrConnectionRefused
-		}
-		if resp.StatusCode == 403 {
-			return environment, errors.New("You don't have permissions to perform this action")
-		}
-		if resp.StatusCode == 404 {
-			return environment, errors.New("Specified environment name does not exist")
-		}
-		return environment, err
+// Create : ...
+func (c *Environment) Create(project string, env *emodels.Environment) {
+	if err := c.cli.Environments.Create(project, env); err != nil {
+		h.PrintError(err.Error())
 	}
-	if body == NILRESPONSE {
-		return environment, errors.New("Unexpected endpoint response : " + string(body))
-	}
-	err = json.Unmarshal([]byte(body), &environment)
-
-	return environment, err
 }
 
-// EnvSchedules : gets a list of environment schedules
-func (m *Manager) EnvSchedules(token, project, env string) (schedules map[string]interface{}, err error) {
-	environment, err := m.getEnv(token, project, env)
+// Delete : Deletes a env and all its relations
+func (c *Environment) Delete(project, env string) *emodels.Build {
+	build, err := c.cli.Environments.Delete(project, env)
 	if err != nil {
-		return schedules, err
+		h.PrintError(err.Error())
 	}
-	sch := environment.Schedules
-	if environment.Options["sync_interval"] != nil {
-		sch["sync"] = map[string]interface{}{
-			"action":        "sync",
-			"instance_type": "",
-			"interval":      environment.Options["sync_interval"],
-		}
-	}
-	return sch, err
+	return build
 }
 
-// EnvStatus ...
-func (m *Manager) EnvStatus(token, project, env string) (environment model.Env, err error) {
-	return m.getEnv(token, project, env)
+// ForceDeletion : Deletes a env and all its relations
+func (c *Environment) ForceDeletion(project, env string) *emodels.Build {
+	build, err := c.cli.Environments.ForceDeletion(project, env)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+	return build
 }
 
-// ResetEnv ...
-func (m *Manager) ResetEnv(project, env, token string) error {
-	e, err := m.EnvStatus(token, project, env)
+// Get : Gets a env by name
+func (c *Environment) Get(project, id string) *emodels.Environment {
+	env, err := c.cli.Environments.Get(project, id)
 	if err != nil {
-		return err
+		h.PrintError(err.Error())
 	}
-	if e.Status != "in_progress" {
-		return errors.New("The environment '" + project + " / " + env + "' cannot be reset as its status is '" + e.Status + "'")
-	}
-	req := []byte(`{"type": "reset"}`)
-	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/actions/", "POST", req, token, "application/json")
-	if err != nil {
-		if resp == nil {
-			return ErrConnectionRefused
-		}
-	}
-	return err
+	return env
 }
 
-// RevertEnv reverts a env to a previous known state using a build ID
-func (m *Manager) RevertEnv(project, env, buildID, token string, dry bool) (string, error) {
-	// get requested manifest
-	payload, err := m.BuildDefinitionFromIndex(token, project, env, buildID)
+// Sync : Syncs a env by name
+func (c *Environment) Sync(project, id string) *emodels.Action {
+	act, err := c.cli.Environments.Sync(project, id)
 	if err != nil {
-		return "", err
+		h.PrintError(err.Error())
 	}
-
-	// apply requested manifest
-	var d model.Definition
-
-	err = d.Load(payload)
-	if err != nil {
-		return "", errors.New("Could not process definition yaml")
-	}
-
-	payload, err = d.Save()
-	if err != nil {
-		return "", errors.New("Could not finalize definition yaml")
-	}
-
-	if dry {
-		return m.dryApply(token, payload, d)
-	}
-
-	return m.ApplyEnv(d, token, nil, true, false)
+	return act
 }
 
-// Destroy : Destroys an existing env
-func (m *Manager) Destroy(token, project, env string, monit bool) error {
-	s, err := m.EnvStatus(token, project, env)
+// Resolve : Resolves a env by name
+func (c *Environment) Resolve(project, id, resolution string) *emodels.Action {
+	act, err := c.cli.Environments.Resolve(project, id, resolution)
 	if err != nil {
-		return err
+		h.PrintError(err.Error())
 	}
-	if s.Status == "in_progress" {
-		return errors.New("The environment " + env + " cannot be destroyed as it is currently '" + s.Status + "'")
-	}
-
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env, "DELETE", nil, token, "application/yaml")
-	if err != nil {
-		if resp == nil {
-			return ErrConnectionRefused
-		}
-		if resp.StatusCode == 404 {
-			return errors.New("Specified environment name does not exist")
-		}
-		return err
-	}
-
-	var res map[string]interface{}
-	err = json.Unmarshal([]byte(body), &res)
-	if err != nil {
-		return err
-	}
-
-	if id, ok := res["id"].(string); ok {
-		err = helper.Monitorize(m.URL, "/events", token, id)
-		if err != nil {
-			return err
-		}
-	} else {
-		return errors.New("could not read response")
-	}
-
-	return nil
+	return act
 }
 
-// ForceDestroy : Destroys an existing env by forcing it
-func (m *Manager) ForceDestroy(token, project, env string) error {
-	_, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/actions/force/", "DELETE", nil, token, "application/yaml")
+// Reset : Resets a env by name
+func (c *Environment) Reset(project, id string) *emodels.Action {
+	act, err := c.cli.Environments.Reset(project, id)
 	if err != nil {
-		if resp == nil {
-			return ErrConnectionRefused
-		}
-		if resp.StatusCode == 404 {
-			return errors.New("Specified environment name does not exist")
-		}
-		return err
+		h.PrintError(err.Error())
 	}
-
-	return nil
+	return act
 }
 
-// UpdateEnv : Updates credentials on a specific environment
-func (m *Manager) UpdateEnv(token, name, project string, credentials, options, schedules map[string]interface{}) error {
-	e := model.Env{
-		Name:        name,
-		Credentials: credentials,
-		Options:     options,
-		Schedules:   schedules,
+// Update : Updates a notification
+func (c *Environment) Update(project string, env *emodels.Environment) {
+	if err := c.cli.Environments.Update(project, env); err != nil {
+		h.PrintError(err.Error())
 	}
-
-	payload, err := json.Marshal(e)
-	if err != nil {
-		return err
-	}
-
-	_, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name, "PUT", payload, token, "application/json")
-	if resp == nil {
-		return ErrConnectionRefused
-	}
-
-	switch resp.StatusCode {
-	case 404:
-		return errors.New("Specified environment does not exist")
-	case 403:
-		return errors.New("You don't have permissions to perform this action, please login as a resource owner")
-	case 401:
-		return errors.New("Invalid session, please log in")
-	}
-
-	return rerr
 }
 
-// CreateEnv : Creates a new empty environmnet
-func (m *Manager) CreateEnv(token, name, project string, credentials, options map[string]interface{}) error {
-	e := model.Env{
-		Name:        name,
-		Credentials: credentials,
-		Options:     options,
-	}
-
-	payload, err := json.Marshal(e)
+// ListAll : Lists all envs on the system
+func (c *Environment) ListAll() []*emodels.Environment {
+	envs, err := c.cli.Environments.ListAll()
 	if err != nil {
-		return err
+		h.PrintError(err.Error())
 	}
-
-	_, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/", "POST", payload, token, "application/json")
-	if resp == nil {
-		return ErrConnectionRefused
-	}
-
-	switch resp.StatusCode {
-	case 404:
-		return errors.New("Specified project does not exist")
-	case 403:
-		return errors.New("You don't have permissions to perform this action, please login as a resource owner")
-	}
-
-	return rerr
+	return envs
 }
 
-// SyncEnv : Sync's an environmnet
-func (m *Manager) SyncEnv(token, name, project string) error {
-	a := model.Action{
-		Type: "sync",
-	}
-
-	data, err := json.Marshal(a)
+// Import : creates an import build for an environment
+func (c *Environment) Import(project, env string, filters []string) *emodels.Action {
+	action, err := c.cli.Environments.Import(project, env, filters)
 	if err != nil {
-		return err
+		h.PrintError(err.Error())
 	}
-
-	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
-	if resp == nil {
-		return ErrConnectionRefused
-	}
-	if rerr != nil {
-		return rerr
-	}
-
-	err = json.Unmarshal([]byte(body), &a)
-	if err != nil {
-		return errors.New(body)
-	}
-
-	stream := helper.OpenStream(m.URL, "/events", token, a.ResourceID)
-
-	for {
-		var m map[string]interface{}
-
-		msg, ok := <-stream
-		if !ok {
-			return errors.New("could not monitor sync progress")
-		}
-
-		if msg.Data == nil {
-			continue
-		}
-
-		err = json.Unmarshal(bytes.Trim(msg.Data, "\x00"), &m)
-		if err != nil {
-			return err
-		}
-
-		if m["_subject"].(string) == "build.import.done" {
-			break
-		}
-	}
-
-	time.Sleep(time.Second * 1)
-
-	b, err := m.BuildStatusByID(token, project, name, a.ResourceID)
-	if err != nil {
-		return err
-	}
-
-	switch b.Status {
-	case "done":
-		color.Green("No changes detected")
-	case "awaiting_resolution":
-		color.Red("Changes detected")
-		fmt.Println("")
-
-		body, err := m.BuildMappingChanges(token, project, name, a.ResourceID)
-		if err != nil {
-			return err
-		}
-
-		view.SyncChanges(body)
-	case "errored":
-		color.Red("Sync failed!")
-	}
-
-	return nil
-}
-
-// ResolveEnv : Resolves an issue with an environment
-func (m *Manager) ResolveEnv(token, name, project, resolution string) error {
-	a := model.Action{
-		Type: "resolve",
-	}
-
-	a.Options.Resolution = resolution
-
-	data, err := json.Marshal(a)
-	if err != nil {
-		return err
-	}
-
-	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
-	if resp == nil {
-		return ErrConnectionRefused
-	}
-	if rerr != nil {
-		return rerr
-	}
-
-	err = json.Unmarshal([]byte(body), &a)
-	if err != nil {
-		return errors.New(body)
-	}
-
-	if a.Error != "" {
-		color.Red(a.Error)
-		return nil
-	}
-
-	if a.Status == "done" {
-		color.Green("Sync successfully resolved!")
-		return nil
-	}
-
-	return helper.Monitorize(m.URL, "/events", token, a.ResourceID)
+	return action
 }

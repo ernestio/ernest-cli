@@ -24,7 +24,7 @@ var CmdDocs = cli.Command{
 	Action: func(c *cli.Context) error {
 		err := open.Run(docURL)
 		if err != nil {
-			fmt.Println("Visit ernest.io documentation site : " + docURL)
+			fmt.Println(h.T("azure.create.success"), docURL)
 		}
 		return nil
 	},

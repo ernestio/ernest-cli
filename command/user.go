@@ -11,12 +11,13 @@ import (
 	"math/big"
 	"unicode"
 
-	h "github.com/ernestio/ernest-cli/helper"
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/howeyc/gopass"
 	"github.com/urfave/cli"
+
+	h "github.com/ernestio/ernest-cli/helper"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // ListUsers : Gets a list of accessible users
@@ -26,12 +27,8 @@ var ListUsers = cli.Command{
 	ArgsUsage:   h.T("user.list.args"),
 	Description: h.T("user.list.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		users, err := m.ListUsers(cfg.Token)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		client := esetup(c, AuthUsersValidation)
+		users := client.User().List()
 		view.PrintUserList(users)
 
 		return nil
@@ -45,52 +42,32 @@ var CreateUser = cli.Command{
 	ArgsUsage:   h.T("user.create.args"),
 	Description: h.T("user.create.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "email",
-			Value: "",
-			Usage: "Email for the user",
-		},
-		cli.BoolFlag{
-			Name:  "mfa",
-			Usage: "Enable MFA",
-		},
-		cli.BoolFlag{
-			Name:  "admin",
-			Usage: "User will be created as admin",
-		},
+		tStringFlag("user.create.flags.email"),
+		tBoolFlag("user.create.flags.mfa"),
+		tBoolFlag("user.create.flags.admin"),
 	},
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify an user username and a password")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You should specify the user password")
-		}
-
+		paramsLenValidation(c, 2, "user.create.args")
+		client := esetup(c, AuthUsersValidation)
 		usr := c.Args()[0]
-		pwd := c.Args()[1]
-		email := c.String("email")
 		mfa := c.Bool("mfa")
-		admin := c.Bool("admin")
-		m, cfg := setup(c)
 
-		mfaSecret, err := m.CreateUser(cfg.Token, usr, email, usr, pwd, mfa)
-		if err != nil {
-			h.PrintError(err.Error())
+		user := &emodels.User{
+			Username: usr,
+			Email:    c.String("email"),
+			Password: c.Args()[1],
+			MFA:      &mfa,
 		}
-
+		client.User().Create(user)
 		color.Green("User %s successfully created\n\n", usr)
 
 		if mfa {
 			color.Green("MFA enabled")
-			fmt.Printf("Account name: Ernest (%s)\nKey: %s\n", usr, mfaSecret)
+			fmt.Printf("Account name: Ernest (%s)\nKey: %s\n", usr, user.MFASecret)
 		}
 
-		if admin {
-			if err = m.SetUserAdmin(cfg.Token, usr, "true"); err != nil {
-				color.Red("It was not possible to set this user as admin: " + err.Error())
-				color.Red("Please fix any errors and try again with 'user admin add ...' command")
-			}
+		if c.Bool("admin") {
+			client.User().Promote(user)
 		}
 
 		return nil
@@ -103,54 +80,36 @@ var PasswordUser = cli.Command{
 	Usage:       h.T("user.change_password.usage"),
 	Description: h.T("user.change_password.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user",
-			Value: "",
-			Usage: "The username of the user to change password",
-		},
-		cli.StringFlag{
-			Name:  "password",
-			Value: "",
-			Usage: "The new user password",
-		},
-		cli.StringFlag{
-			Name:  "current-password",
-			Value: "",
-			Usage: "The current user password",
-		},
+		tStringFlag("user.change_password.flags.user"),
+		tStringFlag("user.change_password.flags.password"),
+		tStringFlag("user.change_password.flags.current-password"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
+		client := esetup(c, AuthUsersValidation)
+		session := client.Session().Get()
 
 		username := c.String("user")
 		password := c.String("password")
 		currentPassword := c.String("current-password")
-
-		session, err := m.GetSession(cfg.Token)
-		if err != nil {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
 
 		if !session.IsAdmin() && username != "" {
 			h.PrintError("You don’t have permissions to perform this action")
 		}
 
 		if session.IsAdmin() && username != "" {
+
 			if password == "" {
 				h.PrintError("Please provide a valid password for the user with `--password`")
 			}
-
-			// Just change the password with the given values for the given user
-			if err = m.ChangePasswordByAdmin(cfg.Token, username, password); err != nil {
-				h.PrintError(err.Error())
-			}
+			user := client.User().Get(username)
+			user.Password = password
+			client.User().Update(user)
 			color.Green("`" + username + "` password has been changed")
+
 		} else {
+
 			// Ask the user for credentials
-			var users []model.User
-			if users, err = m.ListUsers(cfg.Token); err != nil {
-				h.PrintError("You don’t have permissions to perform this action")
-			}
+			users := client.User().List()
 			if len(users) == 0 {
 				h.PrintError("You don’t have permissions to perform this action")
 			}
@@ -178,10 +137,12 @@ var PasswordUser = cli.Command{
 				h.PrintError("Aborting... New password and confirmation doesn't match.")
 			}
 
-			err = m.ChangePassword(cfg.Token, cfg.User, oldpassword, newpassword)
-			if err != nil {
-				h.PrintError(err.Error())
-			}
+			username := client.Config().User
+			user := client.User().Get(username)
+			user.Password = newpassword
+			user.OldPassword = oldpassword
+			client.User().Update(user)
+
 			color.Green("Your password has been changed")
 		}
 
@@ -196,25 +157,13 @@ var DisableUser = cli.Command{
 	ArgsUsage:   h.T("user.disable.args"),
 	Description: h.T("user.disable.description"),
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify an username")
-		}
-
-		m, cfg := setup(c)
+		paramsLenValidation(c, 1, "user.disable.args")
+		client := esetup(c, NonAdminValidation)
 		username := c.Args()[0]
 
-		session, err := m.GetSession(cfg.Token)
-		if err != nil {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if !session.IsAdmin() {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if err = m.ChangePasswordByAdmin(cfg.Token, username, randString(16)); err != nil {
-			h.PrintError(err.Error())
-		}
+		user := client.User().Get(username)
+		user.Password = randString(16)
+		client.User().Update(user)
 
 		color.Green("Account `" + username + "` has been disabled")
 		return nil
@@ -227,32 +176,13 @@ var InfoUser = cli.Command{
 	Usage:       h.T("user.info.usage"),
 	Description: h.T("user.info.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user",
-			Value: "",
-			Usage: "Username",
-		},
+		tStringFlag("user.info.flags.user"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		session, err := m.GetSession(cfg.Token)
-		if err != nil {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
+		client := esetup(c, NonAdminValidation)
+		username := stringWithDefault(c, "user", client.Config().User)
 
-		username := c.String("user")
-		if username != "" && !session.IsAdmin() {
-			h.PrintError("You don’t have permissions to access '" + username + "' information")
-		}
-		if username == "" {
-			username = cfg.User
-		}
-
-		user, err := m.GetUser(cfg.Token, username)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		user := client.User().Get(username)
 		view.PrintUserInfo(user)
 		return nil
 	},
@@ -262,27 +192,17 @@ var InfoUser = cli.Command{
 var AddAdminUser = cli.Command{
 	Name:        "add",
 	Usage:       h.T("user.admin.add.usage"),
+	ArgsUsage:   h.T("user.admin.add.args"),
 	Description: h.T("user.admin.add.description"),
 	Action: func(c *cli.Context) error {
+		paramsLenValidation(c, 1, "user.admin.add.args")
 
-		if len(c.Args()) < 1 {
-			h.PrintError("You must provide ernest username to be added as an admin")
-		}
-
-		m, cfg := setup(c)
-		session, err := m.GetSession(cfg.Token)
-		if err != nil {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if !session.IsAdmin() {
-			h.PrintError("You don't have permissions to perform this action")
-		}
+		client := esetup(c, NonAdminValidation)
 		username := c.Args()[0]
 
-		if err = m.SetUserAdmin(cfg.Token, username, "true"); err != nil {
-			h.PrintError(err.Error())
-		}
+		user := client.User().Get(username)
+		user.Admin = true
+		client.User().Update(user)
 
 		color.Green("Admin privileges assigned to user " + username)
 		return nil
@@ -295,25 +215,14 @@ var RmAdminUser = cli.Command{
 	Usage:       h.T("user.admin.rm.usage"),
 	Description: h.T("user.admin.rm.description"),
 	Action: func(c *cli.Context) error {
+		paramsLenValidation(c, 1, "user.admin.rm.args")
 
-		if len(c.Args()) < 1 {
-			h.PrintError("You must provide ernest username to be added as an admin")
-		}
-
-		m, cfg := setup(c)
-		session, err := m.GetSession(cfg.Token)
-		if err != nil {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if !session.IsAdmin() {
-			h.PrintError("You don't have permissions to perform this action")
-		}
+		client := esetup(c, NonAdminValidation)
 		username := c.Args()[0]
 
-		if err = m.SetUserAdmin(cfg.Token, username, "false"); err != nil {
-			h.PrintError(err.Error())
-		}
+		user := client.User().Get(username)
+		user.Admin = false
+		client.User().Update(user)
 
 		color.Green("Admin privileges revoked from user " + username)
 		return nil
@@ -326,43 +235,20 @@ var EnableMFA = cli.Command{
 	Usage:       h.T("user.enable-mfa.usage"),
 	Description: h.T("user.enable-mfa.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user-name",
-			Usage: "Target user",
-		},
+		tStringFlagND("user.enable-mfa.flags.user"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		username := c.String("user-name")
+		client := esetup(c, NonAdminValidation)
+		session := client.Session().Get()
+		username := stringWithDefault(c, "user-name", session.Username)
 
-		session, err := m.GetSession(cfg.Token)
-		if err != nil {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if !session.IsAdmin() {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if username == "" {
-			username = session.Username
-		}
-
-		user, err := m.GetUserByUsername(cfg.Token, username)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		user := client.User().Get(username)
 		if user.MFA != nil && *user.MFA {
 			fmt.Println("MFA already enabled")
 			return nil
 		}
 
-		secret, err := m.ToggleMFA(cfg.Token, true, user.ID)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		secret := client.User().ToggleMFA(user, true)
 		color.Green("MFA enabled")
 		fmt.Printf("Account name: Ernest (%s)\nKey: %s\n", user.Username, secret)
 
@@ -376,43 +262,20 @@ var DisableMFA = cli.Command{
 	Usage:       h.T("user.disable-mfa.usage"),
 	Description: h.T("user.disable-mfa.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user-name",
-			Usage: "Target user",
-		},
+		tStringFlagND("user.disable-mfa.flags.user"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		username := c.String("user-name")
+		client := esetup(c, NonAdminValidation)
+		session := client.Session().Get()
+		username := stringWithDefault(c, "user-name", session.Username)
 
-		session, err := m.GetSession(cfg.Token)
-		if err != nil {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if !session.IsAdmin() {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if username == "" {
-			username = session.Username
-		}
-
-		user, err := m.GetUserByUsername(cfg.Token, username)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		user := client.User().Get(username)
 		if user.MFA == nil || !*user.MFA {
 			fmt.Println("MFA already disabled")
 			return nil
 		}
 
-		_, err = m.ToggleMFA(cfg.Token, false, user.ID)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		_ = client.User().ToggleMFA(user, false)
 		color.Red("MFA disabled")
 
 		return nil
@@ -425,42 +288,16 @@ var ResetMFA = cli.Command{
 	Usage:       h.T("user.reset-mfa.usage"),
 	Description: h.T("user.reset-mfa.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user-name",
-			Usage: "Target user",
-		},
+		tStringFlagND("user.reset-mfa.flags.user"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		username := c.String("user-name")
+		client := esetup(c, NonAdminValidation)
+		session := client.Session().Get()
+		username := stringWithDefault(c, "user-name", session.Username)
+		user := client.User().Get(username)
 
-		session, err := m.GetSession(cfg.Token)
-		if err != nil {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if !session.IsAdmin() {
-			h.PrintError("You don’t have permissions to perform this action")
-		}
-
-		if username == "" {
-			username = session.Username
-		}
-
-		user, err := m.GetUserByUsername(cfg.Token, username)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		_, err = m.ToggleMFA(cfg.Token, false, user.ID)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		secret, err := m.ToggleMFA(cfg.Token, true, user.ID)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
+		_ = client.User().ToggleMFA(user, false)
+		secret := client.User().ToggleMFA(user, true)
 
 		color.Green("MFA reset")
 		fmt.Printf("Account name: Ernest (%s)\nKey: %s\n", user.Username, secret)

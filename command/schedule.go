@@ -16,24 +16,11 @@ var EnvListSchedules = cli.Command{
 	ArgsUsage:   h.T("envs.schedules.list.args"),
 	Description: h.T("envs.schedules.list.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		paramsLenValidation(c, 2, "envs.schedules.list.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if len(c.Args()) < 1 {
-			h.PrintError("You must provide the project name")
-		}
-		if len(c.Args()) < 2 {
-			h.PrintError("You must provide the new environment name")
-		}
-		project := c.Args()[0]
-		env := c.Args()[1]
-
-		list, err := m.EnvSchedules(cfg.Token, project, env)
-		if err != nil {
-			h.PrintError("Environment does not exist!")
-		}
+		env := client.Environment().Get(c.Args()[0], c.Args()[1])
+		list := env.Schedules
 
 		view.PrintScheduleList(list)
 		return nil
@@ -48,62 +35,31 @@ var EnvAddSchedule = cli.Command{
 	ArgsUsage:   h.T("envs.schedules.add.args"),
 	Description: h.T("envs.schedules.add.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "action",
-			Usage: "defines what action should be scheduled possible values are [power_on, power_off, sync]",
-		},
-		cli.StringFlag{
-			Name:  "instance_type",
-			Usage: "power_on and power_off accept an instance_type to be powered on an off",
-		},
-		cli.StringFlag{
-			Name:  "schedule",
-			Usage: "sets the automatic schedule. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)",
-		},
+		tStringFlagND("envs.schedules.add.flags.action"),
+		tStringFlagND("envs.schedules.add.flags.instance_type"),
+		tStringFlagND("envs.schedules.add.flags.schedule"),
 	},
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		paramsLenValidation(c, 2, "envs.schedules.list.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if len(c.Args()) < 3 {
-			h.PrintError("Required arguments are <project> <env> <schedule_name>")
-		}
-		project := c.Args()[0]
-		env := c.Args()[1]
-		name := c.Args()[2]
-		for _, flag := range []string{"schedule", "action"} {
-			if !c.IsSet(flag) {
-				h.PrintError("Missing required flag " + flag)
-			}
-		}
-
-		e, err := m.EnvStatus(cfg.Token, project, env)
-		if err != nil {
-			h.PrintError("Environment does not exist!")
-		}
+		env := client.Environment().Get(c.Args()[0], c.Args()[1])
 
 		if c.String("action") == "sync" {
-			e.Options["sync_interval"] = c.String("schedule")
+			env.Options["sync_interval"] = c.String("schedule")
 		} else {
 			schedule := make(map[string]string, 0)
-			schedule["name"] = name
+			schedule["name"] = c.Args()[2]
 			schedule["action"] = c.String("action")
 			schedule["interval"] = c.String("schedule")
 			schedule["instance_type"] = c.String("instance_type")
-			if e.Schedules == nil {
-				e.Schedules = make(map[string]interface{}, 0)
+			if env.Schedules == nil {
+				env.Schedules = make(map[string]interface{}, 0)
 			}
-			e.Schedules[name] = schedule
+			env.Schedules[c.Args()[2]] = schedule
 		}
-
-		err = m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), e.Options, e.Schedules)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		color.Green("Environment schedules successfully updated")
+		client.Environment().Update(c.Args()[0], env)
+		color.Green(h.T("envs.schedules.add.success"))
 
 		return nil
 	},
@@ -118,36 +74,17 @@ var EnvRmSchedule = cli.Command{
 	Description: h.T("envs.schedules.rm.description"),
 	Flags:       AllProviderFlags,
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		paramsLenValidation(c, 2, "envs.schedules.list.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if len(c.Args()) < 3 {
-			h.PrintError("Required arguments are <project> <env> <schedule_name>")
-		}
-
-		project := c.Args()[0]
-		env := c.Args()[1]
-		name := c.Args()[2]
-
-		e, err := m.EnvStatus(cfg.Token, project, env)
-		if err != nil {
-			h.PrintError("Environment does not exist!")
-		}
-
-		if name == "sync" {
-			e.Options["sync_interval"] = nil
+		env := client.Environment().Get(c.Args()[0], c.Args()[1])
+		if c.Args()[2] == "sync" {
+			env.Options["sync_interval"] = nil
 		} else {
-			delete(e.Schedules, name)
+			delete(env.Schedules, c.Args()[2])
 		}
-
-		err = m.UpdateEnv(cfg.Token, env, project, ProviderFlagsToSlice(c), e.Options, e.Schedules)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		color.Green("Environment schedules successfully updated")
+		client.Environment().Update(c.Args()[0], env)
+		color.Green(h.T("envs.schedules.rm.success"))
 
 		return nil
 	},

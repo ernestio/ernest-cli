@@ -30,6 +30,7 @@ deps:
 	go get github.com/gosuri/uilive
 	go get github.com/spf13/viper
 	go get github.com/jteeuwen/go-bindata/...
+	go get -u github.com/ernestio/ernest-go-sdk/...
 
 dev-deps: deps
 	go get -u github.com/golang/lint/golint

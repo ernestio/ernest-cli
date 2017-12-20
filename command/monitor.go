@@ -5,6 +5,8 @@
 package command
 
 import (
+	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
@@ -26,38 +28,16 @@ var MonitorEnv = cli.Command{
 	ArgsUsage:   h.T("monitor.args"),
 	Description: h.T("monitor.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			color.Red("You're not allowed to perform this action, please log in")
-			return nil
-		}
+		paramsLenValidation(c, 2, "monitor.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if len(c.Args()) == 0 {
-			h.PrintError("You should specify an existing project name")
-		}
-		if len(c.Args()) == 1 {
-			h.PrintError("You should specify an existing env name")
-		}
-
-		project := c.Args()[0]
-		env := c.Args()[1]
-
-		id, err := m.LatestBuildID(cfg.Token, project, env)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		build, err := m.BuildStatusByID(cfg.Token, project, env, id)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
+		build := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], "")
 
 		if build.Status == "done" {
-			color.Yellow("Environment has been successfully built")
-			color.Yellow("You can check its information running `ernest-cli env info " + project + " / " + env + "`")
+			color.Yellow(h.T("monitor.success_1"))
+			color.Yellow(fmt.Sprintf(h.T("monitor.success_2"), c.Args()[0], c.Args()[1]))
 			return nil
 		}
-
-		return h.Monitorize(cfg.URL, "/events", cfg.Token, build.ID)
+		return h.Monitorize(client.Build().Stream(build.ID))
 	},
 }

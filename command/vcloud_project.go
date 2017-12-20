@@ -6,12 +6,13 @@ package command
 
 // CmdProject subcommand
 import (
-	"strings"
+	"fmt"
 
-	h "github.com/ernestio/ernest-cli/helper"
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
+
+	h "github.com/ernestio/ernest-cli/helper"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // CreateVcloudProject : Creates a VCloud Project
@@ -21,125 +22,39 @@ var CreateVcloudProject = cli.Command{
 	ArgsUsage:   h.T("vcloud.create.args"),
 	Description: h.T("vcloud.create.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user",
-			Value: "",
-			Usage: "Your VCloud valid user name",
-		},
-		cli.StringFlag{
-			Name:  "password",
-			Value: "",
-			Usage: "Your VCloud valid password",
-		},
-		cli.StringFlag{
-			Name:  "org",
-			Value: "",
-			Usage: "Your vCloud Organization",
-		},
-		cli.StringFlag{
-			Name:  "vdc",
-			Value: "",
-			Usage: "Your vCloud vDC",
-		},
-		cli.StringFlag{
-			Name:  "vcloud-url",
-			Value: "",
-			Usage: "VCloud URL",
-		},
-		cli.StringFlag{
-			Name:  "template",
-			Value: "",
-			Usage: "Project template",
-		},
-		cli.BoolFlag{
-			Name:  "fake",
-			Usage: "Fake project",
-		},
+		tStringFlag("vcloud.create.flags.user"),
+		tStringFlag("vcloud.create.flags.password"),
+		tStringFlag("vcloud.create.flags.org"),
+		tStringFlag("vcloud.create.flags.vdc"),
+		tStringFlag("vcloud.create.flags.vcloud-url"),
+		tStringFlag("vcloud.create.flags.template"),
+		tBoolFlag("vcloud.create.flags.fake"),
 	},
 	Action: func(c *cli.Context) error {
-		var errs []string
-
-		if len(c.Args()) == 0 {
-			h.PrintError("You should specify the project name")
-		}
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		name := c.Args()[0]
-		var url, user, password, org, vdc, username string
-		var fake bool
-
-		template := c.String("template")
-		if template != "" {
-			var t model.ProjectTemplate
-			if err := getProjectTemplate(template, &t); err != nil {
-				h.PrintError(err.Error())
-			}
-			url = t.URL
-			user = t.User
-			org = t.Org
-			vdc = t.Vdc
-			password = t.Password
-			fake = t.Fake
-		}
-
-		if c.String("vcloud-url") != "" {
-			url = c.String("vcloud-url")
-		}
-		if c.String("user") != "" {
-			user = c.String("user")
-		}
-		if c.String("org") != "" {
-			org = c.String("org")
-		}
-		if c.String("vdc") != "" {
-			vdc = c.String("vdc")
-		}
-		if c.String("password") != "" {
-			password = c.String("password")
-		}
-		if !fake {
-			fake = c.Bool("fake")
-		}
-		username = user + "@" + org
-
-		if url == "" {
-			errs = append(errs, "Specify a valid VCloud URL with --vcloud-url flag")
-		}
-		if user == "" {
-			errs = append(errs, "Specify a valid user name with --user")
-		}
-		if org == "" {
-			errs = append(errs, "Specify a valid organization with --org")
-		}
-		if vdc == "" {
-			errs = append(errs, "Specify a valid VCloud vDC with --vdc flag")
-		}
-		if password == "" {
-			errs = append(errs, "Specify a valid password with --password")
-		}
+		paramsLenValidation(c, 1, "vcloud.create.args")
+		client := esetup(c, AuthUsersValidation)
+		creds := parseTemplateFlags(c, map[string]flagDef{
+			"vcloud-url": flagDef{typ: "string", mapto: "vcloud_url", req: true},
+			"user":       flagDef{typ: "string", req: true},
+			"org":        flagDef{typ: "string", req: true},
+			"vdc":        flagDef{typ: "string", req: true},
+			"password":   flagDef{typ: "string", req: true},
+			"fake":       flagDef{typ: "bool", def: false},
+		})
+		creds["username"] = creds["user"].(string) + "@" + creds["org"].(string)
 
 		rtype := "vcloud"
-		if fake {
+		if creds["fake"].(bool) {
 			rtype = "vcloud-fake"
 		}
 
-		if len(errs) > 0 {
-			msgs := []string{"Please, fix the error shown below to continue"}
-			for _, e := range errs {
-				msgs = append(msgs, "  - "+e)
-			}
-			h.PrintError(strings.Join(msgs, "\n"))
+		p := &emodels.Project{
+			Name:        c.Args()[0],
+			Type:        rtype,
+			Credentials: creds,
 		}
-
-		body, err := m.CreateVcloudProject(cfg.Token, name, rtype, username, password, url, vdc)
-		if err != nil {
-			h.PrintError(body)
-		} else {
-			color.Green("Project '" + name + "' successfully created ")
-		}
+		client.Project().Create(p)
+		color.Green(fmt.Sprintf(h.T("vcloud.create.success"), p.Name))
 
 		return nil
 	},
@@ -152,22 +67,12 @@ var DeleteProject = cli.Command{
 	ArgsUsage:   h.T("vcloud.delete.args"),
 	Description: h.T("vcloud.delete.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		paramsLenValidation(c, 1, "vcloud.delete.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if len(c.Args()) == 0 {
-			h.PrintError("You should specify the project name")
-		}
 		name := c.Args()[0]
-
-		err := m.DeleteProject(cfg.Token, name)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
-		color.Green("Project " + name + " successfully removed")
+		client.Project().Delete(name)
+		color.Green(fmt.Sprintf(h.T("vcloud.delete.success"), name))
 
 		return nil
 	},
@@ -180,51 +85,26 @@ var UpdateVCloudProject = cli.Command{
 	ArgsUsage:   h.T("vcloud.update.args"),
 	Description: h.T("vcloud.update.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "user",
-			Value: "",
-			Usage: "Your VCloud valid user name",
-		},
-		cli.StringFlag{
-			Name:  "password",
-			Value: "",
-			Usage: "Your VCloud valid password",
-		},
-		cli.StringFlag{
-			Name:  "org",
-			Value: "",
-			Usage: "Your vCloud Organization",
-		},
+		stringFlag("user", "", "Your VCloud valid user name"),
+		stringFlag("password", "", "Your VCloud valid password"),
+		stringFlag("org", "", "Your vCloud Organization"),
 	},
 	Action: func(c *cli.Context) error {
-		var user, password, org string
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-		if len(c.Args()) == 0 {
-			h.PrintError("You should specify the project name")
-		}
-		name := c.Args()[0]
-		user = c.String("user")
-		password = c.String("password")
-		org = c.String("org")
+		paramsLenValidation(c, 1, "vcloud.update.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if user == "" {
-			h.PrintError("You should specify user name with '--user' flag")
-		}
-		if password == "" {
-			h.PrintError("You should specify user password with '--password' flag")
-		}
-		if org == "" {
-			h.PrintError("You should specify user org with '--org' flag")
-		}
+		creds := parseTemplateFlags(c, map[string]flagDef{
+			"user":     flagDef{typ: "string"},
+			"org":      flagDef{typ: "string"},
+			"password": flagDef{typ: "string"},
+		})
+		creds["user"] = creds["user"].(string) + "@" + creds["org"].(string)
 
-		err := m.UpdateVCloudProject(cfg.Token, name, user+"@"+org, password)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-		color.Green("Project " + name + " successfully updated")
+		n := client.Project().Get(c.Args()[0])
+		n.Credentials["user"] = creds["user"].(string)
+		n.Credentials["passwrord"] = creds["password"].(string)
+		client.Project().Update(n)
+		color.Green(fmt.Sprintf(h.T("vcloud.update.success"), n.Name))
 
 		return nil
 	},

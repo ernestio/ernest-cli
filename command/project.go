@@ -6,14 +6,9 @@ package command
 
 // CmdProject subcommand
 import (
-	"errors"
-	"io/ioutil"
-
 	h "github.com/ernestio/ernest-cli/helper"
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/urfave/cli"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // ListProjects ...
@@ -23,15 +18,8 @@ var ListProjects = cli.Command{
 	ArgsUsage:   h.T("project.list.args"),
 	Description: h.T("project.list.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-		projects, err := m.ListProjects(cfg.Token)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		client := esetup(c, AuthUsersValidation)
+		projects := client.Project().List()
 		view.PrintProjectList(projects)
 
 		return nil
@@ -45,19 +33,9 @@ var InfoProject = cli.Command{
 	ArgsUsage:   h.T("project.info.args"),
 	Description: h.T("project.info.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-		if len(c.Args()) == 0 {
-			h.PrintError("You should specify the project name")
-		}
-		project := c.Args()[0]
-		p, err := m.InfoProject(cfg.Token, project)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-
+		paramsLenValidation(c, 1, "project.info.args")
+		client := esetup(c, AuthUsersValidation)
+		p := client.Project().Get(c.Args()[0])
 		view.PrintProjectInfo(p)
 
 		return nil
@@ -99,15 +77,4 @@ var CmdProject = cli.Command{
 		DeleteProject,
 		InfoProject,
 	},
-}
-
-func getProjectTemplate(template string, t *model.ProjectTemplate) (err error) {
-	payload, err := ioutil.ReadFile(template)
-	if err != nil {
-		return errors.New("Template file '" + template + "' not found")
-	}
-	if yaml.Unmarshal(payload, &t) != nil {
-		return errors.New("Template file '" + template + "' is not valid yaml file")
-	}
-	return err
 }

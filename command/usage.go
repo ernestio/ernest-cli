@@ -20,39 +20,21 @@ var CmdUsage = cli.Command{
 	ArgsUsage:   h.T("usage.args"),
 	Description: h.T("usage.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "from",
-			Usage: "the from date the report will be calculated from. Format YYYY-MM-DD",
-		},
-		cli.StringFlag{
-			Name:  "to",
-			Usage: "the to date the report will be caluclutated to. Format YYYY-MM-DD",
-		},
-		cli.StringFlag{
-			Name:  "output",
-			Usage: "the file path to store the report",
-		},
+		tStringFlagND("usage.flags.from"),
+		tStringFlagND("usage.flags.to"),
+		tStringFlagND("usage.flags.output"),
 	},
 	Action: func(c *cli.Context) error {
-		var body string
-		var err error
-
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-
-		if body, err = m.GetUsageReport(cfg.Token, c.String("from"), c.String("to")); err != nil {
-			h.PrintError(err.Error())
-		}
+		client := esetup(c, AuthUsersValidation)
+		body := client.Report().Usage(c.String("from"), c.String("to"))
 
 		if c.String("output") != "" {
-			if err := ioutil.WriteFile(c.String("output"), []byte(body), 0644); err != nil {
+			if err := ioutil.WriteFile(c.String("output"), body, 0644); err != nil {
 				h.PrintError(err.Error())
 			}
-			color.Green("A file named " + c.String("output") + " has been exported to the current folder")
+			color.Green(fmt.Sprintf(h.T("usage.success"), c.String("output")))
 		} else {
-			fmt.Println(body)
+			fmt.Println(string(body))
 		}
 
 		return nil

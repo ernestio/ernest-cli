@@ -5,171 +5,51 @@
 package manager
 
 import (
-	"encoding/json"
-	"errors"
-
-	"github.com/ernestio/ernest-cli/model"
+	h "github.com/ernestio/ernest-cli/helper"
+	eclient "github.com/ernestio/ernest-go-sdk/client"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
-// CreateVcloudProject : Creates a VCloud project
-func (m *Manager) CreateVcloudProject(token, name, rtype, user, password, url, vdc string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "credentials":{"vdc": "` + vdc + `", "username":"` + user + `", "password":"` + password + `", "vcloud_url":"` + url + `"}}`)
-	body, res, err := m.doRequest("/api/projects/", "POST", payload, token, "")
-	if err != nil {
-		if res == nil {
-			return "", ErrConnectionRefused
-		}
-		if res.StatusCode == 409 {
-			return "Project '" + name + "' already exists, please specify a different name", err
-		}
-		return body, err
-	}
-	return body, err
+// Project : ernest-go-sdk Project wrapper
+type Project struct {
+	cli *eclient.Client
 }
 
-// CreateAWSProject : Creates an AWS project
-func (m *Manager) CreateAWSProject(token string, name string, rtype string, region string, awsAccessKeyID string, awsSecretAccessKey string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "credentials":{"region":"` + region + `", "username":"` + name + `", "aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}}`)
-	body, res, err := m.doRequest("/api/projects/", "POST", payload, token, "")
-	if err != nil {
-		if res == nil {
-			return "", ErrConnectionRefused
-		}
-		if res.StatusCode == 409 {
-			return "Project '" + name + "' already exists, please specify a different name", err
-		}
-		return body, err
+// Create : ...
+func (c *Project) Create(project *emodels.Project) {
+	if err := c.cli.Projects.Create(project); err != nil {
+		h.PrintError(err.Error())
 	}
-	return body, err
 }
 
-// CreateAzureProject : Creates an Azure project
-func (m *Manager) CreateAzureProject(token, name, rtype, region, subscriptionID, clientID, clientSecret, tenantID, environment string) (string, error) {
-	payload := []byte(`{"name": "` + name + `", "type":"` + rtype + `", "credentials": {"region":"` + region + `", "username":"` + name + `", "azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}}`)
-	body, res, err := m.doRequest("/api/projects/", "POST", payload, token, "")
-	if err != nil {
-		if res == nil {
-			return "", ErrConnectionRefused
-		}
-		if res.StatusCode == 409 {
-			return "Project '" + name + "' already exists, please specify a different name", err
-		}
-		return body, err
+// Delete : Deletes a project and all its relations
+func (c *Project) Delete(project string) {
+	if err := c.cli.Projects.Delete(project); err != nil {
+		h.PrintError(err.Error())
 	}
-	return body, err
 }
 
-// ListProjects : Lists all projects on your account
-func (m *Manager) ListProjects(token string) (projects []model.Project, err error) {
-	body, res, err := m.doRequest("/api/projects/", "GET", []byte(""), token, "")
+// Get : Gets a project by name
+func (c *Project) Get(id string) *emodels.Project {
+	project, err := c.cli.Projects.Get(id)
 	if err != nil {
-		if res == nil {
-			return nil, ErrConnectionRefused
-		}
-		return nil, err
+		h.PrintError(err.Error())
 	}
-	err = json.Unmarshal([]byte(body), &projects)
-	if err != nil {
-		return nil, err
-	}
-	return projects, err
+	return project
 }
 
-// DeleteProject : Deletes an existing project by its name
-func (m *Manager) DeleteProject(token string, name string) (err error) {
-	body, res, err := m.doRequest("/api/projects/"+name, "DELETE", []byte(""), token, "")
-	if err != nil {
-		if res == nil {
-			return ErrConnectionRefused
-		}
-		if res.StatusCode == 404 {
-			return errors.New("Project '" + name + "' does not exist, please specify a different project name")
-		}
-		if res.StatusCode == 400 {
-			return errors.New(body)
-		}
-
-		return err
+// Update : Updates a notification
+func (c *Project) Update(project *emodels.Project) {
+	if err := c.cli.Projects.Update(project); err != nil {
+		h.PrintError(err.Error())
 	}
-	return nil
 }
 
-// UpdateVCloudProject : updates vcloud project details
-func (m *Manager) UpdateVCloudProject(token, name, user, password string) (err error) {
-	payload := []byte(`{"credentials": {"username":"` + user + `", "password":"` + password + `"}}`)
-	body, res, err := m.doRequest("/api/projects/"+name, "PUT", payload, token, "")
+// List : Lists all projects on the system
+func (c *Project) List() []*emodels.Project {
+	projects, err := c.cli.Projects.List()
 	if err != nil {
-		if res == nil {
-			return ErrConnectionRefused
-		}
-		if res.StatusCode == 404 {
-			return errors.New("Project '" + name + "' does not exist, please specify a different project name")
-		}
-		if res.StatusCode == 400 {
-			return errors.New(body)
-		}
-
-		return err
+		h.PrintError(err.Error())
 	}
-
-	return nil
-}
-
-// UpdateAWSProject : updates awsproject details
-func (m *Manager) UpdateAWSProject(token, name, awsAccessKeyID, awsSecretAccessKey string) (err error) {
-	payload := []byte(`{"credentials": {"aws_access_key_id":"` + awsAccessKeyID + `", "aws_secret_access_key":"` + awsSecretAccessKey + `"}}`)
-	body, res, err := m.doRequest("/api/projects/"+name, "PUT", payload, token, "")
-	if err != nil {
-		if res == nil {
-			return ErrConnectionRefused
-		}
-		if res.StatusCode == 404 {
-			return errors.New("Project '" + name + "' does not exist, please specify a different project name")
-		}
-		if res.StatusCode == 400 {
-			return errors.New(body)
-		}
-
-		return err
-	}
-
-	return nil
-}
-
-// UpdateAzureProject : updates awsproject details
-func (m *Manager) UpdateAzureProject(token, name, subscriptionID, clientID, clientSecret, tenantID, environment string) (err error) {
-	payload := []byte(`{"credentials": {"azure_subscription_id":"` + subscriptionID + `", "azure_client_id":"` + clientID + `", "azure_client_secret": "` + clientSecret + `", "azure_tenant_id": "` + tenantID + `", "azure_environment": "` + environment + `"}}`)
-	body, res, err := m.doRequest("/api/projects/"+name, "PUT", payload, token, "")
-	if err != nil {
-		if res == nil {
-			return ErrConnectionRefused
-		}
-		if res.StatusCode == 404 {
-			return errors.New("Project '" + name + "' does not exist, please specify a different project name")
-		}
-		if res.StatusCode == 400 {
-			return errors.New(body)
-		}
-
-		return err
-	}
-
-	return nil
-}
-
-func (m *Manager) getProjectByName(token string, name string) (project model.Project, err error) {
-	body, res, err := m.doRequest("/api/projects/"+name, "GET", []byte(""), token, "")
-	if err != nil {
-		if res == nil {
-			return project, ErrConnectionRefused
-		}
-		return
-	}
-	err = json.Unmarshal([]byte(body), &project)
-	return
-}
-
-// InfoProject : updates awsproject details
-func (m *Manager) InfoProject(token, name string) (p model.Project, err error) {
-	return m.getProjectByName(token, name)
+	return projects
 }

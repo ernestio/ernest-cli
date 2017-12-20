@@ -5,348 +5,89 @@
 package manager
 
 import (
-	"encoding/json"
-	"errors"
-	"fmt"
-	"io/ioutil"
-	"os"
 	"strconv"
 
-	"github.com/ernestio/ernest-cli/helper"
-	"github.com/ernestio/ernest-cli/model"
-	"github.com/ernestio/ernest-cli/view"
-	"github.com/fatih/color"
+	"github.com/r3labs/sse"
+
+	h "github.com/ernestio/ernest-cli/helper"
+	eclient "github.com/ernestio/ernest-go-sdk/client"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
-// ListBuilds ...
-func (m *Manager) ListBuilds(project, env, token string) (builds []model.Build, err error) {
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/", "GET", []byte(""), token, "")
-	if err != nil {
-		if resp == nil {
-			return nil, ErrConnectionRefused
-		}
-		if resp.StatusCode == 403 {
-			return builds, errors.New("You don't have permissions to perform this action")
-		}
-		if resp.StatusCode == 404 {
-			return builds, errors.New("Specified environment name does not exist")
-		}
-		return nil, err
-	}
-	err = json.Unmarshal([]byte(body), &builds)
-	if err != nil {
-		return nil, err
-	}
-	return builds, err
+// Build : ernest-go-sdk Build wrapper
+type Build struct {
+	cli *eclient.Client
 }
 
-// BuildStatus ...
-func (m *Manager) BuildStatus(token, project, env, index string) (build model.Build, err error) {
-	buildID, err := m.BuildIDFromIndex(token, project, env, index)
+// Create : Creates a new build
+func (c *Build) Create(definition []byte) *emodels.Build {
+	build, err := c.cli.Builds.Create(definition)
 	if err != nil {
-		return build, err
+		h.PrintError(err.Error())
 	}
-
-	return m.BuildStatusByID(token, project, env, buildID)
+	return build
 }
 
-// BuildIDFromIndex ...
-func (m *Manager) BuildIDFromIndex(token, project, env, index string) (string, error) {
-	builds, _ := m.ListBuilds(project, env, token)
-	num, _ := strconv.Atoi(index)
-	if num < 1 || num > len(builds) {
-		return "", errors.New("Invalid build ID")
+// Dry : Simulates the creation of a new build
+func (c *Build) Dry(definition []byte) *[]string {
+	build, err := c.cli.Builds.Dry(definition)
+	if err != nil {
+		h.PrintError(err.Error())
 	}
-	num = len(builds) - num
-	return builds[num].ID, nil
+	return build
 }
 
-// BuildStatusByID ...
-func (m *Manager) BuildStatusByID(token, project, env, buildID string) (build model.Build, err error) {
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+buildID, "GET", []byte(""), token, "")
+// Get : Gets a build by name
+func (c *Build) Get(project, env, id string) *emodels.Build {
+	build, err := c.cli.Builds.Get(project, env, id)
 	if err != nil {
-		if resp == nil {
-			return build, ErrConnectionRefused
-		}
-		if resp.StatusCode == 403 {
-			return build, errors.New("You don't have permissions to perform this action")
-		}
-		if resp.StatusCode == 404 {
-			return build, errors.New("Specified build not found")
-		}
-		return build, err
+		h.PrintError(err.Error())
 	}
-	if body == "null" {
-		return build, errors.New("Unexpected endpoint response : " + string(body))
-	}
-	err = json.Unmarshal([]byte(body), &build)
-	return build, err
+	return build
 }
 
-// BuildDefinitionByID ...
-func (m *Manager) BuildDefinitionByID(token, project, env, buildID string) ([]byte, error) {
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+buildID+"/definition/", "GET", []byte(""), token, "")
+// List : Lists all builds on the system
+func (c *Build) List(project, env string) []*emodels.Build {
+	builds, err := c.cli.Builds.List(project, env)
 	if err != nil {
-		if resp == nil {
-			return nil, ErrConnectionRefused
-		}
-		if resp.StatusCode == 403 {
-			return nil, errors.New("You don't have permissions to perform this action")
-		}
-		if resp.StatusCode == 404 {
-			return nil, errors.New("Specified build not found")
-		}
-		return nil, err
+		h.PrintError(err.Error())
 	}
-	if body == "null" {
-		return nil, errors.New("Unexpected endpoint response : " + string(body))
-	}
-
-	return []byte(body), err
+	return builds
 }
 
-// LatestBuildDefinition ...
-func (m *Manager) LatestBuildDefinition(token, project, env string) ([]byte, error) {
-	id, err := m.LatestBuildID(token, project, env)
+// Stream : Streams build progress
+func (c *Build) Stream(id string) chan *sse.Event {
+	ch, err := c.cli.Builds.Stream(id)
 	if err != nil {
-		return nil, err
+		h.PrintError(err.Error())
 	}
-
-	return m.BuildDefinitionByID(token, project, env, id)
+	return ch
 }
 
-// BuildDefinitionFromIndex ...
-func (m *Manager) BuildDefinitionFromIndex(token, project, env, index string) ([]byte, error) {
-	id, err := m.BuildIDFromIndex(token, project, env, index)
-	if err != nil {
-		return nil, err
+// BuildByPosition : Streams build progress
+func (c *Build) BuildByPosition(project, env, pos string) *emodels.Build {
+	builds := c.List(project, env)
+	if len(builds) == 0 {
+		h.PrintError("No builds were found for the specified parameters")
 	}
 
-	return m.BuildDefinitionByID(token, project, env, id)
-}
-
-// LatestBuildID ...
-func (m *Manager) LatestBuildID(token, project, env string) (string, error) {
-	builds, err := m.ListBuilds(project, env, token)
-	if err != nil {
-		return "", err
-	}
-
-	if len(builds) < 1 {
-		return "", errors.New("Specified build not found")
-	}
-
-	return builds[0].ID, nil
-}
-
-// BuildMappingChanges ...
-func (m *Manager) BuildMappingChanges(token, project, env, build string) (string, error) {
-	body, resp, err := m.doRequest("/api/projects/"+project+"/envs/"+env+"/builds/"+build+"/mapping/?changes=true", "GET", nil, token, "application/json")
-	if err != nil {
-		if resp == nil {
-			return "", ErrConnectionRefused
+	num := len(builds) - 1
+	if pos != "" {
+		num, _ = strconv.Atoi(pos)
+		if num < 1 || num > len(builds) {
+			h.PrintError("Invalid build ID")
 		}
-		var internalError struct {
-			Message string `json:"message"`
-		}
-		if err := json.Unmarshal([]byte(body), &internalError); err != nil {
-			return "", errors.New(body)
-		}
-		return "", errors.New(internalError.Message)
+		num = len(builds) - num
 	}
 
-	return body, nil
+	return builds[num]
 }
 
-// LatestBuildStatus ...
-func (m *Manager) LatestBuildStatus(token, project, env string) (build model.Build, err error) {
-	id, err := m.LatestBuildID(token, project, env)
+// Definition : Gets a build definitin by name
+func (c *Build) Definition(project, env, id string) string {
+	build, err := c.cli.Builds.Definition(project, env, id)
 	if err != nil {
-		return build, err
+		h.PrintError(err.Error())
 	}
-
-	return m.BuildStatusByID(token, project, env, id)
-}
-
-// Apply : Applies a yaml to create / update a new env
-func (m *Manager) Apply(token, path string, credentials map[string]interface{}, monit, dry bool) (string, error) {
-	var d model.Definition
-
-	payload, err := ioutil.ReadFile(path)
-	if err != nil {
-		return "", errors.New("You should specify a valid template path or store an ernest.yml on the current folder")
-	}
-
-	err = d.Load(payload)
-	if err != nil {
-		return "", errors.New("Could not process definition yaml")
-	}
-
-	// Load any imported files
-	if err := d.LoadFileImports(); err != nil {
-		return "", err
-	}
-
-	return m.ApplyEnv(d, token, credentials, monit, dry)
-}
-
-// Import : Imports an existing env
-func (m *Manager) Import(token string, name string, project string, filters []string) (streamID string, err error) {
-	a := model.Action{
-		Type: "import",
-	}
-
-	a.Options.Filters = filters
-
-	data, err := json.Marshal(a)
-	if err != nil {
-		return "", err
-	}
-
-	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
-	if resp == nil {
-		return "", ErrConnectionRefused
-	}
-	if rerr != nil {
-		return "", rerr
-	}
-
-	err = json.Unmarshal([]byte(body), &a)
-	if err != nil {
-		return "", errors.New(body)
-	}
-
-	return a.ResourceID, helper.Monitorize(m.URL, "/events", token, a.ResourceID)
-}
-
-// ApplyEnv : Applies a yaml to create / update a new env
-func (m *Manager) ApplyEnv(d model.Definition, token string, credentials map[string]interface{}, monit, dry bool) (string, error) {
-	payload, err := d.Save()
-
-	if err != nil {
-		return "", errors.New("Could not finalize definition yaml")
-	}
-
-	if dry {
-		return m.dryApply(token, payload, d)
-	}
-
-	var response struct {
-		ID      string `json:"id,omitempty"`
-		Name    string `json:"name,omitempty"`
-		Status  string `json:"status,omitempty"`
-		Project string `json:"project,omitempty"`
-		Message string `json:"message,omitempty"`
-	}
-
-	body, resp, rerr := m.doRequest("/api/projects/"+d.Project+"/envs/"+d.Name+"/builds/", "POST", payload, token, "application/yaml")
-	if resp == nil {
-		return "", ErrConnectionRefused
-	}
-
-	err = json.Unmarshal([]byte(body), &response)
-	if err != nil {
-		return "", errors.New(body)
-	}
-
-	if rerr != nil {
-		return "", errors.New(response.Message)
-	}
-
-	if response.Status == "submitted" {
-		color.Green("Build has been succesfully submitted and is awaiting approval.")
-		os.Exit(0)
-	}
-
-	if monit {
-		err = helper.Monitorize(m.URL, "/events", token, response.ID)
-		if err != nil {
-			return response.ID, err
-		}
-
-		fmt.Println("================\nPlatform Details\n================\n ")
-		var build model.Build
-
-		build, err = m.BuildStatusByID(token, d.Project, d.Name, response.ID)
-		if err != nil {
-			return response.ID, err
-		}
-
-		view.PrintEnvInfo(&build)
-	}
-
-	return response.ID, nil
-}
-
-func (m *Manager) dryApply(token string, payload []byte, d model.Definition) (string, error) {
-	var body string
-	body, resp, err := m.doRequest("/api/projects/"+d.Project+"/envs/"+d.Name+"/builds/?dry=true", "POST", payload, token, "application/yaml")
-	if err != nil {
-		if resp == nil {
-			return "", ErrConnectionRefused
-		}
-		var internalError struct {
-			Message string `json:"message"`
-		}
-		if err := json.Unmarshal([]byte(body), &internalError); err != nil {
-			return "", errors.New(body)
-		}
-		return "", errors.New(internalError.Message)
-	}
-	view.EnvDry(body)
-	return "", nil
-}
-
-// ReviewBuild : Reviews a submitted build
-func (m *Manager) ReviewBuild(token, name, project, resolution string) error {
-	a := model.Action{
-		Type: "review",
-	}
-
-	a.Options.Resolution = resolution
-
-	data, err := json.Marshal(a)
-	if err != nil {
-		return err
-	}
-
-	body, resp, rerr := m.doRequest("/api/projects/"+project+"/envs/"+name+"/actions/", "POST", data, token, "application/json")
-	if resp == nil {
-		return ErrConnectionRefused
-	}
-	if rerr != nil {
-		return rerr
-	}
-
-	err = json.Unmarshal([]byte(body), &a)
-	if err != nil {
-		return errors.New(body)
-	}
-
-	if a.Error != "" {
-		color.Red(a.Error)
-		return nil
-	}
-
-	if a.Status == "done" {
-		color.Green("Submission successfully rejected!")
-		return nil
-	}
-
-	err = helper.Monitorize(m.URL, "/events", token, a.ResourceID)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("================\nPlatform Details\n================\n ")
-	var build model.Build
-
-	build, err = m.BuildStatusByID(token, project, name, a.ResourceID)
-	if err != nil {
-		return err
-	}
-
-	view.PrintEnvInfo(&build)
-
-	return nil
+	return build
 }

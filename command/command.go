@@ -5,17 +5,58 @@
 package command
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"strings"
 
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/manager"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/urfave/cli"
+	yaml "gopkg.in/yaml.v2"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
-// setup ...
-func setup(c *cli.Context) (*manager.Manager, *model.Config) {
+const (
+	// NonEmptuTokenVal ...
+	NonEmptuTokenVal = "non_empty_token"
+	// NonAdminVal ...
+	NonAdminVal = "non_admin"
+)
+
+// NoValidation ...
+var NoValidation = []string{}
+
+// AuthUsersValidation ...
+var AuthUsersValidation = []string{NonEmptuTokenVal}
+
+// NonAdminValidation ...
+var NonAdminValidation = []string{NonEmptuTokenVal, NonAdminVal}
+
+type validation func(*manager.Client)
+
+var validations = map[string]validation{
+	NonEmptuTokenVal: func(client *manager.Client) {
+		if client.Config().Token == "" {
+			h.PrintError("You're not allowed to perform this action, please log in")
+		}
+	},
+	NonAdminVal: func(client *manager.Client) {
+		session := client.Session().Get()
+		if !session.IsAdmin() {
+			h.PrintError("You don’t have permissions to perform this action")
+		}
+	},
+}
+
+var session *emodels.Session
+
+// esetup ...
+func esetup(c *cli.Context, vals []string) *manager.Client {
+	session = nil
 	config := model.GetConfig()
 	if config == nil {
 		config = &model.Config{}
@@ -23,8 +64,183 @@ func setup(c *cli.Context) (*manager.Manager, *model.Config) {
 			h.PrintError("Environment not configured, please use target command")
 		}
 	}
-	m := manager.Manager{URL: config.URL, Version: c.App.Version}
-	return &m, config
+
+	client := manager.New(config)
+	for _, v := range vals {
+		if fn, ok := validations[v]; ok {
+			fn(client)
+		}
+	}
+
+	return client
+
+}
+
+// elogin ...
+func elogin(usr, pwd, vc string) *manager.Client {
+	session = nil
+	config := model.GetConfig()
+	if config == nil {
+		config = &model.Config{}
+	}
+	config.User = usr
+	config.Password = pwd
+	config.Verification = vc
+
+	return manager.NewFromCredsAndVerification(config)
+}
+
+func stringWithDefault(c *cli.Context, key, def string) (val string) {
+	if val = c.String(key); val == "" {
+		val = def
+	}
+	return
+}
+
+func paramsLenValidation(c *cli.Context, number int, translationKey string) {
+	if len(c.Args()) < number {
+		h.PrintError("Please provide required parameters:\n" + h.T(translationKey))
+	}
+}
+
+func requiredFlags(c *cli.Context, flags []string) {
+	errs := []string{}
+	for _, flag := range flags {
+		if c.String(flag) == "" {
+			errs = append(errs, "Please provide a "+flag+" with --"+flag+" flag")
+		}
+	}
+	if len(errs) > 0 {
+		h.PrintError(strings.Join(errs, "\n"))
+	}
+}
+
+func intFlag(name, usage string) cli.IntFlag {
+	return cli.IntFlag{
+		Name:  name,
+		Usage: usage,
+	}
+}
+
+func stringFlagND(name, usage string) cli.StringFlag {
+	return cli.StringFlag{
+		Name:  name,
+		Usage: usage,
+	}
+}
+
+func tStringFlag(key string) cli.StringFlag {
+	return stringFlag(h.T(key+".alias"), h.T(key+".def"), h.T(key+".desc"))
+}
+
+func tStringFlagND(key string) cli.StringFlag {
+	return stringFlagND(h.T(key+".alias"), h.T(key+".desc"))
+}
+
+func tBoolFlag(key string) cli.BoolFlag {
+	return boolFlag(h.T(key+".alias"), h.T(key+".desc"))
+}
+
+func tIntFlag(key string) cli.IntFlag {
+	return intFlag(h.T(key+".alias"), h.T(key+".desc"))
+}
+
+func stringFlag(name, value, usage string) cli.StringFlag {
+	return cli.StringFlag{
+		Name:  name,
+		Value: value,
+		Usage: usage,
+	}
+}
+
+func boolFlag(name, usage string) cli.BoolFlag {
+	return cli.BoolFlag{
+		Name:  name,
+		Usage: usage,
+	}
+}
+
+type flagDef struct {
+	typ   string
+	def   interface{}
+	mapto string
+	req   bool
+}
+
+func parseTemplateFlags(c *cli.Context, keys map[string]flagDef) map[string]interface{} {
+	var err error
+	errs := []string{}
+	flags := make(map[string]interface{})
+	t := c.String("template")
+	if t != "" {
+		flags, err = getProjectTemplateAsMap(t)
+		h.EvaluateError(err)
+	}
+	for k, t := range keys {
+		mapto := k
+		if t.mapto != "" {
+			mapto = t.mapto
+		}
+		if t.def != nil {
+			flags[mapto] = t.def
+		}
+		if t.typ == "string" {
+			if c.String(k) != "" {
+				flags[mapto] = c.String(k)
+			}
+		} else {
+			if c.Bool(k) != false {
+				flags[mapto] = c.Bool(k)
+			}
+		}
+		if t.req {
+			if _, ok := flags[mapto]; !ok {
+				errs = append(errs, "Specify a valid --"+k+" flag")
+			}
+		}
+	}
+
+	if len(errs) > 0 {
+		msgs := []string{"Please, fix the error shown below to continue"}
+		for _, e := range errs {
+			msgs = append(msgs, "  - "+e)
+		}
+		h.PrintError(strings.Join(msgs, "\n"))
+	}
+
+	return flags
+}
+
+func mapDefinition(c *cli.Context) *model.Definition {
+	file := "ernest.yml"
+	if len(c.Args()) == 1 {
+		file = c.Args()[0]
+	}
+	payload, err := ioutil.ReadFile(file)
+	if err != nil {
+		h.PrintError("You should specify a valid template path or store an ernest.yml on the current folder")
+	}
+	def := model.Definition{}
+	if err := def.Load(payload); err != nil {
+		h.PrintError("Could not process definition yaml")
+	}
+	if err := def.LoadFileImports(); err != nil {
+		h.PrintError(err.Error())
+	}
+
+	return &def
+}
+
+func getProjectTemplateAsMap(template string) (map[string]interface{}, error) {
+	flags := make(map[string]interface{}, 0)
+	payload, err := ioutil.ReadFile(template)
+	if err != nil {
+		return flags, errors.New("Template file '" + template + "' not found")
+	}
+	if yaml.Unmarshal(payload, &flags) != nil {
+		return flags, errors.New("Template file '" + template + "' is not valid yaml file")
+	}
+	return flags, nil
 }
 
 // askForConfirmation uses Scanln to parse user input. A user must type in "yes" or "no" and

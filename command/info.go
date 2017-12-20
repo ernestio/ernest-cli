@@ -20,9 +20,9 @@ var Info = cli.Command{
 	ArgsUsage:   h.T("info.args"),
 	Description: h.T("info.description"),
 	Action: func(c *cli.Context) error {
-		_, cfg := setup(c)
-		fmt.Println("Target:      " + cfg.URL)
-		fmt.Println("User:        " + cfg.User)
+		client := esetup(c, NoValidation)
+		fmt.Println("Target:      " + client.Config().URL)
+		fmt.Println("User:        " + client.Config().User)
 		fmt.Println("CLI Version: " + c.App.Version)
 
 		return nil

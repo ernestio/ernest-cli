@@ -9,12 +9,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/olekukonko/tablewriter"
+
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // PrintLoggerList : pretty print for loggers list
-func PrintLoggerList(loggers []model.Logger) {
+func PrintLoggerList(loggers []*emodels.Logger) {
 	if len(loggers) == 0 {
 		fmt.Println("There are no loggers created yet.")
 		return

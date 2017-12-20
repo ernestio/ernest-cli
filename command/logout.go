@@ -5,8 +5,6 @@
 package command
 
 import (
-	"os"
-
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
@@ -21,20 +19,15 @@ var Logout = cli.Command{
 	ArgsUsage:   h.T("logout.args"),
 	Description: h.T("logout.description"),
 	Action: func(c *cli.Context) error {
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're already logged out")
-		}
-		if m == nil {
-			os.Exit(1)
-		}
+		client := esetup(c, AuthUsersValidation)
+
+		cfg := client.Config()
 		cfg.Token = ""
 		cfg.User = ""
-		err := model.SaveConfig(cfg)
-		if err != nil {
-			h.PrintError("Can't write config file")
+		if err := model.SaveConfig(cfg); err != nil {
+			h.PrintError(h.T("logout.errors.write"))
 		}
-		color.Green("Bye.")
+		color.Green(h.T("logout.success"))
 		return nil
 	},
 }

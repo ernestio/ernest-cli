@@ -22,32 +22,29 @@ var Target = cli.Command{
 	ArgsUsage:   h.T("target.args"),
 	Description: h.T("target.description"),
 	Action: func(c *cli.Context) error {
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify the target url")
-		}
-		_, cfg := setup(c)
+		paramsLenValidation(c, 1, "target.args")
+		cfg := esetup(c, NoValidation).Config()
+
 		cfg.URL = c.Args()[0]
-		if err := persistTarget(cfg); err != nil {
-			h.PrintError("Couldn't write config file ~/.ernest check permissions")
-		}
+		persistTarget(cfg)
+
 		color.Green("Target set")
 		return nil
 	},
 }
 
-func persistTarget(cfg *model.Config) error {
+func persistTarget(cfg *model.Config) {
 	u, _ := url.Parse(cfg.URL)
 	if u.Scheme == "http" {
 		color.Yellow("Warning! Your are using an insecure target for Ernest")
 	}
 	if u.Scheme != "https" && u.Scheme != "http" {
 		color.Red("You should specify a valid url for the target")
-		return nil
+		return
 	}
 	err := model.SaveConfig(cfg)
 	if err != nil {
 		color.Red(err.Error())
-		return err
+		h.EvaluateErrorMsg(err, "Couldn't write config file ~/.ernest check permissions")
 	}
-	return nil
 }

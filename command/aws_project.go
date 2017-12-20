@@ -6,116 +6,52 @@ package command
 
 // CmdProject subcommand
 import (
-	"strings"
+	"fmt"
 
-	h "github.com/ernestio/ernest-cli/helper"
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
+
+	h "github.com/ernestio/ernest-cli/helper"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // CreateAWSProject : Creates an AWS project
 var CreateAWSProject = cli.Command{
 	Name:        "aws",
-	Usage:       h.T("aws.project.create.usage"),
-	Description: h.T("aws.project.create.description"),
-	ArgsUsage:   h.T("aws.project.create.args"),
+	Usage:       h.T("aws.create.usage"),
+	Description: h.T("aws.create.description"),
+	ArgsUsage:   h.T("aws.create.args"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "region, r",
-			Value: "",
-			Usage: "Project region",
-		},
-		cli.StringFlag{
-			Name:  "access_key_id, k",
-			Value: "",
-			Usage: "AWS access key id",
-		},
-		cli.StringFlag{
-			Name:  "secret_access_key, s",
-			Value: "",
-			Usage: "AWS Secret access key",
-		},
-		cli.StringFlag{
-			Name:  "template, t",
-			Value: "",
-			Usage: "Project template",
-		},
-		cli.BoolFlag{
-			Name:  "fake, f",
-			Usage: "Fake project",
-		},
+		tStringFlag("aws.create.flags.region"),
+		tStringFlag("aws.create.flags.access_key_id"),
+		tStringFlag("aws.create.flags.secret_access_key"),
+		tStringFlag("aws.create.flags.template"),
+		tBoolFlag("aws.create.flags.fake"),
 	},
 	Action: func(c *cli.Context) error {
-		var errs []string
-		var accessKeyID, secretAccessKey, region string
-		var fake bool
-		m, cfg := setup(c)
-
-		if len(c.Args()) < 1 {
-			h.PrintError("You should specify the project name")
-		}
-
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
-		name := c.Args()[0]
-
-		template := c.String("template")
-		if template != "" {
-			var t model.ProjectTemplate
-			if err := getProjectTemplate(template, &t); err != nil {
-				h.PrintError(err.Error())
-			}
-			accessKeyID = t.Token
-			secretAccessKey = t.Secret
-			region = t.Region
-			fake = t.Fake
-		}
-		if c.String("secret_access_key") != "" {
-			secretAccessKey = c.String("secret_access_key")
-		}
-		if c.String("access_key_id") != "" {
-			accessKeyID = c.String("access_key_id")
-		}
-		if c.String("region") != "" {
-			region = c.String("region")
-		}
-		if !fake {
-			fake = c.Bool("fake")
-		}
-
-		if secretAccessKey == "" {
-			errs = append(errs, "Specify a valid secret access key with --secret_access_key flag")
-		}
-
-		if accessKeyID == "" {
-			errs = append(errs, "Specify a valid access key id with --access_key_id flag")
-		}
-
-		if region == "" {
-			errs = append(errs, "Specify a valid region with --region flag")
-		}
-
-		if len(errs) > 0 {
-			msgs := []string{"Please, fix the error shown below to continue"}
-			for _, e := range errs {
-				msgs = append(msgs, "  - "+e)
-			}
-			h.PrintError(strings.Join(msgs, "\n"))
-		}
+		paramsLenValidation(c, 1, "aws.create.args")
+		client := esetup(c, AuthUsersValidation)
+		creds := parseTemplateFlags(c, map[string]flagDef{
+			"secret_access_key": flagDef{typ: "string", mapto: "aws_secret_access_key", req: true},
+			"access_key_id":     flagDef{typ: "string", mapto: "aws_access_key_id", req: true},
+			"region":            flagDef{typ: "string", req: true},
+			"fake":              flagDef{typ: "bool", def: false},
+		})
+		creds["username"] = c.Args()[0]
 
 		rtype := "aws"
-
-		if fake {
+		if creds["fake"].(bool) {
 			rtype = "aws-fake"
 		}
-		body, err := m.CreateAWSProject(cfg.Token, name, rtype, region, accessKeyID, secretAccessKey)
-		if err != nil {
-			h.PrintError(body)
-		} else {
-			color.Green("Project '" + name + "' successfully created ")
+
+		p := &emodels.Project{
+			Name:        c.Args()[0],
+			Type:        rtype,
+			Credentials: creds,
 		}
+		client.Project().Create(p)
+		color.Green(fmt.Sprintf(h.T("aws.create.success"), p.Name))
+
 		return nil
 	},
 }
@@ -123,47 +59,26 @@ var CreateAWSProject = cli.Command{
 // UpdateAWSProject : Updates the specified VCloud project
 var UpdateAWSProject = cli.Command{
 	Name:        "aws",
-	Usage:       h.T("aws.project.create.usage"),
-	ArgsUsage:   h.T("aws.project.create.usage"),
-	Description: h.T("aws.project.create.usage"),
+	Usage:       h.T("aws.update.usage"),
+	ArgsUsage:   h.T("aws.update.args"),
+	Description: h.T("aws.update.description"),
 	Flags: []cli.Flag{
-		cli.StringFlag{
-			Name:  "access_key_id",
-			Value: "",
-			Usage: "Your AWS access key id",
-		},
-		cli.StringFlag{
-			Name:  "secret_access_key",
-			Value: "",
-			Usage: "Your AWS secret access key",
-		},
+		tStringFlag("aws.update.flags.access_key_id"),
+		tStringFlag("aws.update.flags.secret_access_key"),
 	},
 	Action: func(c *cli.Context) error {
-		var accessKeyID, secretAccessKey string
-		m, cfg := setup(c)
-		if cfg.Token == "" {
-			h.PrintError("You're not allowed to perform this action, please log in")
-		}
+		paramsLenValidation(c, 1, "aws.create.args")
+		client := esetup(c, AuthUsersValidation)
 
-		if len(c.Args()) == 0 {
-			h.PrintError("You should specify the project name")
-		}
-		name := c.Args()[0]
-		accessKeyID = c.String("access_key_id")
-		secretAccessKey = c.String("secret_access_key")
+		creds := parseTemplateFlags(c, map[string]flagDef{
+			"access_key_id":     flagDef{typ: "string", mapto: "aws_access_key_id"},
+			"secret_access_key": flagDef{typ: "string", mapto: "aws_secret_access_key"},
+		})
 
-		if accessKeyID == "" {
-			h.PrintError("You should specify your aws access key id with '--access_key_id' flag")
-		}
-		if secretAccessKey == "" {
-			h.PrintError("You should specify your aws secret access key with '--secret_access_key' flag")
-		}
-
-		err := m.UpdateAWSProject(cfg.Token, name, accessKeyID, secretAccessKey)
-		if err != nil {
-			h.PrintError(err.Error())
-		}
-		color.Green("Project " + name + " successfully updated")
+		n := client.Project().Get(c.Args()[0])
+		n.Credentials = creds
+		client.Project().Update(n)
+		color.Green(fmt.Sprintf(h.T("aws.update.success"), n.Name))
 
 		return nil
 	},

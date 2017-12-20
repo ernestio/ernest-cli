@@ -10,21 +10,16 @@ import (
 	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
-// Role : ernest-go-sdk Roles wrapper
-type Role struct {
+// Session : ernest-go-sdk Session wrapper
+type Session struct {
 	cli *eclient.Client
 }
 
-// Create : Creates a new role
-func (c *Role) Create(role *emodels.Role) {
-	if err := c.cli.Roles.Create(role); err != nil {
-		h.PrintError(err.Error())
+// Get : ..
+func (c *Session) Get() *emodels.Session {
+	ses, err := c.cli.Sessions.Get()
+	if err != nil {
+		h.PrintError("You don’t have permissions to perform this action")
 	}
-}
-
-// Delete : Deletes a role and all its relations
-func (c *Role) Delete(role *emodels.Role) {
-	if err := c.cli.Roles.Delete(role); err != nil {
-		h.PrintError(err.Error())
-	}
+	return ses
 }

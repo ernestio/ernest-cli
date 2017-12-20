@@ -5,12 +5,12 @@ import (
 	"strconv"
 	"text/tabwriter"
 
-	"github.com/ernestio/ernest-cli/model"
+	emodels "github.com/ernestio/ernest-go-sdk/models"
 	"github.com/olekukonko/tablewriter"
 )
 
 // PrintUserList : ...
-func PrintUserList(users []model.User) {
+func PrintUserList(users []*emodels.User) {
 	w := new(tabwriter.Writer)
 	w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
@@ -19,7 +19,7 @@ func PrintUserList(users []model.User) {
 	for _, u := range users {
 		id := strconv.Itoa(u.ID)
 		admin := "no"
-		if u.IsAdmin() {
+		if u.Admin {
 			admin = "yes"
 		}
 		table.Append([]string{id, u.Username, u.Type, admin})
