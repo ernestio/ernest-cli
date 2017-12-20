@@ -236,7 +236,7 @@ var _langEnYml = []byte(`en:
           alias: "secret_access_key, s"
           def: ""
           desc: "AWS Secret access key"
-      success: "Project '%s' successfully updated"
+      success: "Project %s successfully updated"
   azure:
     create:
       usage: "Create a new azure project."
@@ -316,7 +316,7 @@ var _langEnYml = []byte(`en:
           alias: "environment"
           def: ""
           desc: "Azure environment. Supported values are public(default), usgovernment, german and chine"
-      success: "Project '%s' successfully updated"
+      success: "Project %s successfully updated"
   docs:
     usage: "Open docs in the default browser."
     args: ""
@@ -385,7 +385,7 @@ var _langEnYml = []byte(`en:
           $ ernest env apply --dry myenvironment.yml
       flags:
         dry:
-          alias: flags
+          alias: dry
           desc: print the changes to be applied on an environment intead of applying them
         credentials:
           alias: credentials
@@ -403,7 +403,7 @@ var _langEnYml = []byte(`en:
         force:
           alias: "force,f"
           desc: Hard ernest env removal.
-        yes:
+        yesflag:
           alias: "yes,y"
           desc: Destroy an environment without prompting confirmation.
       confirmation: "Do you really want to destroy this environment? (Y/n) "
@@ -760,9 +760,9 @@ var _langEnYml = []byte(`en:
         timeout:
           alias: timeout
           desc: Logstash timeout
-      erros:
-        logfile: "You should specify a logfile with --logfile flag"
+      errors:
         hostname: "You should specify a logstash hostname  with --hostname flag"
+        logfile: "You should specify a logfile with --logfile flag"
         port: "You should specify a logstash port with --port flag"
         timeout: "You should specify a logstash timeout with --timeout flag"
         token: "You should specify a rollbar token with --token flag"
@@ -805,7 +805,7 @@ var _langEnYml = []byte(`en:
         Example:
           $ ernest roles set -u john -r owner -p my_project
           $ ernest roles set -u john -r reader -p my_project -e my_environment
-      success: "User %s has been authorized to %s resource %s"
+      success: "User '%s' has been authorized to %s resource %s"
       flags:
         user:
           alias: user, u
@@ -832,7 +832,7 @@ var _langEnYml = []byte(`en:
         Example:
           $ ernest roles set -u john -r owner -p my_project
           $ ernest roles set -u john -r reader -p my_project -e my_environment
-      success: "User %s has been unauthorized as %s %s"
+      success: "User '%s' has been unauthorized as %s %s"
   target:
     usage: "Configure Ernest target instance."
     args: "$ ernest target <ernest_url>"
@@ -923,7 +923,7 @@ var _langEnYml = []byte(`en:
           alias: fake
           def:
           desc: Fake environment
-      success: "Project %s successfully created"
+      success: "Project '%s' successfully created"
     delete:
       usage: "Deletes the specified project."
       args: "$ ernest project delete <project-name>"
@@ -954,7 +954,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 30865, mode: os.FileMode(420), modTime: time.Unix(1513768295, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 30870, mode: os.FileMode(420), modTime: time.Unix(1513773336, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

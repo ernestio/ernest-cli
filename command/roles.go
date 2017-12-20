@@ -40,7 +40,7 @@ func rolesManager(c *cli.Context, set bool) {
 		color.Green(fmt.Sprintf(h.T("roles.set.success"), c.String("user"), verb, rID))
 	} else {
 		client.Role().Delete(role)
-		color.Green(fmt.Sprintf(h.T("roles.unset.success"), c.String("user"), rID), c.String("role"))
+		color.Green(fmt.Sprintf(h.T("roles.unset.success"), c.String("user"), rID, c.String("role")))
 	}
 
 }

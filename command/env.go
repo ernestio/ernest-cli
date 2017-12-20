@@ -253,7 +253,7 @@ var DestroyEnv = cli.Command{
 	Description: h.T("envs.destroy.description"),
 	Flags: []cli.Flag{
 		tBoolFlag("envs.destroy.flags.force"),
-		tBoolFlag("envs.destroy.flags.yes"),
+		tBoolFlag("envs.destroy.flags.yesflag"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.destroy.args")
@@ -265,14 +265,14 @@ var DestroyEnv = cli.Command{
 			if c.Bool("yes") {
 				client.Environment().Delete(c.Args()[0], c.Args()[1])
 			} else {
-				fmt.Print(h.T("envs.destroy.flags.confirmation"))
+				fmt.Print(h.T("envs.destroy.confirmation"))
 				if askForConfirmation() == false {
 					return nil
 				}
 				client.Environment().Delete(c.Args()[0], c.Args()[1])
 			}
 		}
-		color.Green(h.T("envs.destroy.flags.success"))
+		color.Green(h.T("envs.destroy.success"))
 		return nil
 	},
 }

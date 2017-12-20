@@ -239,6 +239,7 @@ var EnableMFA = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, NonAdminValidation)
+		session := client.Session().Get()
 		username := stringWithDefault(c, "user-name", session.Username)
 
 		user := client.User().Get(username)
@@ -265,6 +266,7 @@ var DisableMFA = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, NonAdminValidation)
+		session := client.Session().Get()
 		username := stringWithDefault(c, "user-name", session.Username)
 
 		user := client.User().Get(username)
@@ -290,6 +292,7 @@ var ResetMFA = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, NonAdminValidation)
+		session := client.Session().Get()
 		username := stringWithDefault(c, "user-name", session.Username)
 		user := client.User().Get(username)
 

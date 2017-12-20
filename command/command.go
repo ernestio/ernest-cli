@@ -87,7 +87,7 @@ func elogin(usr, pwd, vc string) *manager.Client {
 	config.Password = pwd
 	config.Verification = vc
 
-	return manager.NewFromCreds(config)
+	return manager.NewFromCredsAndVerification(config)
 }
 
 func stringWithDefault(c *cli.Context, key, def string) (val string) {

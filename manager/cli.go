@@ -30,6 +30,15 @@ func NewFromCreds(config *model.Config) *Client {
 	return &Client{cli: client, cfg: config}
 }
 
+// NewFromCredsAndVerification ...
+func NewFromCredsAndVerification(config *model.Config) *Client {
+	client := eclient.New(
+		econfig.New(config.URL).
+			WithCredentialsAndVerification(config.User, config.Password, config.Verification),
+	)
+	return &Client{cli: client, cfg: config}
+}
+
 // New : ...
 func New(config *model.Config) *Client {
 	client := eclient.New(

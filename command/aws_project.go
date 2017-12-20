@@ -78,7 +78,7 @@ var UpdateAWSProject = cli.Command{
 		n := client.Project().Get(c.Args()[0])
 		n.Credentials = creds
 		client.Project().Update(n)
-		color.Green(fmt.Sprintf(h.T("aws.create.success"), n.Name))
+		color.Green(fmt.Sprintf(h.T("aws.update.success"), n.Name))
 
 		return nil
 	},
