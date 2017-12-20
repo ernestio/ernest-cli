@@ -7,13 +7,11 @@ package command
 // CmdProject subcommand
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 
 	h "github.com/ernestio/ernest-cli/helper"
-	"github.com/ernestio/ernest-cli/model"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
@@ -44,8 +42,8 @@ var UpdateEnv = cli.Command{
 	ArgsUsage:   h.T("envs.update.args"),
 	Description: h.T("envs.update.description"),
 	Flags: append([]cli.Flag{
-		stringFlagND("sync_interval", "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)"),
-		stringFlagND("submissions", "allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'"),
+		tStringFlagND("envs.update.flags.sync_interval"),
+		tStringFlagND("envs.update.flags.submissions"),
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.update.args")
@@ -68,9 +66,9 @@ var CreateEnv = cli.Command{
 	ArgsUsage:   h.T("envs.create.args"),
 	Description: h.T("envs.create.description"),
 	Flags: append([]cli.Flag{
-		stringFlagND("credentials", "will override project information"),
-		stringFlagND("sync_interval", "sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)"),
-		stringFlagND("submissions", "allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'"),
+		tStringFlagND("envs.create.flags.credentials"),
+		tStringFlagND("envs.create.flags.sync_interval"),
+		tStringFlagND("envs.create.flags.submissions"),
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.create.args")
@@ -89,26 +87,6 @@ var CreateEnv = cli.Command{
 	},
 }
 
-func mapDefinition(c *cli.Context) *model.Definition {
-	file := "ernest.yml"
-	if len(c.Args()) == 1 {
-		file = c.Args()[0]
-	}
-	payload, err := ioutil.ReadFile(file)
-	if err != nil {
-		h.PrintError("You should specify a valid template path or store an ernest.yml on the current folder")
-	}
-	def := model.Definition{}
-	if err := def.Load(payload); err != nil {
-		h.PrintError("Could not process definition yaml")
-	}
-	if err := def.LoadFileImports(); err != nil {
-		h.PrintError(err.Error())
-	}
-
-	return &def
-}
-
 // ApplyEnv command
 // Applies changes described on a YAML file to an env
 var ApplyEnv = cli.Command{
@@ -118,8 +96,8 @@ var ApplyEnv = cli.Command{
 	ArgsUsage:   h.T("envs.apply.args"),
 	Description: h.T("envs.apply.description"),
 	Flags: append([]cli.Flag{
-		boolFlag("dry", "print the changes to be applied on an environment intead of applying them"),
-		stringFlagND("credentials", "will override project information"),
+		tBoolFlag("envs.apply.flags.dry"),
+		tStringFlagND("envs.apply.flags.credentials"),
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 1, "envs.apply.args")
@@ -168,7 +146,6 @@ var SyncEnv = cli.Command{
 	Usage:       h.T("envs.sync.usage"),
 	ArgsUsage:   h.T("envs.sync.args"),
 	Description: h.T("envs.sync.description"),
-	Flags:       append([]cli.Flag{}),
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.sync.args")
 		client := esetup(c, AuthUsersValidation)
@@ -196,8 +173,8 @@ var ReviewEnv = cli.Command{
 	ArgsUsage:   h.T("envs.review.args"),
 	Description: h.T("envs.review.description"),
 	Flags: append([]cli.Flag{
-		boolFlag("accept, a", "Accept Sync changes"),
-		boolFlag("reject, r", "Reject Sync changes"),
+		tBoolFlag("envs.review.flags.accept"),
+		tBoolFlag("envs.review.flags.reject"),
 	}),
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.review.args")
@@ -240,9 +217,9 @@ var ResolveEnv = cli.Command{
 	ArgsUsage:   h.T("envs.resolve.args"),
 	Description: h.T("envs.resolve.description"),
 	Flags: append([]cli.Flag{
-		boolFlag("accept, a", "Accept Sync changes"),
-		boolFlag("reject, r", "Reject Sync changes"),
-		boolFlag("ignore, i", "Ignore Sync changes"),
+		tBoolFlag("envs.resolve.flags.accept"),
+		tBoolFlag("envs.resolve.flags.reject"),
+		tBoolFlag("envs.resolve.flags.ignore"),
 	}),
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.resolve.args")
@@ -260,7 +237,7 @@ var ResolveEnv = cli.Command{
 		}
 
 		if resolution == "" {
-			h.PrintError("You should specify a valid resolution [accept|reject|ignore]")
+			h.PrintError(h.T("envs.resolve.errors.non_valid"))
 		}
 		client.Environment().Resolve(c.Args()[0], c.Args()[1], resolution)
 		return nil
@@ -275,8 +252,8 @@ var DestroyEnv = cli.Command{
 	ArgsUsage:   h.T("envs.destroy.args"),
 	Description: h.T("envs.destroy.description"),
 	Flags: []cli.Flag{
-		boolFlag("force,f", "Hard ernest env removal."),
-		boolFlag("yes,y", "Destroy an environment without prompting confirmation."),
+		tBoolFlag("envs.destroy.flags.force"),
+		tBoolFlag("envs.destroy.flags.yes"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.destroy.args")
@@ -288,14 +265,14 @@ var DestroyEnv = cli.Command{
 			if c.Bool("yes") {
 				client.Environment().Delete(c.Args()[0], c.Args()[1])
 			} else {
-				fmt.Print("Do you really want to destroy this environment? (Y/n) ")
+				fmt.Print(h.T("envs.destroy.flags.confirmation"))
 				if askForConfirmation() == false {
 					return nil
 				}
 				client.Environment().Delete(c.Args()[0], c.Args()[1])
 			}
 		}
-		color.Green("Environment successfully removed")
+		color.Green(h.T("envs.destroy.flags.success"))
 		return nil
 	},
 }
@@ -326,8 +303,7 @@ var ResetEnv = cli.Command{
 		paramsLenValidation(c, 2, "envs.reset.args")
 		client := esetup(c, AuthUsersValidation)
 		client.Environment().Reset(c.Args()[0], c.Args()[1])
-		color.Red("You've successfully resetted the environment '" + c.Args()[0] + " / " + c.Args()[1] + "'")
-
+		color.Red(fmt.Sprintf(h.T("envs.reset.success"), c.Args()[0], c.Args()[1]))
 		return nil
 	},
 }
@@ -339,7 +315,7 @@ var RevertEnv = cli.Command{
 	ArgsUsage:   h.T("envs.revert.args"),
 	Description: h.T("envs.revert.description"),
 	Flags: []cli.Flag{
-		boolFlag("dry", "print the changes to be applied on an environment intead of applying them"),
+		tBoolFlag("envs.revert.flags.dry"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 3, "envs.revert.args")
@@ -352,7 +328,7 @@ var RevertEnv = cli.Command{
 		} else {
 			client.Build().Create([]byte(def))
 			if build.Status == "submitted" {
-				color.Green("Build has been succesfully submitted and is awaiting approval.")
+				color.Green(h.T("envs.revert.success"))
 				os.Exit(0)
 			}
 
@@ -372,7 +348,7 @@ var DefinitionEnv = cli.Command{
 	ArgsUsage:   h.T("envs.definition.args"),
 	Description: h.T("envs.definition.description"),
 	Flags: []cli.Flag{
-		stringFlag("build", "", "Build ID"),
+		tStringFlag("envs.definition.flags.build"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.definition.args")
@@ -394,7 +370,7 @@ var InfoEnv = cli.Command{
 	ArgsUsage:   h.T("envs.info.args"),
 	Description: h.T("envs.info.description"),
 	Flags: []cli.Flag{
-		stringFlag("build", "", "Build ID"),
+		tStringFlag("envs.info.flags.build"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.info.args")
@@ -439,8 +415,8 @@ var ImportEnv = cli.Command{
 	ArgsUsage:   h.T("envs.import.args"),
 	Description: h.T("envs.import.description"),
 	Flags: []cli.Flag{
-		stringFlag("project", "", "Project name"),
-		stringFlag("filters", "", "Import filters comma delimited list"),
+		tStringFlag("envs.import.flags.project"),
+		tStringFlag("envs.import.flags.filters"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.import.args")

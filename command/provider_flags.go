@@ -6,29 +6,29 @@ import (
 
 // ProviderVCloudFlags : ..
 var ProviderVCloudFlags = []cli.Flag{
-	stringFlag("user", "", "Your VCloud valid user name"),
-	stringFlag("password", "", "Your VCloud valid password"),
-	stringFlag("org", "", "Your vCloud Organization"),
-	stringFlag("vse-url", "", "VSE URL"),
-	stringFlag("vcloud-url", "", "VCloud URL"),
-	stringFlag("public-network", "", "Public Network"),
-	stringFlag("vcloud-region, reg", "", "Project region"),
+	tStringFlag("vcloud.create.flags.user"),
+	tStringFlag("vcloud.create.flags.password"),
+	tStringFlag("vcloud.create.flags.org"),
+	tStringFlag("vcloud.create.flags.vse-url"),
+	tStringFlag("vcloud.create.flags.vcloud-url"),
+	tStringFlag("vcloud.create.flags.public-network"),
+	tStringFlag("vcloud.create.flags.vcloud-region"),
 }
 
 // ProviderAWSFlags : ...
 var ProviderAWSFlags = []cli.Flag{
-	stringFlag("access_key_id, k", "", "AWS access key id"),
-	stringFlag("secret_access_key, sak", "", "AWS Secret access key"),
-	stringFlag("region, r", "", "Project region"),
+	tStringFlag("aws.create.flags.region"),
+	tStringFlag("aws.create.flags.access_key_id"),
+	tStringFlag("aws.create.flags.secret_access_key"),
 }
 
 // ProviderAzureFlags : ...
 var ProviderAzureFlags = []cli.Flag{
-	stringFlag("subscription_id, s", "", "Azure subscription id"),
-	stringFlag("client_id, c", "", "Azure client id"),
-	stringFlag("client_secret, p", "", "Azure client secret"),
-	stringFlag("tenant_id, t", "", "Azure tenant_id"),
-	stringFlag("environment, e", "", "Azure environment. Supported values are public(default), usgovernment, german and chine"),
+	tStringFlag("azure.update.flags.subscription_id"),
+	tStringFlag("azure.update.flags.client_id"),
+	tStringFlag("azure.update.flags.client_secret"),
+	tStringFlag("azure.update.flags.tenant_id"),
+	tStringFlag("azure.update.flags.environment"),
 }
 
 // AWSVCloudFlags : All aws vcloud provider flags

@@ -5,6 +5,8 @@
 package command
 
 import (
+	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
@@ -32,8 +34,8 @@ var MonitorEnv = cli.Command{
 		build := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], "")
 
 		if build.Status == "done" {
-			color.Yellow("Environment has been successfully built")
-			color.Yellow("You can check its information running `ernest-cli env info " + c.Args()[0] + " / " + c.Args()[1] + "`")
+			color.Yellow(h.T("monitor.success_1"))
+			color.Yellow(fmt.Sprintf(h.T("monitor.success_2"), c.Args()[0], c.Args()[1]))
 			return nil
 		}
 		return h.Monitorize(client.Build().Stream(build.ID))

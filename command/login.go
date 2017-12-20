@@ -25,9 +25,9 @@ var Login = cli.Command{
 	ArgsUsage:   h.T("login.args"),
 	Description: h.T("login.description"),
 	Flags: []cli.Flag{
-		stringFlag("user", "", "User credentials"),
-		stringFlag("password", "", "Password credentials"),
-		stringFlag("verification-code", "", "MFA verification code"),
+		tStringFlag("login.flags.user"),
+		tStringFlag("login.flags.password"),
+		tStringFlag("login.flags.verification"),
 	},
 	Action: func(c *cli.Context) error {
 		var username string

@@ -35,9 +35,9 @@ var EnvAddSchedule = cli.Command{
 	ArgsUsage:   h.T("envs.schedules.add.args"),
 	Description: h.T("envs.schedules.add.description"),
 	Flags: []cli.Flag{
-		stringFlagND("action", "defines what action should be scheduled possible values are [power_on, power_off, sync]"),
-		stringFlagND("instance_type", "power_on and power_off accept an instance_type to be powered on an off"),
-		stringFlagND("schedule", "sets the automatic schedule. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)"),
+		tStringFlagND("envs.schedules.add.flags.action"),
+		tStringFlagND("envs.schedules.add.flags.instance_type"),
+		tStringFlagND("envs.schedules.add.flags.schedule"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.schedules.list.args")
@@ -59,8 +59,7 @@ var EnvAddSchedule = cli.Command{
 			env.Schedules[c.Args()[2]] = schedule
 		}
 		client.Environment().Update(c.Args()[0], env)
-
-		color.Green("Environment schedules successfully updated")
+		color.Green(h.T("envs.schedules.add.success"))
 
 		return nil
 	},
@@ -85,8 +84,7 @@ var EnvRmSchedule = cli.Command{
 			delete(env.Schedules, c.Args()[2])
 		}
 		client.Environment().Update(c.Args()[0], env)
-
-		color.Green("Environment schedules successfully updated")
+		color.Green(h.T("envs.schedules.rm.success"))
 
 		return nil
 	},

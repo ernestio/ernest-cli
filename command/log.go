@@ -22,10 +22,7 @@ var CmdLog = cli.Command{
 	ArgsUsage:   h.T("log.args"),
 	Description: h.T("log.description"),
 	Flags: []cli.Flag{
-		cli.BoolFlag{
-			Name:  "raw",
-			Usage: "Raw output will be displayed instead of pretty-printed",
-		},
+		tBoolFlag("log.flags.raw"),
 	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, AuthUsersValidation)

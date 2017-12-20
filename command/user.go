@@ -42,9 +42,9 @@ var CreateUser = cli.Command{
 	ArgsUsage:   h.T("user.create.args"),
 	Description: h.T("user.create.description"),
 	Flags: []cli.Flag{
-		stringFlag("email", "", "Email for the user"),
-		boolFlag("mfa", "Enable MFA"),
-		boolFlag("admin", "User will be created as admin"),
+		tStringFlag("user.create.flags.email"),
+		tBoolFlag("user.create.flags.mfa"),
+		tBoolFlag("user.create.flags.admin"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "user.create.args")
@@ -80,9 +80,9 @@ var PasswordUser = cli.Command{
 	Usage:       h.T("user.change_password.usage"),
 	Description: h.T("user.change_password.description"),
 	Flags: []cli.Flag{
-		stringFlag("user", "", "The username of the user to change password"),
-		stringFlag("password", "", "The new user password"),
-		stringFlag("current-password", "", "The current user password"),
+		tStringFlag("user.change_password.flags.user"),
+		tStringFlag("user.change_password.flags.password"),
+		tStringFlag("user.change_password.flags.current-password"),
 	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, AuthUsersValidation)
@@ -175,7 +175,9 @@ var InfoUser = cli.Command{
 	Name:        "info",
 	Usage:       h.T("user.info.usage"),
 	Description: h.T("user.info.description"),
-	Flags:       []cli.Flag{stringFlag("user", "", "Username")},
+	Flags: []cli.Flag{
+		tStringFlag("user.info.flags.user"),
+	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, NonAdminValidation)
 		username := stringWithDefault(c, "user", client.Config().User)
@@ -232,7 +234,9 @@ var EnableMFA = cli.Command{
 	Name:        "enable-mfa",
 	Usage:       h.T("user.enable-mfa.usage"),
 	Description: h.T("user.enable-mfa.description"),
-	Flags:       []cli.Flag{stringFlagND("user-name", "Target user")},
+	Flags: []cli.Flag{
+		tStringFlagND("user.enable-mfa.flags.user"),
+	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, NonAdminValidation)
 		username := stringWithDefault(c, "user-name", session.Username)
@@ -256,7 +260,9 @@ var DisableMFA = cli.Command{
 	Name:        "disable-mfa",
 	Usage:       h.T("user.disable-mfa.usage"),
 	Description: h.T("user.disable-mfa.description"),
-	Flags:       []cli.Flag{stringFlagND("user-name", "Target user")},
+	Flags: []cli.Flag{
+		tStringFlagND("user.disable-mfa.flags.user"),
+	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, NonAdminValidation)
 		username := stringWithDefault(c, "user-name", session.Username)
@@ -279,7 +285,9 @@ var ResetMFA = cli.Command{
 	Name:        "reset-mfa",
 	Usage:       h.T("user.reset-mfa.usage"),
 	Description: h.T("user.reset-mfa.description"),
-	Flags:       []cli.Flag{stringFlagND("user-name", "Target user")},
+	Flags: []cli.Flag{
+		tStringFlagND("user.reset-mfa.flags.user"),
+	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, NonAdminValidation)
 		username := stringWithDefault(c, "user-name", session.Username)

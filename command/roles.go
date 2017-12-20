@@ -6,6 +6,8 @@ package command
 
 // CmdUser subcommand
 import (
+	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
@@ -35,10 +37,10 @@ func rolesManager(c *cli.Context, set bool) {
 		if c.String("role") == "reader" {
 			verb = "read"
 		}
-		color.Green("User '" + c.String("user") + "' has been authorized to " + verb + " resource " + rID)
+		color.Green(fmt.Sprintf(h.T("roles.set.success"), c.String("user"), verb, rID))
 	} else {
 		client.Role().Delete(role)
-		color.Green("User '" + c.String("user") + "' has been unauthorized as " + rID + " " + c.String("role"))
+		color.Green(fmt.Sprintf(h.T("roles.unset.success"), c.String("user"), rID), c.String("role"))
 	}
 
 }
@@ -50,10 +52,10 @@ var CmdRolesSet = cli.Command{
 	ArgsUsage:   h.T("roles.set.args"),
 	Description: h.T("roles.set.description"),
 	Flags: []cli.Flag{
-		stringFlag("user, u", "", "User to be authorized over the given resource"),
-		stringFlag("project, p", "", "Project to authorize"),
-		stringFlag("role, r", "", "Role type [owner, reader]"),
-		stringFlag("environment, e", "", "Environment to authorize"),
+		tStringFlag("roles.set.flags.user"),
+		tStringFlag("roles.set.flags.project"),
+		tStringFlag("roles.set.flags.role"),
+		tStringFlag("roles.set.flags.environment"),
 	},
 	Action: func(c *cli.Context) error {
 		rolesManager(c, true)
@@ -68,10 +70,10 @@ var CmdRolesUnset = cli.Command{
 	ArgsUsage:   h.T("roles.unset.args"),
 	Description: h.T("roles.unset.description"),
 	Flags: []cli.Flag{
-		stringFlag("user, u", "", "User to be authorized over the given resource"),
-		stringFlag("project, p", "", "Project to authorize"),
-		stringFlag("role, r", "", "Role type [owner, reader]"),
-		stringFlag("environment, e", "", "Environment to authorize"),
+		tStringFlag("roles.set.flags.user"),
+		tStringFlag("roles.set.flags.project"),
+		tStringFlag("roles.set.flags.role"),
+		tStringFlag("roles.set.flags.environment"),
 	},
 	Action: func(c *cli.Context) error {
 		rolesManager(c, false)

@@ -6,6 +6,8 @@ package command
 
 // CmdProject subcommand
 import (
+	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
@@ -20,11 +22,11 @@ var CreateAWSProject = cli.Command{
 	Description: h.T("aws.create.description"),
 	ArgsUsage:   h.T("aws.create.args"),
 	Flags: []cli.Flag{
-		stringFlag("region, r", "", "Project region"),
-		stringFlag("access_key_id, k", "", "AWS access key id"),
-		stringFlag("secret_access_key, s", "", "AWS Secret access key"),
-		stringFlag("template, t", "", "Project template"),
-		boolFlag("fake, f", "Fake project"),
+		tStringFlag("aws.create.flags.region"),
+		tStringFlag("aws.create.flags.access_key_id"),
+		tStringFlag("aws.create.flags.secret_access_key"),
+		tStringFlag("aws.create.flags.template"),
+		tBoolFlag("aws.create.flags.fake"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 1, "aws.create.args")
@@ -48,7 +50,7 @@ var CreateAWSProject = cli.Command{
 			Credentials: creds,
 		}
 		client.Project().Create(p)
-		color.Green("Project '" + p.Name + "' successfully created ")
+		color.Green(fmt.Sprintf(h.T("aws.create.success"), p.Name))
 
 		return nil
 	},
@@ -57,12 +59,12 @@ var CreateAWSProject = cli.Command{
 // UpdateAWSProject : Updates the specified VCloud project
 var UpdateAWSProject = cli.Command{
 	Name:        "aws",
-	Usage:       h.T("aws.create.usage"),
-	ArgsUsage:   h.T("aws.create.args"),
-	Description: h.T("aws.create.description"),
+	Usage:       h.T("aws.update.usage"),
+	ArgsUsage:   h.T("aws.update.args"),
+	Description: h.T("aws.update.description"),
 	Flags: []cli.Flag{
-		stringFlag("access_key_id", "", "Your AWS access key id"),
-		stringFlag("secret_access_key", "", "Your AWS secret access key"),
+		tStringFlag("aws.update.flags.access_key_id"),
+		tStringFlag("aws.update.flags.secret_access_key"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 1, "aws.create.args")
@@ -76,7 +78,7 @@ var UpdateAWSProject = cli.Command{
 		n := client.Project().Get(c.Args()[0])
 		n.Credentials = creds
 		client.Project().Update(n)
-		color.Green("Project " + n.Name + " successfully updated")
+		color.Green(fmt.Sprintf(h.T("aws.create.success"), n.Name))
 
 		return nil
 	},

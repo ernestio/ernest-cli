@@ -6,6 +6,8 @@ package command
 
 // CmdProject subcommand
 import (
+	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
@@ -20,13 +22,13 @@ var CreateAzureProject = cli.Command{
 	Description: h.T("azure.create.description"),
 	ArgsUsage:   h.T("azure.create.args"),
 	Flags: []cli.Flag{
-		stringFlag("region, r", "", "Project region"),
-		stringFlag("subscription_id, s", "", "Azure subscription id"),
-		stringFlag("client_id, c", "", "Azure client id"),
-		stringFlag("client_secret, p", "", "Azure client secret"),
-		stringFlag("tenant_id, t", "", "Azure tenant_id"),
-		stringFlag("environment, e", "", "Azure environment. Supported values are public(default), usgovernment, german and chine"),
-		boolFlag("fake, f", "Fake project"),
+		tStringFlag("azure.create.flags.region"),
+		tStringFlag("azure.create.flags.subscription_id"),
+		tStringFlag("azure.create.flags.client_id"),
+		tStringFlag("azure.create.flags.client_secret"),
+		tStringFlag("azure.create.flags.tenant_id"),
+		tStringFlag("azure.create.flags.environment"),
+		tBoolFlag("azure.create.flags.fake"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 1, "azure.create.args")
@@ -51,7 +53,7 @@ var CreateAzureProject = cli.Command{
 			Credentials: creds,
 		}
 		client.Project().Create(p)
-		color.Green("Project '" + p.Name + "' successfully created ")
+		color.Green(fmt.Sprintf(h.T("azure.create.success"), p.Name))
 
 		return nil
 	},
@@ -64,11 +66,11 @@ var UpdateAzureProject = cli.Command{
 	Description: h.T("azure.update.description"),
 	ArgsUsage:   h.T("azure.update.args"),
 	Flags: []cli.Flag{
-		stringFlag("subscription_id, s", "", "Azure subscription id"),
-		stringFlag("client_id, c", "", "Azure client id"),
-		stringFlag("client_secret, p", "", "Azure client secret"),
-		stringFlag("tenant_id, t", "", "Azure tenant_id"),
-		stringFlag("environment, e", "", "Azure environment. Supported values are public(default), usgovernment, german and chine"),
+		tStringFlag("azure.update.flags.subscription_id"),
+		tStringFlag("azure.update.flags.client_id"),
+		tStringFlag("azure.update.flags.client_secret"),
+		tStringFlag("azure.update.flags.tenant_id"),
+		tStringFlag("azure.update.flags.environment"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 1, "azure.update.args")
@@ -86,7 +88,7 @@ var UpdateAzureProject = cli.Command{
 		n := client.Project().Get(c.Args()[0])
 		n.Credentials = creds
 		client.Project().Update(n)
-		color.Green("Project " + n.Name + " successfully updated")
+		color.Green(fmt.Sprintf(h.T("azure.update.success"), n.Name))
 
 		return nil
 	},

@@ -20,9 +20,9 @@ var CmdUsage = cli.Command{
 	ArgsUsage:   h.T("usage.args"),
 	Description: h.T("usage.description"),
 	Flags: []cli.Flag{
-		stringFlagND("from", "the from date the report will be calculated from. Format YYYY-MM-DD"),
-		stringFlagND("to", "the to date the report will be caluclutated to. Format YYYY-MM-DD"),
-		stringFlagND("output", "the file path to store the report"),
+		tStringFlagND("usage.flags.from"),
+		tStringFlagND("usage.flags.to"),
+		tStringFlagND("usage.flags.output"),
 	},
 	Action: func(c *cli.Context) error {
 		client := esetup(c, AuthUsersValidation)
@@ -32,7 +32,7 @@ var CmdUsage = cli.Command{
 			if err := ioutil.WriteFile(c.String("output"), body, 0644); err != nil {
 				h.PrintError(err.Error())
 			}
-			color.Green("A file named " + c.String("output") + " has been exported to the current folder")
+			color.Green(fmt.Sprintf(h.T("usage.success"), c.String("output")))
 		} else {
 			fmt.Println(string(body))
 		}

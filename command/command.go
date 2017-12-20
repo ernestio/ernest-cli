@@ -129,6 +129,22 @@ func stringFlagND(name, usage string) cli.StringFlag {
 	}
 }
 
+func tStringFlag(key string) cli.StringFlag {
+	return stringFlag(h.T(key+".alias"), h.T(key+".def"), h.T(key+".desc"))
+}
+
+func tStringFlagND(key string) cli.StringFlag {
+	return stringFlagND(h.T(key+".alias"), h.T(key+".desc"))
+}
+
+func tBoolFlag(key string) cli.BoolFlag {
+	return boolFlag(h.T(key+".alias"), h.T(key+".desc"))
+}
+
+func tIntFlag(key string) cli.IntFlag {
+	return intFlag(h.T(key+".alias"), h.T(key+".desc"))
+}
+
 func stringFlag(name, value, usage string) cli.StringFlag {
 	return cli.StringFlag{
 		Name:  name,
@@ -193,6 +209,26 @@ func parseTemplateFlags(c *cli.Context, keys map[string]flagDef) map[string]inte
 	}
 
 	return flags
+}
+
+func mapDefinition(c *cli.Context) *model.Definition {
+	file := "ernest.yml"
+	if len(c.Args()) == 1 {
+		file = c.Args()[0]
+	}
+	payload, err := ioutil.ReadFile(file)
+	if err != nil {
+		h.PrintError("You should specify a valid template path or store an ernest.yml on the current folder")
+	}
+	def := model.Definition{}
+	if err := def.Load(payload); err != nil {
+		h.PrintError("Could not process definition yaml")
+	}
+	if err := def.LoadFileImports(); err != nil {
+		h.PrintError(err.Error())
+	}
+
+	return &def
 }
 
 func getProjectTemplateAsMap(template string) (map[string]interface{}, error) {

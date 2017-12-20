@@ -6,6 +6,8 @@ package command
 
 // CmdProject subcommand
 import (
+	"fmt"
+
 	"github.com/fatih/color"
 	"github.com/urfave/cli"
 
@@ -20,13 +22,13 @@ var CreateVcloudProject = cli.Command{
 	ArgsUsage:   h.T("vcloud.create.args"),
 	Description: h.T("vcloud.create.description"),
 	Flags: []cli.Flag{
-		stringFlag("user", "", "Your VCloud valid user name"),
-		stringFlag("password", "", "Your VCloud valid password"),
-		stringFlag("org", "", "Your vCloud Organization"),
-		stringFlag("vdc", "", "Your vCloud vDC"),
-		stringFlag("vcloud-url", "", "VCloud URL"),
-		stringFlag("template", "", "Project template"),
-		boolFlag("fake", "Fake project"),
+		tStringFlag("vcloud.create.flags.user"),
+		tStringFlag("vcloud.create.flags.password"),
+		tStringFlag("vcloud.create.flags.org"),
+		tStringFlag("vcloud.create.flags.vdc"),
+		tStringFlag("vcloud.create.flags.vcloud-url"),
+		tStringFlag("vcloud.create.flags.template"),
+		tBoolFlag("vcloud.create.flags.fake"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 1, "vcloud.create.args")
@@ -52,7 +54,7 @@ var CreateVcloudProject = cli.Command{
 			Credentials: creds,
 		}
 		client.Project().Create(p)
-		color.Green("Project '" + p.Name + "' successfully created ")
+		color.Green(fmt.Sprintf(h.T("vcloud.create.success"), p.Name))
 
 		return nil
 	},
@@ -70,7 +72,7 @@ var DeleteProject = cli.Command{
 
 		name := c.Args()[0]
 		client.Project().Delete(name)
-		color.Green("Project " + name + " successfully removed")
+		color.Green(fmt.Sprintf(h.T("vcloud.delete.success"), name))
 
 		return nil
 	},
@@ -102,7 +104,7 @@ var UpdateVCloudProject = cli.Command{
 		n.Credentials["user"] = creds["user"].(string)
 		n.Credentials["passwrord"] = creds["password"].(string)
 		client.Project().Update(n)
-		color.Green("Project " + n.Name + " successfully updated")
+		color.Green(fmt.Sprintf(h.T("vcloud.update.success"), n.Name))
 
 		return nil
 	},

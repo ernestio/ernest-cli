@@ -6,6 +6,8 @@ package command
 
 // CmdNotification subcommand
 import (
+	"fmt"
+
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
@@ -42,7 +44,7 @@ var DeleteNotification = cli.Command{
 		client := esetup(c, AuthUsersValidation)
 
 		client.Notification().Delete(name)
-		color.Green("Notify " + name + " successfully delete")
+		color.Green(fmt.Sprintf(h.T("notification.delete.success"), name))
 		return nil
 	},
 }
@@ -62,7 +64,7 @@ var UpdateNotification = cli.Command{
 		n := client.Notification().Get(name)
 		n.Config = notifyConfig
 		client.Notification().Update(n)
-		color.Green("Notify " + name + " successfully updated")
+		color.Green(fmt.Sprintf(h.T("notification.update.success"), name))
 		return nil
 	},
 }
@@ -87,7 +89,7 @@ var AddEntityToNotification = cli.Command{
 			client.Notification().AddProject(notification, project)
 		}
 
-		color.Green("Environment " + entity + " successfully attached to " + notification + " notify")
+		color.Green(fmt.Sprintf(h.T("notification.service.add.success"), entity, notification))
 		return nil
 	},
 }
@@ -112,7 +114,7 @@ var RmEntityToNotification = cli.Command{
 			client.Notification().RmProject(notification, project)
 		}
 
-		color.Green("Environment " + entity + " successfully removed from " + notification + " notify")
+		color.Green(fmt.Sprintf(h.T("notification.service.rm.success"), entity, notification))
 		return nil
 	},
 }
@@ -136,7 +138,7 @@ var CreateNotification = cli.Command{
 			Config: notifyConfig,
 		}
 		client.Notification().Create(&notification)
-		color.Green("Notify " + name + " successfully created")
+		color.Green(fmt.Sprintf(h.T("notification.create.success"), name))
 		return nil
 	},
 }

@@ -37,12 +37,12 @@ var SetLogger = cli.Command{
 	ArgsUsage:   h.T("logger.set.args"),
 	Description: h.T("logger.set.description"),
 	Flags: []cli.Flag{
-		stringFlagND("logfile", "Specify the path for the loging file"),
-		stringFlagND("token", "Rollbar token"),
-		stringFlagND("env", "Rollbar environment"),
-		stringFlagND("hostname", "Logstash hostname"),
-		intFlag("port", "Logstash port"),
-		intFlag("timeout", "Logstash timeout"),
+		tStringFlag("logger.set.flags.logfile"),
+		tStringFlag("logger.set.flags.token"),
+		tStringFlag("logger.set.flags.env"),
+		tStringFlag("logger.set.flags.hostname"),
+		tIntFlag("logger.set.flags.port"),
+		tIntFlag("logger.set.flags.timeout"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 1, "logger.set.args")
@@ -59,32 +59,32 @@ var SetLogger = cli.Command{
 		}
 		if logger.Type == "basic" {
 			if logger.Logfile == "" {
-				h.PrintError("You should specify a logfile with --logfile flag")
+				h.PrintError(h.T("logger.set.errors.logfile"))
 			}
 		} else if logger.Type == "logstash" {
 			if logger.Hostname == "" {
-				h.PrintError("You should specify a logstash hostname  with --hostname flag")
+				h.PrintError(h.T("logger.set.errors.hostname"))
 			}
 			if logger.Port == 0 {
-				h.PrintError("You should specify a logstash port with --port flag")
+				h.PrintError(h.T("logger.set.errors.port"))
 			}
 			if logger.Timeout == 0 {
-				h.PrintError("You should specify a logstash timeout with --timeout flag")
+				h.PrintError(h.T("logger.set.errors.timeout"))
 			}
 		} else if logger.Type == "rollbar" {
 			if logger.Token == "" {
-				h.PrintError("You should specify a rollbar token with --token flag")
+				h.PrintError(h.T("logger.set.errors.token"))
 			}
 			if logger.Environment == "" {
 				logger.Environment = "development"
 			}
 		} else {
-			color.Red("Invalid type, valid types are basic and logstash")
+			color.Red(h.T("logger.set.errors.type"))
 			return nil
 		}
 
 		client.Logger().Create(&logger)
-		color.Green("Logger successfully set up")
+		color.Green(h.T("logger.set.success"))
 
 		return nil
 	},
@@ -101,7 +101,7 @@ var DelLogger = cli.Command{
 		client := esetup(c, NonAdminValidation)
 
 		client.Logger().Delete(c.Args()[0])
-		color.Green("Logger successfully deleted")
+		color.Green(h.T("logger.del.success"))
 
 		return nil
 	},

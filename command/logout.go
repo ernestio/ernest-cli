@@ -25,9 +25,9 @@ var Logout = cli.Command{
 		cfg.Token = ""
 		cfg.User = ""
 		if err := model.SaveConfig(cfg); err != nil {
-			h.PrintError("Can't write config file")
+			h.PrintError(h.T("logout.errors.write"))
 		}
-		color.Green("Bye.")
+		color.Green(h.T("logout.success"))
 		return nil
 	},
 }
