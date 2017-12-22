@@ -27,7 +27,7 @@ var Logout = cli.Command{
 		if err := model.SaveConfig(cfg); err != nil {
 			h.PrintError(h.T("logout.errors.write"))
 		}
-		color.Green(h.T("logout.success"))
+		color.Green("faaaaail")
 		return nil
 	},
 }
