@@ -4,3 +4,5 @@ ernest-cli
 *-darwin-*
 *-linux-*
 *-windows-*
+
+vendor/
