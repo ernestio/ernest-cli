@@ -15,22 +15,8 @@ cover:
 	go test -coverprofile cover.out
 
 deps:
-	go get -u github.com/fatih/color
-	go get -u github.com/urfave/cli
-	go get -u github.com/mitchellh/go-homedir
-	go get -u gopkg.in/yaml.v2
-	go get -u github.com/howeyc/gopass
-	go get -u github.com/r3labs/sse
-	go get -u github.com/olekukonko/tablewriter
-	go get github.com/pmezard/go-difflib/difflib
-	go get github.com/skratchdot/open-golang/open
-	go get github.com/hokaccha/go-prettyjson
-	go get github.com/nu7hatch/gouuid
-	go get github.com/mitchellh/mapstructure
-	go get github.com/gosuri/uilive
-	go get github.com/spf13/viper
-	go get github.com/jteeuwen/go-bindata/...
-	go get -u github.com/ernestio/ernest-go-sdk/...
+	go get -u github.com/golang/dep/cmd/dep
+	dep ensure
 
 dev-deps: deps
 	go get -u github.com/golang/lint/golint
