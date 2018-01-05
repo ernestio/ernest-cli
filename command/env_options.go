@@ -5,8 +5,6 @@
 package command
 
 import (
-	"fmt"
-
 	"github.com/urfave/cli"
 )
 
@@ -15,8 +13,6 @@ func MapEnvOptions(c *cli.Context, opts map[string]interface{}) map[string]inter
 	if opts == nil {
 		opts = make(map[string]interface{})
 	}
-
-	fmt.Println(c.IsSet("sync_interval"))
 
 	if c.IsSet("sync_interval") {
 		opts["sync_interval"] = c.String("sync_interval")
