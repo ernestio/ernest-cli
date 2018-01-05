@@ -35,9 +35,9 @@ var EnvAddSchedule = cli.Command{
 	ArgsUsage:   h.T("envs.schedules.add.args"),
 	Description: h.T("envs.schedules.add.description"),
 	Flags: []cli.Flag{
-		tStringFlagND("envs.schedules.add.flags.action"),
-		tStringFlagND("envs.schedules.add.flags.instance_type"),
-		tStringFlagND("envs.schedules.add.flags.schedule"),
+		tStringFlagND("envs.schedule.add.flags.action"),
+		tStringFlagND("envs.schedule.add.flags.instance_type"),
+		tStringFlagND("envs.schedule.add.flags.schedule"),
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.schedules.list.args")
@@ -72,7 +72,6 @@ var EnvRmSchedule = cli.Command{
 	Usage:       h.T("envs.schedules.rm.usage"),
 	ArgsUsage:   h.T("envs.schedules.rm.args"),
 	Description: h.T("envs.schedules.rm.description"),
-	Flags:       AllProviderFlags,
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.schedules.list.args")
 		client := esetup(c, AuthUsersValidation)
