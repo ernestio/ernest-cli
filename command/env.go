@@ -320,13 +320,23 @@ var RevertEnv = cli.Command{
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 3, "envs.revert.args")
 		client := esetup(c, AuthUsersValidation)
-		build := client.Build().Get(c.Args()[0], c.Args()[1], c.Args()[2])
-		def := client.Build().Definition(c.Args()[0], c.Args()[1], c.Args()[2])
+		builds := client.Build().List(c.Args()[0], c.Args()[1])
+		position := len(builds) - 1
+		if len(c.Args()) > 2 {
+			var err error
+			position, err = strconv.Atoi(c.Args()[2])
+			if err != nil {
+				h.PrintError("Invalid build")
+			}
+			position = position - 1
+		}
+		build := builds[position]
+		def := client.Build().Definition(c.Args()[0], c.Args()[1], build.ID)
 
 		if c.Bool("dry") == true {
 			view.EnvDry(*client.Build().Dry([]byte(def)))
 		} else {
-			client.Build().Create([]byte(def))
+			build := client.Build().Create([]byte(def))
 			if build.Status == "submitted" {
 				color.Green(h.T("envs.revert.success"))
 				os.Exit(0)
@@ -354,8 +364,19 @@ var DefinitionEnv = cli.Command{
 		paramsLenValidation(c, 2, "envs.definition.args")
 		client := esetup(c, AuthUsersValidation)
 
-		build := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], c.String("build"))
+		builds := client.Build().List(c.Args()[0], c.Args()[1])
+		position := len(builds) - 1
+		if len(c.Args()) > 2 {
+			var err error
+			position, err = strconv.Atoi(c.Args()[2])
+			if err != nil {
+				h.PrintError("Invalid build")
+			}
+			position = position - 1
+		}
+		build := builds[position]
 		def := client.Build().Definition(c.Args()[0], c.Args()[1], build.ID)
+
 		fmt.Println(def)
 
 		return nil
