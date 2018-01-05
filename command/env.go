@@ -269,7 +269,8 @@ var DestroyEnv = cli.Command{
 				if askForConfirmation() == false {
 					return nil
 				}
-				client.Environment().Delete(c.Args()[0], c.Args()[1])
+				build := client.Environment().Delete(c.Args()[0], c.Args()[1])
+				h.Monitorize(client.Build().Stream(build.ID))
 			}
 		}
 		color.Green(h.T("envs.destroy.success"))
