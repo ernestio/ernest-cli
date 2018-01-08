@@ -77,8 +77,8 @@ func (c *Environment) Reset(project, id string) *emodels.Action {
 }
 
 // Update : Updates a notification
-func (c *Environment) Update(project string, env *emodels.Environment) {
-	if err := c.cli.Environments.Update(project, env); err != nil {
+func (c *Environment) Update(env *emodels.Environment) {
+	if err := c.cli.Environments.Update(env); err != nil {
 		h.PrintError(err.Error())
 	}
 }

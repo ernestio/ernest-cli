@@ -51,7 +51,7 @@ var UpdateEnv = cli.Command{
 		env := client.Environment().Get(c.Args()[0], c.Args()[1])
 		env.Credentials = ProviderFlagsToSlice(c)
 		env.Options = MapEnvOptions(c, env.Options)
-		client.Environment().Update(c.Args()[0], env)
+		client.Environment().Update(env)
 		color.Green("Environment successfully updated")
 
 		return nil
