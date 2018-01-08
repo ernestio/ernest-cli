@@ -58,7 +58,7 @@ var EnvAddSchedule = cli.Command{
 			}
 			env.Schedules[c.Args()[2]] = schedule
 		}
-		client.Environment().Update(c.Args()[0], env)
+		client.Environment().Update(env)
 		color.Green(h.T("envs.schedules.add.success"))
 
 		return nil
@@ -82,7 +82,7 @@ var EnvRmSchedule = cli.Command{
 		} else {
 			delete(env.Schedules, c.Args()[2])
 		}
-		client.Environment().Update(c.Args()[0], env)
+		client.Environment().Update(env)
 		color.Green(h.T("envs.schedules.rm.success"))
 
 		return nil
