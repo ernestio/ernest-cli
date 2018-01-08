@@ -676,6 +676,82 @@ en:
         Example:
         $ ernest notify create my_notify slack '{"url":"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"}'
       success: "Notify %s successfully created"
+  policy:
+    list:
+      usage: "List available policies."
+      args: " "
+      description: |
+        List available policies.
+
+        Example:
+          $ ernest policy list
+    delete:
+      usage: "Deletes an existing policy."
+      args: "$ ernest policy delete <policy_name>"
+      description: |
+        Deletes an existing policy
+
+        Example:
+          $ ernest policy delete --policy-name <policy_name>
+      success: "Policy %s successfully deleted"
+      flags:
+        name:
+          alias: "policy-name"
+          def: ""
+          desc: "Policy name"
+    update:
+      usage: "Update an existing policy."
+      args: "$ ernest policy update --policy-name <policy_name> --spec <spec>"
+      description: |
+        Updates an existing policy
+
+        Example:
+          $ ernest policy update --policy-name <name> --spec <spec>
+      success: "Notify %s successfully updated"
+      errors:
+        spec: "You should specify a valid path for your policy file"
+      flags:
+        name:
+          alias: "policy-name"
+          def: ""
+          desc: "Policy name"
+        spec:
+          alias: "spec"
+          def: ""
+          desc: "Policy spec"
+    create:
+      usage: "Create a new policy."
+      args: "$ ernest policy create --policy-name <notify_name> --spec <spec>"
+      description: |
+        Creates a new policy on Ernest
+
+        Example:
+          $ ernest policy create --policy-name <notify_name> --spec <spec>
+      success: "Policy %s successfully created"
+      errors:
+        spec: "You should specify a valid path for your policy file"
+      flags:
+        name:
+          alias: "policy-name"
+          def: ""
+          desc: "Policy name"
+        spec:
+          alias: "spec"
+          def: ""
+          desc: "Policy spec"
+    show:
+      usage: "Display existing policy details."
+      args: "$ ernest policy show --policy-name <notify_name>"
+      description: |
+        Display existing policy details
+
+        Example:
+          $ ernest policy show --policy-name <notify_name>
+      flags:
+        name:
+          alias: "policy-name"
+          def: ""
+          desc: "Policy name"
   logger:
     list:
       usage: "Lists active loggers."

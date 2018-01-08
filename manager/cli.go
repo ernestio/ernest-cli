@@ -14,6 +14,7 @@ type Client struct {
 	user         *User
 	session      *Session
 	notification *Notification
+	policy       *Policy
 	role         *Role
 	project      *Project
 	env          *Environment
@@ -69,6 +70,14 @@ func (c *Client) Notification() *Notification {
 		c.notification = &Notification{cli: c.cli}
 	}
 	return c.notification
+}
+
+// Policy : Policy wrapper lazy load
+func (c *Client) Policy() *Policy {
+	if c.notification == nil {
+		c.policy = &Policy{cli: c.cli}
+	}
+	return c.policy
 }
 
 // Role : Role wrapper lazy load
