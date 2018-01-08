@@ -262,16 +262,14 @@ var DestroyEnv = cli.Command{
 		if c.Bool("force") {
 			client.Environment().ForceDeletion(c.Args()[0], c.Args()[1])
 		} else {
-			if c.Bool("yes") {
-				client.Environment().Delete(c.Args()[0], c.Args()[1])
-			} else {
+			if c.Bool("yes") == false {
 				fmt.Print(h.T("envs.destroy.confirmation"))
 				if askForConfirmation() == false {
 					return nil
 				}
-				build := client.Environment().Delete(c.Args()[0], c.Args()[1])
-				h.Monitorize(client.Build().Stream(build.ID))
 			}
+			build := client.Environment().Delete(c.Args()[0], c.Args()[1])
+			h.Monitorize(client.Build().Stream(build.ID))
 		}
 		color.Green(h.T("envs.destroy.success"))
 		return nil
