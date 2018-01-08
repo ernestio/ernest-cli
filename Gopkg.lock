@@ -2,6 +2,7 @@
 
 
 [[projects]]
+  branch = "master"
   name = "github.com/ernestio/ernest-go-sdk"
   packages = [
     "client",
@@ -10,6 +11,7 @@
     "client/generic",
     "client/loggers",
     "client/notifications",
+    "client/policies",
     "client/projects",
     "client/reports",
     "client/roles",
@@ -19,8 +21,7 @@
     "connection",
     "models"
   ]
-  revision = "57d9fed0b5b701b0b1a285b4ea2ef29eab4a274f"
-  version = "v1"
+  revision = "b9cc185630de4a79847e91d6c1a8fab1d028284b"
 
 [[projects]]
   name = "github.com/fatih/color"
@@ -216,6 +217,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8c5ba064f4551674d595999e255b84e7c898397b8821e9b3cb76f351e0f850e4"
+  inputs-digest = "9e17144374c59f399a45c6009795da1aa367c1faf7a9fa2ac69f0dd3d752d2d2"
   solver-name = "gps-cdcl"
   solver-version = 1

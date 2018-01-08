@@ -22,7 +22,7 @@
 
 [[constraint]]
   name = "github.com/ernestio/ernest-go-sdk"
-  version = "1.0.0"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/fatih/color"
