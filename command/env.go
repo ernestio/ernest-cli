@@ -320,7 +320,7 @@ var RevertEnv = cli.Command{
 		paramsLenValidation(c, 3, "envs.revert.args")
 		client := esetup(c, AuthUsersValidation)
 		builds := client.Build().List(c.Args()[0], c.Args()[1])
-		build := getBuildByPosition(c.Args(), builds)
+		build := getBuildByPosition(c.Args()[2], builds)
 		def := client.Build().Definition(c.Args()[0], c.Args()[1], build.ID)
 
 		if c.Bool("dry") == true {
@@ -339,18 +339,16 @@ var RevertEnv = cli.Command{
 	},
 }
 
-func getBuildByPosition(args []string, builds []*emodels.Build) *emodels.Build {
-	position := 0
-	if len(args) > 2 {
-		var err error
-		position, err = strconv.Atoi(args[2])
-		if err != nil {
-			h.PrintError("Specified environment build does not exist")
-		}
-		position = len(builds) - position
-		if position < 0 || position > len(builds)-1 {
-			h.PrintError("Specified environment build does not exist")
-		}
+func getBuildByPosition(input interface{}, builds []*emodels.Build) *emodels.Build {
+	pos, _ := input.(string)
+	position, err := strconv.Atoi(pos)
+	if err != nil {
+		position = len(builds)
+	}
+	position = len(builds) - position
+
+	if position < 0 || position > len(builds)-1 {
+		h.PrintError("Specified environment build does not exist")
 	}
 	return builds[position]
 }
@@ -368,10 +366,13 @@ var DefinitionEnv = cli.Command{
 	},
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.definition.args")
+		flags := parseTemplateFlags(c, map[string]flagDef{
+			"build": flagDef{typ: "string"},
+		})
 		client := esetup(c, AuthUsersValidation)
 
 		builds := client.Build().List(c.Args()[0], c.Args()[1])
-		build := getBuildByPosition(c.Args(), builds)
+		build := getBuildByPosition(flags["build"], builds)
 		def := client.Build().Definition(c.Args()[0], c.Args()[1], build.ID)
 
 		fmt.Println(def)
