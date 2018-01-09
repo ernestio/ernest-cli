@@ -320,16 +320,7 @@ var RevertEnv = cli.Command{
 		paramsLenValidation(c, 3, "envs.revert.args")
 		client := esetup(c, AuthUsersValidation)
 		builds := client.Build().List(c.Args()[0], c.Args()[1])
-		position := len(builds) - 1
-		if len(c.Args()) > 2 {
-			var err error
-			position, err = strconv.Atoi(c.Args()[2])
-			if err != nil {
-				h.PrintError("Invalid build")
-			}
-			position = position - 1
-		}
-		build := builds[position]
+		build := getBuildByPosition(c.Args(), builds)
 		def := client.Build().Definition(c.Args()[0], c.Args()[1], build.ID)
 
 		if c.Bool("dry") == true {
@@ -348,6 +339,22 @@ var RevertEnv = cli.Command{
 	},
 }
 
+func getBuildByPosition(args []string, builds []*emodels.Build) *emodels.Build {
+	position := 0
+	if len(args) > 2 {
+		var err error
+		position, err = strconv.Atoi(args[2])
+		if err != nil {
+			h.PrintError("Specified environment build does not exist")
+		}
+		position = len(builds) - position
+		if position < 0 || position > len(builds)-1 {
+			h.PrintError("Specified environment build does not exist")
+		}
+	}
+	return builds[position]
+}
+
 // DefinitionEnv command
 // Shows the current definition of an environment by its name
 var DefinitionEnv = cli.Command{
@@ -364,16 +371,7 @@ var DefinitionEnv = cli.Command{
 		client := esetup(c, AuthUsersValidation)
 
 		builds := client.Build().List(c.Args()[0], c.Args()[1])
-		position := len(builds) - 1
-		if len(c.Args()) > 2 {
-			var err error
-			position, err = strconv.Atoi(c.Args()[2])
-			if err != nil {
-				h.PrintError("Invalid build")
-			}
-			position = position - 1
-		}
-		build := builds[position]
+		build := getBuildByPosition(c.Args(), builds)
 		def := client.Build().Definition(c.Args()[0], c.Args()[1], build.ID)
 
 		fmt.Println(def)
