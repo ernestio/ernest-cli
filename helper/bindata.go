@@ -798,6 +798,48 @@ var _langEnYml = []byte(`en:
           alias: "policy-name"
           def: ""
           desc: "Policy name"
+    attach:
+      usage: "Attach a policy to an existing environment."
+      args: "$ ernest policy attach --policy-name <notify_name> --environment project/env"
+      description: |
+        Attach a policy to an existing environment.
+
+        Example:
+          $ ernest policy attach --policy-name <notify_name> --environment project/env
+      flags:
+        name:
+          alias: "policy-name"
+          def: ""
+          desc: "Policy name"
+        environment:
+          alias: "environment"
+          def: ""
+          desc: "Environment"
+      errors:
+        already_attached: "Policy is already attached to this environment"
+        invalid_name: "Environment must be in form project/name"
+      success: "Policy %s successfully attached to %s"
+    detach:
+      usage: "Detach a policy from an existing environment."
+      args: "$ ernest policy detach --policy-name <notify_name> --environment project/env"
+      description: |
+        Detch a policy to an existing environment.
+
+        Example:
+          $ ernest policy detach --policy-name <notify_name> --environment project/env
+      flags:
+        name:
+          alias: "policy-name"
+          def: ""
+          desc: "Policy name"
+        environment:
+          alias: "environment"
+          def: ""
+          desc: "Environment"
+      errors:
+        not_attached: "Policy is not attached to this environment"
+        invalid_name: "Environment must be in form project/name"
+      success: "Policy %s successfully detached from %s"
   logger:
     list:
       usage: "Lists active loggers."
@@ -1030,7 +1072,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 33010, mode: os.FileMode(420), modTime: time.Unix(1515503356, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 34515, mode: os.FileMode(420), modTime: time.Unix(1515601208, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

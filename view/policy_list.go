@@ -3,6 +3,7 @@ package view
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 
@@ -16,9 +17,9 @@ func PrintPolicyList(policies []*emodels.Policy) {
 		fmt.Println("")
 	} else {
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"Name"})
+		table.SetHeader([]string{"Name", "Environments"})
 		for _, s := range policies {
-			table.Append([]string{s.Name})
+			table.Append([]string{s.Name, strings.Join(s.Environments, ",")})
 		}
 		table.Render()
 	}

@@ -8,6 +8,7 @@ package command
 import (
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/view"
@@ -139,6 +140,84 @@ var ShowPolicy = cli.Command{
 	},
 }
 
+// AttachPolicy : Display an existing policy
+var AttachPolicy = cli.Command{
+	Name:        "attach",
+	Usage:       h.T("policy.attach.usage"),
+	ArgsUsage:   h.T("policy.attach.args"),
+	Description: h.T("policy.attach.description"),
+	Flags: []cli.Flag{
+		tStringFlag("policy.attach.flags.name"),
+		tStringFlag("policy.attach.flags.environment"),
+	},
+	Action: func(c *cli.Context) error {
+		flags := parseTemplateFlags(c, map[string]flagDef{
+			"policy-name": flagDef{typ: "string", req: true},
+			"environment": flagDef{typ: "string", req: true},
+		})
+		client := esetup(c, AuthUsersValidation)
+		env := flags["environment"].(string)
+		parts := strings.Split(env, "/")
+		if len(parts) != 2 {
+			h.PrintError(h.T("policy.attach.errors.invalid_name"))
+		}
+
+		p := client.Policy().Get(flags["policy-name"].(string))
+		_ = client.Environment().Get(parts[0], parts[1])
+		for _, v := range p.Environments {
+			if v == p.Name {
+				h.PrintError(h.T("policy.attach.errors.already_attached"))
+			}
+		}
+		p.Environments = append(p.Environments, p.Name)
+		client.Policy().Update(p)
+
+		color.Green(fmt.Sprintf(h.T("policy.attach.success"), p.Name, env))
+		return nil
+	},
+}
+
+// DetachPolicy : Display an existing policy
+var DetachPolicy = cli.Command{
+	Name:        "detach",
+	Usage:       h.T("policy.detach.usage"),
+	ArgsUsage:   h.T("policy.detach.args"),
+	Description: h.T("policy.detach.description"),
+	Flags: []cli.Flag{
+		tStringFlag("policy.detach.flags.name"),
+		tStringFlag("policy.detach.flags.environment"),
+	},
+	Action: func(c *cli.Context) error {
+		flags := parseTemplateFlags(c, map[string]flagDef{
+			"policy-name": flagDef{typ: "string", req: true},
+			"environment": flagDef{typ: "string", req: true},
+		})
+		client := esetup(c, AuthUsersValidation)
+		env := flags["environment"].(string)
+		parts := strings.Split(env, "/")
+		if len(parts) != 2 {
+			h.PrintError(h.T("policy.detach.errors.invalid_name"))
+		}
+
+		p := client.Policy().Get(flags["policy-name"].(string))
+		_ = client.Environment().Get(parts[0], parts[1])
+		var toBeAttached []string
+		for _, v := range p.Environments {
+			if v != p.Name {
+				toBeAttached = append(toBeAttached, p.Name)
+			}
+		}
+		if len(toBeAttached) == len(p.Environments) {
+			h.T("policy.detach.error.not_attached")
+		}
+		p.Environments = toBeAttached
+		client.Policy().Update(p)
+
+		color.Green(fmt.Sprintf(h.T("policy.detach.success"), p.Name, env))
+		return nil
+	},
+}
+
 // CmdPolicy ...
 var CmdPolicy = cli.Command{
 	Name:    "policy",
@@ -150,5 +229,7 @@ var CmdPolicy = cli.Command{
 		UpdatePolicy,
 		DeletePolicy,
 		ShowPolicy,
+		AttachPolicy,
+		DetachPolicy,
 	},
 }
