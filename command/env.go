@@ -446,6 +446,11 @@ var ImportEnv = cli.Command{
 			filters = strings.Split(c.String("filters"), ",")
 		}
 
+		env := emodels.Environment{
+			Name:    c.Args()[1],
+			Project: c.Args()[0],
+		}
+		client.Environment().Create(c.Args()[0], &env)
 		a := client.Environment().Import(c.Args()[0], c.Args()[1], filters)
 		h.Monitorize(client.Build().Stream(a.ResourceID))
 

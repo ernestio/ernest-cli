@@ -25,10 +25,11 @@ dev-deps: deps
 	go get -u golang.org/x/tools/cmd/cover
 	go get -u github.com/ernestio/ernest-config-client
 	go get -u github.com/ernestio/crypto
+	go get github.com/alecthomas/gometalinter
+	gometalinter --install
 
 lint:
-	golint ./...
-	go vet ./...
+	gometalinter --config .linter.conf
 
 dist: dist-linux dist-darwin dist-windows
 
