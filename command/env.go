@@ -203,7 +203,12 @@ var ReviewEnv = cli.Command{
 
 			return nil
 		}
-		client.Environment().Resolve(project, env, resolution)
+
+		action := client.Environment().Review(project, env, resolution)
+		if action.ResourceID != "" {
+			h.Monitorize(client.Build().Stream(action.ResourceID))
+		}
+
 		return nil
 	},
 }
@@ -239,7 +244,12 @@ var ResolveEnv = cli.Command{
 		if resolution == "" {
 			h.PrintError(h.T("envs.resolve.errors.non_valid"))
 		}
-		client.Environment().Resolve(c.Args()[0], c.Args()[1], resolution)
+
+		action := client.Environment().Resolve(c.Args()[0], c.Args()[1], resolution)
+		if action.ResourceID != "" {
+			h.Monitorize(client.Build().Stream(action.ResourceID))
+		}
+
 		return nil
 	},
 }
