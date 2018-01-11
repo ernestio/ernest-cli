@@ -33,6 +33,7 @@ func main() {
 		command.CmdLog,
 		command.CmdUsage,
 		command.CmdNotification,
+		command.CmdPolicy,
 		command.CmdRoles,
 	}
 	if err := app.Run(os.Args); err != nil {
