@@ -67,6 +67,15 @@ func (c *Environment) Resolve(project, id, resolution string) *emodels.Action {
 	return act
 }
 
+// Review : Reviews an env by name
+func (c *Environment) Review(project, id, resolution string) *emodels.Action {
+	act, err := c.cli.Environments.Review(project, id, resolution)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+	return act
+}
+
 // Reset : Resets a env by name
 func (c *Environment) Reset(project, id string) *emodels.Action {
 	act, err := c.cli.Environments.Reset(project, id)
