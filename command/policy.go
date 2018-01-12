@@ -169,7 +169,7 @@ var AttachPolicy = cli.Command{
 				h.PrintError(h.T("policy.attach.errors.already_attached"))
 			}
 		}
-		p.Environments = append(p.Environments, p.Name)
+		p.Environments = append(p.Environments, env)
 		client.Policy().Update(p)
 
 		color.Green(fmt.Sprintf(h.T("policy.attach.success"), p.Name, env))
@@ -203,8 +203,8 @@ var DetachPolicy = cli.Command{
 		_ = client.Environment().Get(parts[0], parts[1])
 		var toBeAttached []string
 		for _, v := range p.Environments {
-			if v != p.Name {
-				toBeAttached = append(toBeAttached, p.Name)
+			if v != env {
+				toBeAttached = append(toBeAttached, v)
 			}
 		}
 		if len(toBeAttached) == len(p.Environments) {
