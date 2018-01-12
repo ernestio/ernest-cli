@@ -1072,7 +1072,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 34529, mode: os.FileMode(420), modTime: time.Unix(1515757265, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 34529, mode: os.FileMode(420), modTime: time.Unix(1515759492, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
