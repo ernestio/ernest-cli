@@ -753,7 +753,7 @@ var _langEnYml = []byte(`en:
 
         Example:
           $ ernest policy update --policy-name <name> --spec <spec>
-      success: "Notify %s successfully updated"
+      success: "Policy %s successfully updated"
       errors:
         spec: "You should specify a valid path for your policy file"
       flags:
@@ -817,7 +817,7 @@ var _langEnYml = []byte(`en:
           desc: "Environment"
       errors:
         already_attached: "Policy is already attached to this environment"
-        invalid_name: "Environment must be in form project/name"
+        invalid_name: "Environment must be in form project/environment"
       success: "Policy %s successfully attached to %s"
     detach:
       usage: "Detach a policy from an existing environment."
@@ -838,7 +838,7 @@ var _langEnYml = []byte(`en:
           desc: "Environment"
       errors:
         not_attached: "Policy is not attached to this environment"
-        invalid_name: "Environment must be in form project/name"
+        invalid_name: "Environment must be in form project/environment"
       success: "Policy %s successfully detached from %s"
   logger:
     list:
@@ -1072,7 +1072,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 34515, mode: os.FileMode(420), modTime: time.Unix(1515601208, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 34529, mode: os.FileMode(420), modTime: time.Unix(1515759492, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

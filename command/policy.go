@@ -165,7 +165,7 @@ var AttachPolicy = cli.Command{
 		p := client.Policy().Get(flags["policy-name"].(string))
 		_ = client.Environment().Get(parts[0], parts[1])
 		for _, v := range p.Environments {
-			if v == p.Name {
+			if v == env {
 				h.PrintError(h.T("policy.attach.errors.already_attached"))
 			}
 		}
