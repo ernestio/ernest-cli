@@ -707,7 +707,7 @@ en:
 
         Example:
           $ ernest policy update --policy-name <name> --spec <spec>
-      success: "Notify %s successfully updated"
+      success: "Policy %s successfully updated"
       errors:
         spec: "You should specify a valid path for your policy file"
       flags:
@@ -771,7 +771,7 @@ en:
           desc: "Environment"
       errors:
         already_attached: "Policy is already attached to this environment"
-        invalid_name: "Environment must be in form project/name"
+        invalid_name: "Environment must be in form project/environment"
       success: "Policy %s successfully attached to %s"
     detach:
       usage: "Detach a policy from an existing environment."
@@ -792,7 +792,7 @@ en:
           desc: "Environment"
       errors:
         not_attached: "Policy is not attached to this environment"
-        invalid_name: "Environment must be in form project/name"
+        invalid_name: "Environment must be in form project/environment"
       success: "Policy %s successfully detached from %s"
   logger:
     list:
