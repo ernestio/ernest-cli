@@ -941,6 +941,10 @@ var _langEnYml = []byte(`en:
           alias: environment, e
           def:
           desc: Environment to authorize
+        policy:
+          alias: policy, pl
+          def:
+          desc: Policy to authorize
     unset:
       usage: "ernest role unset -u john -r owner -p my_project"
       args: "$ ernest roles set -u john -r reader -p my_project [-e my_environment]"
@@ -1072,7 +1076,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 34529, mode: os.FileMode(420), modTime: time.Unix(1515759492, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 34624, mode: os.FileMode(420), modTime: time.Unix(1515762692, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

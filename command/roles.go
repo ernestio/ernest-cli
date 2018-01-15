@@ -16,13 +16,16 @@ import (
 )
 
 func rolesManager(c *cli.Context, set bool) {
-	requiredFlags(c, []string{"role", "user", "project"})
+	requiredFlags(c, []string{"role", "user"})
 	client := esetup(c, AuthUsersValidation)
 	rType := "project"
 	rID := c.String("project")
 	if c.String("environment") != "" {
 		rType = "environment"
 		rID = c.String("project") + "/" + c.String("environment")
+	} else if c.String("policy") != "" {
+		rType = "policy"
+		rID = c.String("policy")
 	}
 
 	role := &emodels.Role{
@@ -56,6 +59,7 @@ var CmdRolesSet = cli.Command{
 		tStringFlag("roles.set.flags.project"),
 		tStringFlag("roles.set.flags.role"),
 		tStringFlag("roles.set.flags.environment"),
+		tStringFlag("roles.set.flags.policy"),
 	},
 	Action: func(c *cli.Context) error {
 		rolesManager(c, true)
@@ -74,6 +78,7 @@ var CmdRolesUnset = cli.Command{
 		tStringFlag("roles.set.flags.project"),
 		tStringFlag("roles.set.flags.role"),
 		tStringFlag("roles.set.flags.environment"),
+		tStringFlag("roles.set.flags.policy"),
 	},
 	Action: func(c *cli.Context) error {
 		rolesManager(c, false)
