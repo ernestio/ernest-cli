@@ -428,9 +428,9 @@ var DiffEnv = cli.Command{
 
 		build1 := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], c.Args()[2])
 		build2 := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], c.Args()[3])
-		def1 := client.Build().Definition(c.Args()[0], c.Args()[1], build1.GetID())
-		def2 := client.Build().Definition(c.Args()[0], c.Args()[1], build2.GetID())
-		view.PrintEnvDiff(build1.GetID(), build2.GetID(), []byte(def1), []byte(def2))
+		changelog := client.Build().Diff(c.Args()[0], c.Args()[1], build1.GetID(), build2.GetID())
+
+		view.PrintDiff(changelog)
 
 		return nil
 	},
