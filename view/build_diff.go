@@ -42,7 +42,7 @@ func (cl *componentlist) get(c string) *component {
 }
 
 func (cl *componentlist) add(c diff.Change) {
-	id := strings.Replace(c.Path[0], "::", ".", 0)
+	id := strings.Replace(c.Path[0], "::", ".", 1)
 	c.Path = c.Path[1:]
 
 	last := c.Path[len(c.Path)-1]
