@@ -6,10 +6,13 @@ package command
 
 // CmdProject subcommand
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/view"
@@ -149,7 +152,66 @@ var SyncEnv = cli.Command{
 	Action: func(c *cli.Context) error {
 		paramsLenValidation(c, 2, "envs.sync.args")
 		client := esetup(c, AuthUsersValidation)
-		client.Environment().Sync(c.Args()[0], c.Args()[1])
+
+		project := c.Args()[0]
+		env := c.Args()[1]
+
+		action := client.Environment().Sync(project, env)
+		if action.ResourceID == "" {
+			return nil
+		}
+
+		stream := client.Build().Stream(action.ResourceID)
+		for {
+			var m map[string]interface{}
+
+			msg, ok := <-stream
+			if !ok {
+				h.PrintError("could not monitor sync progress")
+			}
+
+			if msg.Data == nil {
+				continue
+			}
+
+			if json.Unmarshal(bytes.Trim(msg.Data, "\x00"), &m) != nil {
+				h.PrintError("could not parse response")
+			}
+
+			if m["_subject"].(string) == "build.import.done" {
+				break
+			}
+		}
+
+		// wait for definition mapper to update build graph
+		time.Sleep(time.Second)
+
+		build := client.Build().Get(project, env, action.ResourceID)
+
+		switch build.Status {
+		case "done":
+			color.Green("No changes detected")
+		case "awaiting_resolution":
+			color.Red("Changes detected")
+			fmt.Println("")
+
+			builds := client.Build().List(project, env)
+
+			b1 := buildIDFromIndex(builds, strconv.Itoa(len(builds)-1))
+			b2 := buildIDFromIndex(builds, strconv.Itoa(len(builds)))
+
+			changelog := client.Build().Diff(project, env, b1.ID, b2.ID)
+			if len(*changelog) == 0 {
+				color.Green("There are no changes detected")
+				return nil
+			}
+
+			color.Red("If rejected, ernest will action the following changes:")
+
+			view.PrintDiff(changelog)
+		case "errored":
+			color.Red("Sync failed!")
+		}
 
 		return nil
 	},
@@ -196,10 +258,9 @@ var ReviewEnv = cli.Command{
 
 			b1 := buildIDFromIndex(builds, strconv.Itoa(len(builds)-1))
 			b2 := buildIDFromIndex(builds, strconv.Itoa(len(builds)))
-			def1 := client.Build().Definition(project, env, b1.ID)
-			def2 := client.Build().Definition(project, env, b2.ID)
 
-			view.PrintEnvDiff(b1.ID, b2.ID, []byte(def1), []byte(def2))
+			changelog := client.Build().Diff(project, env, b1.ID, b2.ID)
+			view.PrintDiff(changelog)
 
 			return nil
 		}
@@ -230,6 +291,9 @@ var ResolveEnv = cli.Command{
 		paramsLenValidation(c, 2, "envs.resolve.args")
 		client := esetup(c, AuthUsersValidation)
 
+		project := c.Args()[0]
+		env := c.Args()[1]
+
 		var resolution string
 		if c.Bool("accept") {
 			resolution = "accept-changes"
@@ -242,7 +306,15 @@ var ResolveEnv = cli.Command{
 		}
 
 		if resolution == "" {
-			h.PrintError(h.T("envs.resolve.errors.non_valid"))
+			builds := client.Build().List(project, env)
+
+			b1 := buildIDFromIndex(builds, strconv.Itoa(len(builds)-1))
+			b2 := buildIDFromIndex(builds, strconv.Itoa(len(builds)))
+
+			changelog := client.Build().Diff(project, env, b1.ID, b2.ID)
+			view.PrintDiff(changelog)
+
+			return nil
 		}
 
 		action := client.Environment().Resolve(c.Args()[0], c.Args()[1], resolution)
