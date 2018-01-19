@@ -255,11 +255,9 @@ var ReviewEnv = cli.Command{
 
 		if resolution == "" {
 			builds := client.Build().List(project, env)
-
-			b1 := buildIDFromIndex(builds, strconv.Itoa(len(builds)-1))
 			b2 := buildIDFromIndex(builds, strconv.Itoa(len(builds)))
 
-			changelog := client.Build().Diff(project, env, b1.ID, b2.ID)
+			changelog := client.Build().Changelog(project, env, b2.ID)
 			view.PrintDiff(changelog)
 
 			return nil

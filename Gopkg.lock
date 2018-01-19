@@ -21,7 +21,7 @@
     "connection",
     "models"
   ]
-  revision = "b4863f56efac4aa097ae3a132c4100f3d0bca971"
+  revision = "1188e4ce8ed3909d4c921a54f0bfbc3067285d75"
 
 [[projects]]
   name = "github.com/fatih/color"
@@ -124,12 +124,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  name = "github.com/pmezard/go-difflib"
-  packages = ["difflib"]
-  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
-  version = "v1.0.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/r3labs/diff"
   packages = ["."]
@@ -223,6 +217,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c2c9473c34c872d84410f104bce81c1eb007042676abff1b7fe725f50fc0b708"
+  inputs-digest = "04949f34585e4b42519f4375e77aeb8dae81e0995fae0dbb9cb8ff8c7fdd909b"
   solver-name = "gps-cdcl"
   solver-version = 1
