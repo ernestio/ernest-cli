@@ -65,6 +65,15 @@ func (c *Build) Diff(project, env, from, to string) *diff.Changelog {
 	return changelog
 }
 
+// Changelog : get a changelog for a build (if it has been generated)
+func (c *Build) Changelog(project, env, id string) *diff.Changelog {
+	changelog, err := c.cli.Builds.Changelog(project, env, id)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+	return changelog
+}
+
 // Stream : Streams build progress
 func (c *Build) Stream(id string) chan *sse.Event {
 	ch, err := c.cli.Builds.Stream(id)
