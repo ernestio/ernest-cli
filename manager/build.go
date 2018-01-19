@@ -7,6 +7,7 @@ package manager
 import (
 	"strconv"
 
+	"github.com/r3labs/diff"
 	"github.com/r3labs/sse"
 
 	h "github.com/ernestio/ernest-cli/helper"
@@ -53,6 +54,15 @@ func (c *Build) List(project, env string) []*emodels.Build {
 		h.PrintError(err.Error())
 	}
 	return builds
+}
+
+// Diff : Diff two builds by id
+func (c *Build) Diff(project, env, from, to string) *diff.Changelog {
+	changelog, err := c.cli.Builds.Diff(project, env, from, to)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+	return changelog
 }
 
 // Stream : Streams build progress

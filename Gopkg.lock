@@ -21,7 +21,7 @@
     "connection",
     "models"
   ]
-  revision = "7966fa449bed6e3471658931d889d59b7b97d3ea"
+  revision = "b4863f56efac4aa097ae3a132c4100f3d0bca971"
 
 [[projects]]
   name = "github.com/fatih/color"
@@ -130,6 +130,12 @@
   version = "v1.0.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/r3labs/diff"
+  packages = ["."]
+  revision = "94f6e3434299a8466b500bbf08ee11228d3a3986"
+
+[[projects]]
   name = "github.com/r3labs/sse"
   packages = ["."]
   revision = "ab73c814bbdece537f16e92302cd99d1618d0e0d"
@@ -217,6 +223,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9e17144374c59f399a45c6009795da1aa367c1faf7a9fa2ac69f0dd3d752d2d2"
+  inputs-digest = "c2c9473c34c872d84410f104bce81c1eb007042676abff1b7fe725f50fc0b708"
   solver-name = "gps-cdcl"
   solver-version = 1
