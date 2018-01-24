@@ -505,7 +505,7 @@ en:
     schedule:
       list:
         usage: "List environment schedules."
-        args: " "
+        args: "<project> <environment>"
         description: |
           Lists the schedules for a scpecific environment
 

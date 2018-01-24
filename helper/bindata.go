@@ -551,7 +551,7 @@ var _langEnYml = []byte(`en:
     schedule:
       list:
         usage: "List environment schedules."
-        args: " "
+        args: "<project> <environment>"
         description: |
           Lists the schedules for a scpecific environment
 
@@ -1076,7 +1076,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 34650, mode: os.FileMode(420), modTime: time.Unix(1516798358, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 34672, mode: os.FileMode(420), modTime: time.Unix(1516802212, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
