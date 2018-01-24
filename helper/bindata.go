@@ -575,7 +575,7 @@ var _langEnYml = []byte(`en:
           schedule:
             alias: schedule
             desc: sets the automatic schedule. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
-        success: Environment schedules successfully updated
+        success: "Environment schedules successfully updated"
       rm:
         usage: "Removes a schedule on the specified environment."
         args: "$ ernest env schedule rm <project> <env> <my_schedule>"
@@ -1076,7 +1076,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 34624, mode: os.FileMode(420), modTime: time.Unix(1515762692, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 34626, mode: os.FileMode(420), modTime: time.Unix(1516793954, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

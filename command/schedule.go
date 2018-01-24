@@ -12,11 +12,11 @@ import (
 var EnvListSchedules = cli.Command{
 	Name:        "list",
 	Aliases:     []string{"a"},
-	Usage:       h.T("envs.schedules.list.usage"),
-	ArgsUsage:   h.T("envs.schedules.list.args"),
-	Description: h.T("envs.schedules.list.description"),
+	Usage:       h.T("envs.schedule.list.usage"),
+	ArgsUsage:   h.T("envs.schedule.list.args"),
+	Description: h.T("envs.schedule.list.description"),
 	Action: func(c *cli.Context) error {
-		paramsLenValidation(c, 2, "envs.schedules.list.args")
+		paramsLenValidation(c, 2, "envs.schedule.list.args")
 		client := esetup(c, AuthUsersValidation)
 
 		env := client.Environment().Get(c.Args()[0], c.Args()[1])
@@ -31,16 +31,16 @@ var EnvListSchedules = cli.Command{
 var EnvAddSchedule = cli.Command{
 	Name:        "add",
 	Aliases:     []string{"a"},
-	Usage:       h.T("envs.schedules.add.usage"),
-	ArgsUsage:   h.T("envs.schedules.add.args"),
-	Description: h.T("envs.schedules.add.description"),
+	Usage:       h.T("envs.schedule.add.usage"),
+	ArgsUsage:   h.T("envs.schedule.add.args"),
+	Description: h.T("envs.schedule.add.description"),
 	Flags: []cli.Flag{
 		tStringFlagND("envs.schedule.add.flags.action"),
 		tStringFlagND("envs.schedule.add.flags.instance_type"),
 		tStringFlagND("envs.schedule.add.flags.schedule"),
 	},
 	Action: func(c *cli.Context) error {
-		paramsLenValidation(c, 2, "envs.schedules.list.args")
+		paramsLenValidation(c, 2, "envs.schedule.list.args")
 		client := esetup(c, AuthUsersValidation)
 
 		env := client.Environment().Get(c.Args()[0], c.Args()[1])
@@ -59,7 +59,7 @@ var EnvAddSchedule = cli.Command{
 			env.Schedules[c.Args()[2]] = schedule
 		}
 		client.Environment().Update(env)
-		color.Green(h.T("envs.schedules.add.success"))
+		color.Green(h.T("envs.schedule.add.success"))
 
 		return nil
 	},
@@ -69,11 +69,11 @@ var EnvAddSchedule = cli.Command{
 var EnvRmSchedule = cli.Command{
 	Name:        "delete",
 	Aliases:     []string{"a"},
-	Usage:       h.T("envs.schedules.rm.usage"),
-	ArgsUsage:   h.T("envs.schedules.rm.args"),
-	Description: h.T("envs.schedules.rm.description"),
+	Usage:       h.T("envs.schedule.rm.usage"),
+	ArgsUsage:   h.T("envs.schedule.rm.args"),
+	Description: h.T("envs.schedule.rm.description"),
 	Action: func(c *cli.Context) error {
-		paramsLenValidation(c, 2, "envs.schedules.list.args")
+		paramsLenValidation(c, 2, "envs.schedule.list.args")
 		client := esetup(c, AuthUsersValidation)
 
 		env := client.Environment().Get(c.Args()[0], c.Args()[1])
@@ -83,7 +83,7 @@ var EnvRmSchedule = cli.Command{
 			delete(env.Schedules, c.Args()[2])
 		}
 		client.Environment().Update(env)
-		color.Green(h.T("envs.schedules.rm.success"))
+		color.Green(h.T("envs.schedule.rm.success"))
 
 		return nil
 	},

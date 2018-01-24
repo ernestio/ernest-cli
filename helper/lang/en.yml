@@ -529,7 +529,7 @@ en:
           schedule:
             alias: schedule
             desc: sets the automatic schedule. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
-        success: Environment schedules successfully updated
+        success: "Environment schedules successfully updated"
       rm:
         usage: "Removes a schedule on the specified environment."
         args: "$ ernest env schedule rm <project> <env> <my_schedule>"
