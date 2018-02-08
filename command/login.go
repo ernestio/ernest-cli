@@ -34,24 +34,24 @@ var Login = cli.Command{
 		var password string
 		var verificationCode string
 
-		if os.Getenv("ERNEST_USER") != "" {
-			username = os.Getenv("ERNEST_USER")
-		} else {
-			if c.String("user") == "" {
+		if c.String("user") == "" {
+			if os.Getenv("ERNEST_USER") != "" {
+				username = os.Getenv("ERNEST_USER")
+			} else {
 				fmt.Printf("Username: ")
 				_, err := fmt.Scanln(&username)
 				if err != nil {
 					fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
 				}
-			} else {
-				username = c.String("user")
 			}
+		} else {
+			username = c.String("user")
 		}
 
-		if os.Getenv("ERNEST_PASSWORD") != "" {
-			password = os.Getenv("ERNEST_PASSWORD")
-		} else {
-			if c.String("password") == "" {
+		if c.String("password") == "" {
+			if os.Getenv("ERNEST_PASSWORD") != "" {
+				password = os.Getenv("ERNEST_PASSWORD")
+			} else {
 				fmt.Printf("Password: ")
 				if runtime.GOOS == "windows" {
 					_, err := fmt.Scanln(&password)
@@ -62,9 +62,9 @@ var Login = cli.Command{
 					pass, _ := gopass.GetPasswdMasked()
 					password = string(pass)
 				}
-			} else {
-				password = c.String("password")
 			}
+		} else {
+			password = c.String("password")
 		}
 
 		verificationCode = c.String("verification-code")
