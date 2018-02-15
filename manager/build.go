@@ -11,6 +11,7 @@ import (
 	"github.com/r3labs/sse"
 
 	h "github.com/ernestio/ernest-cli/helper"
+	"github.com/ernestio/ernest-cli/view"
 	eclient "github.com/ernestio/ernest-go-sdk/client"
 	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
@@ -24,6 +25,10 @@ type Build struct {
 func (c *Build) Create(definition []byte) *emodels.Build {
 	build, err := c.cli.Builds.Create(definition)
 	if err != nil {
+		ernesterr, ok := err.(*emodels.Error)
+		if ok {
+			view.PrintValidation(ernesterr.Validation)
+		}
 		h.PrintError(err.Error())
 	}
 	return build
