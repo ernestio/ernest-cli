@@ -22,7 +22,15 @@ func PrintValidation(v *models.Validation) {
 		color.Red("Validation Failed!")
 	}
 
+	var current string
+
 	for _, control := range v.Controls {
+		if control.PolicyName() != current {
+			fmt.Println(control.PolicyName())
+		}
+
+		current = control.PolicyName()
+
 		if control.Status == "passed" {
 			color.Green("✔ %s", control.CodeDesc)
 		} else {
