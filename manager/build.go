@@ -5,6 +5,7 @@
 package manager
 
 import (
+	"os"
 	"strconv"
 
 	"github.com/r3labs/diff"
@@ -25,9 +26,10 @@ type Build struct {
 func (c *Build) Create(definition []byte) *emodels.Build {
 	build, err := c.cli.Builds.Create(definition)
 	if err != nil {
-		ernesterr, ok := err.(*emodels.Error)
+		merr, ok := err.(*emodels.Error)
 		if ok {
-			view.PrintValidation(ernesterr.Validation)
+			view.PrintValidation(merr.Validation)
+			os.Exit(1)
 		}
 		h.PrintError(err.Error())
 	}

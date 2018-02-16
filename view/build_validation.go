@@ -40,5 +40,21 @@ func PrintValidation(v *models.Validation) {
 		}
 	}
 
-	fmt.Println("Test Summary: %d passed, %d failed, %d total", passed, failed, total)
+	fmt.Printf("\nTest Summary: %s, %s, %d total\n", fmtpassed(passed), fmtfailed(failed), total)
+}
+
+func fmtpassed(i int) string {
+	if i < 1 {
+		return fmt.Sprintf("%d passed", i)
+	} else {
+		return color.GreenString("%d passed", i)
+	}
+}
+
+func fmtfailed(i int) string {
+	if i > 0 {
+		return color.RedString("%d failed", i)
+	} else {
+		return fmt.Sprintf("%d failed", i)
+	}
 }
