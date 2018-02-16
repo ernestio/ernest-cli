@@ -54,14 +54,20 @@ var validations = map[string]validation{
 
 var session *emodels.Session
 
+func Esetup(c *cli.Context, vals []string) *manager.Client {
+	return esetup(c, vals)
+}
+
 // esetup ...
 func esetup(c *cli.Context, vals []string) *manager.Client {
 	session = nil
 	config := model.GetConfig()
 	if config == nil {
 		config = &model.Config{}
-		if c.Command.Name != "target" && c.Command.Name != "setup" {
-			h.PrintError("Environment not configured, please use target command")
+		if c != nil {
+			if c.Command.Name != "target" && c.Command.Name != "setup" {
+				h.PrintError("Environment not configured, please use target command")
+			}
 		}
 	}
 
@@ -74,6 +80,10 @@ func esetup(c *cli.Context, vals []string) *manager.Client {
 
 	return client
 
+}
+
+func Elogin(usr, pwd, vc string) *manager.Client {
+	return elogin(usr, pwd, vc)
 }
 
 // elogin ...

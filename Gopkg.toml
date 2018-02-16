@@ -75,3 +75,11 @@
 [[constraint]]
   branch = "v2"
   name = "gopkg.in/yaml.v2"
+
+[[constraint]]
+  name = "github.com/abiosoft/ishell"
+  branch = "master"
+
+[[override]]
+  name = "github.com/chzyer/readline"
+  branch = "master"
