@@ -23,6 +23,7 @@ func PrintValidation(v *models.Validation) {
 	}
 
 	var current string
+	passed, failed, total := v.Stats()
 
 	for _, control := range v.Controls {
 		if control.PolicyName() != current {
@@ -39,5 +40,5 @@ func PrintValidation(v *models.Validation) {
 		}
 	}
 
-	fmt.Println("Test Summary: ")
+	fmt.Println("Test Summary: %d passed, %d failed, %d total", passed, failed, total)
 }
