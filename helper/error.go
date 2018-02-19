@@ -10,10 +10,16 @@ import (
 	"github.com/fatih/color"
 )
 
+var Console = false
+
 // PrintError : prints an error and returns
 func PrintError(msg string) {
 	color.Red(msg)
-	os.Exit(1)
+	if Console {
+		panic("console")
+	} else {
+		os.Exit(1)
+	}
 }
 
 // EvaluateError : Evaluates an error and exits program

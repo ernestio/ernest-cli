@@ -3,6 +3,18 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/abiosoft/ishell"
+  packages = ["."]
+  revision = "42a9bbfa0017d7243b50b8f542076ef3d5e7da6c"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/chzyer/readline"
+  packages = ["."]
+  revision = "f6d7a1f6fbf35bbf9beb80dc63c56a29dcfb759f"
+
+[[projects]]
+  branch = "master"
   name = "github.com/ernestio/ernest-go-sdk"
   packages = [
     "client",
@@ -28,6 +40,12 @@
   packages = ["."]
   revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
   version = "v1.5.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/flynn-archive/go-shlex"
+  packages = ["."]
+  revision = "3f9db97f856818214da2e1057f8ad84803971cff"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -217,6 +235,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "04949f34585e4b42519f4375e77aeb8dae81e0995fae0dbb9cb8ff8c7fdd909b"
+  inputs-digest = "fd047cd7b5b5c02174d0505f13d16a816dd91f6505e6c4c459726cea6ae4c5ab"
   solver-name = "gps-cdcl"
   solver-version = 1
