@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/ernestio/ernest-cli/command"
+	"github.com/ernestio/ernest-cli/icommand"
 	"github.com/urfave/cli"
 )
 
@@ -35,6 +36,7 @@ func main() {
 		command.CmdNotification,
 		command.CmdPolicy,
 		command.CmdRoles,
+		icommand.CmdConsole,
 	}
 	if err := app.Run(os.Args); err != nil {
 		log.Println("Oops, something is broken")
