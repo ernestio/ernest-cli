@@ -16,27 +16,21 @@ func PrintValidation(v *models.Validation) {
 		return
 	}
 
-	if v.Passed() {
-		color.Green("Validation Passed!")
-	} else {
-		color.Red("Validation Failed!")
-	}
-
 	var current string
 	passed, failed, total := v.Stats()
 
 	for _, control := range v.Controls {
 		if control.PolicyName() != current {
-			fmt.Println(control.PolicyName())
+			fmt.Printf("Policy: %s\n\n", control.PolicyName())
 		}
 
 		current = control.PolicyName()
 
 		if control.Status == "passed" {
-			color.Green("✔ %s", control.CodeDesc)
+			fmt.Printf("    %s\n\n", color.GreenString("✔ %s", control.CodeDesc))
 		} else {
-			color.Red("✘ %s", control.CodeDesc)
-			color.Red("✘ %s", control.CodeDesc)
+			fmt.Printf("    %s\n", color.RedString("✘ %s", control.CodeDesc))
+			fmt.Printf("      %s\n\n", color.RedString(control.Message))
 		}
 	}
 
