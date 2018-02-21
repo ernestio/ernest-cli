@@ -19,7 +19,8 @@ import (
 
 // Build : ernest-go-sdk Build wrapper
 type Build struct {
-	cli *eclient.Client
+	cli     *eclient.Client
+	Verbose bool
 }
 
 // Create : Creates a new build
@@ -32,6 +33,9 @@ func (c *Build) Create(definition []byte) *emodels.Build {
 			os.Exit(1)
 		}
 		h.PrintError(err.Error())
+	}
+	if c.Verbose {
+		view.PrintValidation(build.Validation)
 	}
 	return build
 }

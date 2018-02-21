@@ -33,7 +33,7 @@
     "connection",
     "models"
   ]
-  revision = "7f3c6c432ae3a316a53e5328000995ab0f6db469"
+  revision = "3dcb6fbe1ec2bbc18a26a20be5819ff8a684473a"
 
 [[projects]]
   name = "github.com/fatih/color"

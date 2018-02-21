@@ -387,6 +387,9 @@ var _langEnYml = []byte(`en:
         dry:
           alias: dry
           desc: print the changes to be applied on an environment intead of applying them
+        verbose:
+          alias: verbose
+          desc: provide more information when applying a build
         credentials:
           alias: credentials
           desc: will override project information
@@ -1076,7 +1079,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 34672, mode: os.FileMode(420), modTime: time.Unix(1516802212, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 34777, mode: os.FileMode(420), modTime: time.Unix(1519234254, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

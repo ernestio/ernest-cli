@@ -6,6 +6,7 @@ package view
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ernestio/ernest-go-sdk/models"
 	"github.com/fatih/color"
@@ -16,21 +17,36 @@ func PrintValidation(v *models.Validation) {
 		return
 	}
 
-	var current string
 	passed, failed, total := v.Stats()
 
-	for _, control := range v.Controls {
-		if control.PolicyName() != current {
-			fmt.Printf("Policy: %s\n\n", control.PolicyName())
+	for i, profile := range v.Profiles {
+		if i > 0 {
+			fmt.Printf("\nPolicy: %s\n\n", profile.PolicyName())
+		} else {
+			fmt.Printf("Policy: %s\n\n", profile.PolicyName())
 		}
 
-		current = control.PolicyName()
+		for i, control := range profile.Controls {
+			var nl string
+			if i > 0 {
+				nl = "\n"
+			}
 
-		if control.Status == "passed" {
-			fmt.Printf("    %s\n\n", color.GreenString("✔ %s", control.CodeDesc))
-		} else {
-			fmt.Printf("    %s\n", color.RedString("✘ %s", control.CodeDesc))
-			fmt.Printf("      %s\n\n", color.RedString(control.Message))
+			if control.Passed() {
+				color.Green("%s    ✔ %s", nl, control.ControlTitle())
+			} else {
+				color.Red("%s    ✘ %s", nl, control.ControlTitle())
+			}
+
+			for _, result := range control.Results {
+				desc := strings.Split(result.CodeDesc, ":: ")
+				if result.Status == "passed" {
+					color.Green("      ✔ %s", desc[len(desc)-1])
+				} else {
+					color.Red("      ✘ %s", desc[len(desc)-1])
+					color.Red("        %s", result.Message)
+				}
+			}
 		}
 	}
 

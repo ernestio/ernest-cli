@@ -341,6 +341,9 @@ en:
         dry:
           alias: dry
           desc: print the changes to be applied on an environment intead of applying them
+        verbose:
+          alias: verbose
+          desc: provide more information when applying a build
         credentials:
           alias: credentials
           desc: will override project information

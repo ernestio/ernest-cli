@@ -100,6 +100,7 @@ var ApplyEnv = cli.Command{
 	Description: h.T("envs.apply.description"),
 	Flags: append([]cli.Flag{
 		tBoolFlag("envs.apply.flags.dry"),
+		tBoolFlag("envs.apply.flags.verbose"),
 		tStringFlagND("envs.apply.flags.credentials"),
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
@@ -124,6 +125,10 @@ var ApplyEnv = cli.Command{
 			view.EnvDry(*client.Build().Dry(payload))
 			return nil
 		}
+		if c.Bool("verbose") {
+			client.Build().Verbose = true
+		}
+
 		build := client.Build().Create(payload)
 		if build.Status == "submitted" {
 			color.Green("Build has been succesfully submitted and is awaiting approval.")
