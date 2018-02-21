@@ -73,6 +73,7 @@ var CmdConsole = cli.Command{
 		shell.AddCmd(role(shell, ctx))
 		shell.AddCmd(schedule(shell, ctx))
 		shell.AddCmd(users(shell, ctx))
+		shell.AddCmd(logger(shell, ctx))
 
 		// run shell
 		shell.Run()
