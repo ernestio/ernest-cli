@@ -41,10 +41,10 @@ func PrintValidation(v *models.Validation) {
 			for _, result := range control.Results {
 				desc := strings.Split(result.CodeDesc, ":: ")
 				if result.Status == "passed" {
-					color.Green("      ✔ %s", desc[len(desc)-1])
+					color.Green("      ✔ %s", fmtresult(desc[len(desc)-1]))
 				} else {
-					color.Red("      ✘ %s", desc[len(desc)-1])
-					color.Red("        %s", result.Message)
+					color.Red("      ✘ %s", fmtresult(desc[len(desc)-1]))
+					color.Red("        %s", fmtresult(result.Message))
 				}
 			}
 		}
@@ -67,4 +67,30 @@ func fmtfailed(i int) string {
 	} else {
 		return fmt.Sprintf("%d failed", i)
 	}
+}
+
+func fmtresult(r string) string {
+	// remove strange formatting of hash to array of kv pairs
+
+	b := strings.Index(r, "[")
+	e := strings.LastIndex(r, "]")
+
+	if b == -1 || e == -1 {
+		return r
+	}
+
+	final := r[0:b] + "{"
+	items := r[b:e]
+	sections := strings.Split(items, "], ")
+
+	for i := range sections {
+		sections[i] = strings.TrimPrefix(sections[i], "[")
+		sections[i] = strings.TrimPrefix(sections[i], "and [")
+		sections[i] = strings.Replace(sections[i], "\", ", "\" => ", -1)
+	}
+
+	final = final + strings.Join(sections, ", ")
+	final = final + "}"
+
+	return final
 }
