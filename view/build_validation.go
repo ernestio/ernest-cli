@@ -72,6 +72,9 @@ func fmtfailed(i int) string {
 func fmtresult(r string) string {
 	// remove strange formatting of hash to array of kv pairs
 
+	r = strings.Replace(r, "\n", "\n        ", -1)
+	r = strings.Replace(r, " ::", "", 1)
+
 	b := strings.Index(r, "[")
 	e := strings.LastIndex(r, "]")
 
