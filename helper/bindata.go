@@ -468,6 +468,14 @@ var _langEnYml = []byte(`en:
         build:
           alias: "build"
           desc: "Build ID"
+    validate:
+      usage: "$ ernest env validate <my_project> <my_env>"
+      args: "$ ernest env validate <my_project> <my_env>"
+      description: |
+        Will validate the specified environment against its attached policy documents.
+
+        Examples:
+          $ ernest env validate <my_project> <my_env>
     sync:
       usage: "$ ernest env sync <my_project> <my_env>"
       args: "$ ernest env sync <my_project> <my_env>"
@@ -1079,7 +1087,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 34777, mode: os.FileMode(420), modTime: time.Unix(1519234254, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 35089, mode: os.FileMode(420), modTime: time.Unix(1520526896, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -422,6 +422,14 @@ en:
         build:
           alias: "build"
           desc: "Build ID"
+    validate:
+      usage: "$ ernest env validate <my_project> <my_env>"
+      args: "$ ernest env validate <my_project> <my_env>"
+      description: |
+        Will validate the specified environment against its attached policy documents.
+
+        Examples:
+          $ ernest env validate <my_project> <my_env>
     sync:
       usage: "$ ernest env sync <my_project> <my_env>"
       args: "$ ernest env sync <my_project> <my_env>"

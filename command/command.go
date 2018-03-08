@@ -54,6 +54,7 @@ var validations = map[string]validation{
 
 var session *emodels.Session
 
+//Esetup : sets up connection to ernest
 func Esetup(c *cli.Context, vals []string) *manager.Client {
 	return esetup(c, vals)
 }
@@ -82,6 +83,7 @@ func esetup(c *cli.Context, vals []string) *manager.Client {
 
 }
 
+// Elogin : logs in
 func Elogin(usr, pwd, vc string) *manager.Client {
 	return elogin(usr, pwd, vc)
 }
