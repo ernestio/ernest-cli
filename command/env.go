@@ -316,6 +316,7 @@ var ResolveEnv = cli.Command{
 
 			changelog := client.Build().Diff(project, env, b1.ID, b2.ID)
 			view.PrintDiff(changelog)
+			fmt.Printf("\n\n")
 			view.PrintValidation(b2.Validation)
 
 			return nil
