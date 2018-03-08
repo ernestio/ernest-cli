@@ -316,6 +316,8 @@ var ResolveEnv = cli.Command{
 
 			changelog := client.Build().Diff(project, env, b1.ID, b2.ID)
 			view.PrintDiff(changelog)
+			fmt.Printf("\n\n")
+			view.PrintValidation(b2.Validation)
 
 			return nil
 		}
@@ -324,6 +326,28 @@ var ResolveEnv = cli.Command{
 		if action.ResourceID != "" {
 			h.Monitorize(client.Build().Stream(action.ResourceID))
 		}
+
+		return nil
+	},
+}
+
+// ValidateEnv command
+// Validates an issue that requires user input
+var ValidateEnv = cli.Command{
+	Name:        "validate",
+	Usage:       h.T("envs.validate.usage"),
+	ArgsUsage:   h.T("envs.validate.args"),
+	Description: h.T("envs.validate.description"),
+	Action: func(c *cli.Context) error {
+		paramsLenValidation(c, 2, "envs.validate.args")
+		client := esetup(c, AuthUsersValidation)
+
+		project := c.Args()[0]
+		env := c.Args()[1]
+
+		validation := client.Environment().Validate(project, env)
+
+		view.PrintValidation(validation)
 
 		return nil
 	},
@@ -582,5 +606,6 @@ var CmdEnv = cli.Command{
 		ResolveEnv,
 		ReviewEnv,
 		ScheduleEnv,
+		ValidateEnv,
 	},
 }

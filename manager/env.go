@@ -85,6 +85,15 @@ func (c *Environment) Reset(project, id string) *emodels.Action {
 	return act
 }
 
+// Reset : Resets a env by name
+func (c *Environment) Validate(project, env string) *emodels.Validation {
+	validation, err := c.cli.Environments.Validate(project, env)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+	return validation
+}
+
 // Update : Updates a notification
 func (c *Environment) Update(env *emodels.Environment) {
 	if err := c.cli.Environments.Update(env); err != nil {
