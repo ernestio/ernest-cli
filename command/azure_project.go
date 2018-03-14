@@ -22,7 +22,6 @@ var CreateAzureProject = cli.Command{
 	Description: h.T("azure.create.description"),
 	ArgsUsage:   h.T("azure.create.args"),
 	Flags: []cli.Flag{
-		tStringFlag("azure.create.flags.region"),
 		tStringFlag("azure.create.flags.subscription_id"),
 		tStringFlag("azure.create.flags.client_id"),
 		tStringFlag("azure.create.flags.client_secret"),
@@ -34,7 +33,6 @@ var CreateAzureProject = cli.Command{
 		paramsLenValidation(c, 1, "azure.create.args")
 		client := esetup(c, AuthUsersValidation)
 		creds := parseTemplateFlags(c, map[string]flagDef{
-			"region":          flagDef{typ: "string", mapto: "region", req: true},
 			"subscription_id": flagDef{typ: "string", mapto: "azure_subscription_id", req: true},
 			"client_id":       flagDef{typ: "string", mapto: "azure_client_id", req: true},
 			"client_secret":   flagDef{typ: "string", mapto: "azure_client_secret", req: true},
@@ -82,7 +80,6 @@ var UpdateAzureProject = cli.Command{
 			"client_secret":   flagDef{typ: "string", mapto: "azure_client_secret"},
 			"tenant_id":       flagDef{typ: "string", mapto: "azure_tenant_id"},
 			"environment":     flagDef{typ: "string", mapto: "azure_environment"},
-			"region":          flagDef{typ: "string", mapto: "region"},
 		})
 
 		n := client.Project().Get(c.Args()[0])

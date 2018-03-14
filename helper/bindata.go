@@ -240,29 +240,24 @@ var _langEnYml = []byte(`en:
   azure:
     create:
       usage: "Create a new azure project."
-      args: "$ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
+      args: "$ ernest project create azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
       description: |
         Create a new Azure project on the targeted instance of Ernest.
 
         Example:
-          $ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
+          $ ernest project create azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
 
         Template example:
           $ ernest project create azure --template myproject.yml myproject
         Where myproject.yaml will look like:
           ---
           fake: true
-          region: westus
           subscription_id: SUBSCRIPTION
           client_id: USER
           client_secret: PASSWORD
           tenant_id: TENANT
           environment: public
       flags:
-        region:
-          alias: "region, r"
-          def: ""
-          desc: "Project region"
         subscription_id:
           alias: "subscription_id"
           def: ""
@@ -1087,7 +1082,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 35089, mode: os.FileMode(420), modTime: time.Unix(1520526896, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 34936, mode: os.FileMode(420), modTime: time.Unix(1521033204, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
