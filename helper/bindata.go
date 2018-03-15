@@ -778,12 +778,12 @@ var _langEnYml = []byte(`en:
           desc: "Policy spec"
     create:
       usage: "Create a new policy."
-      args: "$ ernest policy create --policy-name <notify_name> --spec <spec>"
+      args: "$ ernest policy create --policy-name <policy_name> --spec <spec>"
       description: |
         Creates a new policy on Ernest
 
         Example:
-          $ ernest policy create --policy-name <notify_name> --spec <spec>
+          $ ernest policy create --policy-name <policy_name> --spec <spec>
       success: "Policy %s successfully created"
       errors:
         spec: "You should specify a valid path for your policy file"
@@ -798,25 +798,55 @@ var _langEnYml = []byte(`en:
           desc: "Policy spec"
     show:
       usage: "Display existing policy details."
-      args: "$ ernest policy show --policy-name <notify_name>"
+      args: "$ ernest policy show --policy-name <policy_name>"
       description: |
         Display existing policy details
 
         Example:
-          $ ernest policy show --policy-name <notify_name>
+          $ ernest policy show --policy-name <policy_name>
       flags:
         name:
           alias: "policy-name"
           def: ""
           desc: "Policy name"
+    history:
+      usage: "Display all policy revisions."
+      args: "$ ernest policy history --policy-name <policy_name>"
+      description: |
+        Display all policy revisions
+
+        Example:
+          $ ernest policy history --policy-name <policy_name>
+      flags:
+        name:
+          alias: "policy-name"
+          def: ""
+          desc: "Policy name"
+    definition:
+      usage: "Display the policy document for a given policy revision."
+      args: "$ ernest policy definition --policy-name <policy_name> --revision <policy_revision>"
+      description: |
+        Display the policy document for a given policy revision
+
+        Example:
+          $ ernest policy definition --policy-name <policy_name> --revision <policy_revision>
+      flags:
+        name:
+          alias: "policy-name"
+          def: ""
+          desc: "Policy name"
+        revision:
+          alias: "revision"
+          def: ""
+          desc: "Policy revision"
     attach:
       usage: "Attach a policy to an existing environment."
-      args: "$ ernest policy attach --policy-name <notify_name> --environment project/env"
+      args: "$ ernest policy attach --policy-name <policy_name> --environment project/env"
       description: |
         Attach a policy to an existing environment.
 
         Example:
-          $ ernest policy attach --policy-name <notify_name> --environment project/env
+          $ ernest policy attach --policy-name <policy_name> --environment project/env
       flags:
         name:
           alias: "policy-name"
@@ -832,12 +862,12 @@ var _langEnYml = []byte(`en:
       success: "Policy %s successfully attached to %s"
     detach:
       usage: "Detach a policy from an existing environment."
-      args: "$ ernest policy detach --policy-name <notify_name> --environment project/env"
+      args: "$ ernest policy detach --policy-name <policy_name> --environment project/env"
       description: |
         Detch a policy to an existing environment.
 
         Example:
-          $ ernest policy detach --policy-name <notify_name> --environment project/env
+          $ ernest policy detach --policy-name <policy_name> --environment project/env
       flags:
         name:
           alias: "policy-name"
@@ -1087,7 +1117,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 35089, mode: os.FileMode(420), modTime: time.Unix(1520526896, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 36044, mode: os.FileMode(420), modTime: time.Unix(1521135448, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
