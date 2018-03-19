@@ -74,11 +74,10 @@ func PrintProjectList(projects []*emodels.Project) {
 		fmt.Println("")
 		fmt.Println("Azure Projects")
 		table := tablewriter.NewWriter(os.Stdout)
-		table.SetHeader([]string{"ID", "Name", "Type", "Region"})
+		table.SetHeader([]string{"ID", "Name", "Type"})
 		for _, d := range azure {
 			id := strconv.Itoa(d.ID)
-			region, _ := d.Credentials["region"].(string)
-			table.Append([]string{id, d.Name, d.Type, region})
+			table.Append([]string{id, d.Name, d.Type})
 		}
 		table.Render()
 	}

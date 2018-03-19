@@ -240,29 +240,24 @@ var _langEnYml = []byte(`en:
   azure:
     create:
       usage: "Create a new azure project."
-      args: "$ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
+      args: "$ ernest project create azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
       description: |
         Create a new Azure project on the targeted instance of Ernest.
 
         Example:
-          $ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
+          $ ernest project create azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
 
         Template example:
           $ ernest project create azure --template myproject.yml myproject
         Where myproject.yaml will look like:
           ---
           fake: true
-          region: westus
           subscription_id: SUBSCRIPTION
           client_id: USER
           client_secret: PASSWORD
           tenant_id: TENANT
           environment: public
       flags:
-        region:
-          alias: "region, r"
-          def: ""
-          desc: "Project region"
         subscription_id:
           alias: "subscription_id"
           def: ""
@@ -798,17 +793,21 @@ var _langEnYml = []byte(`en:
           desc: "Policy spec"
     show:
       usage: "Display existing policy details."
-      args: "$ ernest policy show --policy-name <policy_name>"
+      args: "$ ernest policy show --policy-name <policy_name> --revision <policy_revision>"
       description: |
         Display existing policy details
 
         Example:
-          $ ernest policy show --policy-name <policy_name>
+          $ ernest policy show --policy-name <policy_name> --revision <policy_revision>
       flags:
         name:
           alias: "policy-name"
           def: ""
           desc: "Policy name"
+        revision:
+          alias: "revision"
+          def: ""
+          desc: "Policy revision"
     history:
       usage: "Display all policy revisions."
       args: "$ ernest policy history --policy-name <policy_name>"
@@ -822,23 +821,6 @@ var _langEnYml = []byte(`en:
           alias: "policy-name"
           def: ""
           desc: "Policy name"
-    definition:
-      usage: "Display the policy document for a given policy revision."
-      args: "$ ernest policy definition --policy-name <policy_name> --revision <policy_revision>"
-      description: |
-        Display the policy document for a given policy revision
-
-        Example:
-          $ ernest policy definition --policy-name <policy_name> --revision <policy_revision>
-      flags:
-        name:
-          alias: "policy-name"
-          def: ""
-          desc: "Policy name"
-        revision:
-          alias: "revision"
-          def: ""
-          desc: "Policy revision"
     attach:
       usage: "Attach a policy to an existing environment."
       args: "$ ernest policy attach --policy-name <policy_name> --environment project/env"
@@ -1117,7 +1099,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 36044, mode: os.FileMode(420), modTime: time.Unix(1521135448, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 35460, mode: os.FileMode(420), modTime: time.Unix(1521458705, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
