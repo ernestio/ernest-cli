@@ -147,7 +147,6 @@ var HistoryPolicy = cli.Command{
 	Description: h.T("policy.history.description"),
 	Flags: []cli.Flag{
 		tStringFlag("policy.history.flags.name"),
-		tStringFlag("policy.history.flags.revision"),
 	},
 	Action: func(c *cli.Context) error {
 		flags := parseTemplateFlags(c, map[string]flagDef{
@@ -156,8 +155,8 @@ var HistoryPolicy = cli.Command{
 		client := esetup(c, AuthUsersValidation)
 
 		documents := client.Policy().ListDocuments(flags["policy-name"].(string))
-		// view.RenderDocuments
-		fmt.Println(documents)
+		view.PrintPolicyHistory(documents)
+
 		return nil
 	},
 }
