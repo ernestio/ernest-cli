@@ -5,7 +5,6 @@
 package manager
 
 import (
-	"os"
 	"strconv"
 
 	"github.com/r3labs/diff"
@@ -30,7 +29,6 @@ func (c *Build) Create(definition []byte) *emodels.Build {
 		merr, ok := err.(*emodels.Error)
 		if ok {
 			view.PrintValidation(merr.Validation)
-			os.Exit(1)
 		}
 		h.PrintError(err.Error())
 	}
