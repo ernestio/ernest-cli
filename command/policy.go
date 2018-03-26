@@ -79,9 +79,7 @@ var UpdatePolicy = cli.Command{
 			h.PrintError(h.T("policy.update.errors.spec"))
 		}
 
-		n := client.Policy().Get(name)
-		n.Definition = string(spec)
-		client.Policy().Update(n)
+		client.Policy().CreateDocument(name, string(spec))
 		color.Green(fmt.Sprintf(h.T("policy.update.success"), name))
 		return nil
 	},
@@ -109,10 +107,10 @@ var CreatePolicy = cli.Command{
 		}
 
 		policy := emodels.Policy{
-			Name:       flags["policy-name"].(string),
-			Definition: string(spec),
+			Name: flags["policy-name"].(string),
 		}
 		client.Policy().Create(&policy)
+		client.Policy().CreateDocument(policy.Name, string(spec))
 		color.Green(fmt.Sprintf(h.T("policy.create.success"), policy.Name))
 		return nil
 	},
@@ -126,7 +124,29 @@ var ShowPolicy = cli.Command{
 	Description: h.T("policy.show.description"),
 	Flags: []cli.Flag{
 		tStringFlag("policy.show.flags.name"),
-		tStringFlag("policy.show.flags.spec"),
+		tStringFlag("policy.show.flags.revision"),
+	},
+	Action: func(c *cli.Context) error {
+		flags := parseTemplateFlags(c, map[string]flagDef{
+			"policy-name": flagDef{typ: "string", req: true},
+			"revision":    flagDef{typ: "string", req: true},
+		})
+		client := esetup(c, AuthUsersValidation)
+
+		n := client.Policy().GetDocument(flags["policy-name"].(string), flags["revision"].(string))
+		fmt.Println(n.Definition)
+		return nil
+	},
+}
+
+// HistoryPolicy : Display a policys revisions
+var HistoryPolicy = cli.Command{
+	Name:        "history",
+	Usage:       h.T("policy.history.usage"),
+	ArgsUsage:   h.T("policy.history.args"),
+	Description: h.T("policy.history.description"),
+	Flags: []cli.Flag{
+		tStringFlag("policy.history.flags.name"),
 	},
 	Action: func(c *cli.Context) error {
 		flags := parseTemplateFlags(c, map[string]flagDef{
@@ -134,8 +154,9 @@ var ShowPolicy = cli.Command{
 		})
 		client := esetup(c, AuthUsersValidation)
 
-		n := client.Policy().Get(flags["policy-name"].(string))
-		fmt.Println(n.Definition)
+		documents := client.Policy().ListDocuments(flags["policy-name"].(string))
+		view.PrintPolicyHistory(documents)
+
 		return nil
 	},
 }
@@ -229,6 +250,7 @@ var CmdPolicy = cli.Command{
 		UpdatePolicy,
 		DeletePolicy,
 		ShowPolicy,
+		HistoryPolicy,
 		AttachPolicy,
 		DetachPolicy,
 	},

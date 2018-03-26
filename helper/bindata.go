@@ -240,29 +240,24 @@ var _langEnYml = []byte(`en:
   azure:
     create:
       usage: "Create a new azure project."
-      args: "$ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
+      args: "$ ernest project create azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project"
       description: |
         Create a new Azure project on the targeted instance of Ernest.
 
         Example:
-          $ ernest project create azure --region westus --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
+          $ ernest project create azure --subscription_id SUBSCRIPTION --client_id USER --client_secret PASSWORD --tenant_id TENANT --environment public my_project
 
         Template example:
           $ ernest project create azure --template myproject.yml myproject
         Where myproject.yaml will look like:
           ---
           fake: true
-          region: westus
           subscription_id: SUBSCRIPTION
           client_id: USER
           client_secret: PASSWORD
           tenant_id: TENANT
           environment: public
       flags:
-        region:
-          alias: "region, r"
-          def: ""
-          desc: "Project region"
         subscription_id:
           alias: "subscription_id"
           def: ""
@@ -387,6 +382,9 @@ var _langEnYml = []byte(`en:
         dry:
           alias: dry
           desc: print the changes to be applied on an environment intead of applying them
+        verbose:
+          alias: verbose
+          desc: provide more information when applying a build
         credentials:
           alias: credentials
           desc: will override project information
@@ -465,6 +463,14 @@ var _langEnYml = []byte(`en:
         build:
           alias: "build"
           desc: "Build ID"
+    validate:
+      usage: "$ ernest env validate <my_project> <my_env>"
+      args: "$ ernest env validate <my_project> <my_env>"
+      description: |
+        Will validate the specified environment against its attached policy documents.
+
+        Examples:
+          $ ernest env validate <my_project> <my_env>
     sync:
       usage: "$ ernest env sync <my_project> <my_env>"
       args: "$ ernest env sync <my_project> <my_env>"
@@ -767,12 +773,12 @@ var _langEnYml = []byte(`en:
           desc: "Policy spec"
     create:
       usage: "Create a new policy."
-      args: "$ ernest policy create --policy-name <notify_name> --spec <spec>"
+      args: "$ ernest policy create --policy-name <policy_name> --spec <spec>"
       description: |
         Creates a new policy on Ernest
 
         Example:
-          $ ernest policy create --policy-name <notify_name> --spec <spec>
+          $ ernest policy create --policy-name <policy_name> --spec <spec>
       success: "Policy %s successfully created"
       errors:
         spec: "You should specify a valid path for your policy file"
@@ -787,12 +793,29 @@ var _langEnYml = []byte(`en:
           desc: "Policy spec"
     show:
       usage: "Display existing policy details."
-      args: "$ ernest policy show --policy-name <notify_name>"
+      args: "$ ernest policy show --policy-name <policy_name> --revision <policy_revision>"
       description: |
         Display existing policy details
 
         Example:
-          $ ernest policy show --policy-name <notify_name>
+          $ ernest policy show --policy-name <policy_name> --revision <policy_revision>
+      flags:
+        name:
+          alias: "policy-name"
+          def: ""
+          desc: "Policy name"
+        revision:
+          alias: "revision"
+          def: ""
+          desc: "Policy revision"
+    history:
+      usage: "Display all policy revisions."
+      args: "$ ernest policy history --policy-name <policy_name>"
+      description: |
+        Display all policy revisions
+
+        Example:
+          $ ernest policy history --policy-name <policy_name>
       flags:
         name:
           alias: "policy-name"
@@ -800,12 +823,12 @@ var _langEnYml = []byte(`en:
           desc: "Policy name"
     attach:
       usage: "Attach a policy to an existing environment."
-      args: "$ ernest policy attach --policy-name <notify_name> --environment project/env"
+      args: "$ ernest policy attach --policy-name <policy_name> --environment project/env"
       description: |
         Attach a policy to an existing environment.
 
         Example:
-          $ ernest policy attach --policy-name <notify_name> --environment project/env
+          $ ernest policy attach --policy-name <policy_name> --environment project/env
       flags:
         name:
           alias: "policy-name"
@@ -821,12 +844,12 @@ var _langEnYml = []byte(`en:
       success: "Policy %s successfully attached to %s"
     detach:
       usage: "Detach a policy from an existing environment."
-      args: "$ ernest policy detach --policy-name <notify_name> --environment project/env"
+      args: "$ ernest policy detach --policy-name <policy_name> --environment project/env"
       description: |
         Detch a policy to an existing environment.
 
         Example:
-          $ ernest policy detach --policy-name <notify_name> --environment project/env
+          $ ernest policy detach --policy-name <policy_name> --environment project/env
       flags:
         name:
           alias: "policy-name"
@@ -1076,7 +1099,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 34672, mode: os.FileMode(420), modTime: time.Unix(1516802212, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 35460, mode: os.FileMode(420), modTime: time.Unix(1521458705, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

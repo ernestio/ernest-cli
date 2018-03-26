@@ -53,3 +53,30 @@ func (c *Policy) Delete(policy string) {
 		h.PrintError(err.Error())
 	}
 }
+
+// GetDocument : Gets a policy document by revision
+func (c *Policy) GetDocument(policy, revision string) *emodels.PolicyDocument {
+	document, err := c.cli.Policies.GetDocument(policy, revision)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+
+	return document
+}
+
+// ListDocuments : Lists all policy documents by policy name
+func (c *Policy) ListDocuments(policy string) []*emodels.PolicyDocument {
+	documents, err := c.cli.Policies.ListDocuments(policy)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+
+	return documents
+}
+
+// CreateDocument : Creates a policy document and all its relations
+func (c *Policy) CreateDocument(policy, document string) {
+	if _, err := c.cli.Policies.CreateDocument(policy, document); err != nil {
+		h.PrintError(err.Error())
+	}
+}

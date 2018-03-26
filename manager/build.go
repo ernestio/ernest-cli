@@ -11,20 +11,29 @@ import (
 	"github.com/r3labs/sse"
 
 	h "github.com/ernestio/ernest-cli/helper"
+	"github.com/ernestio/ernest-cli/view"
 	eclient "github.com/ernestio/ernest-go-sdk/client"
 	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // Build : ernest-go-sdk Build wrapper
 type Build struct {
-	cli *eclient.Client
+	cli     *eclient.Client
+	Verbose bool
 }
 
 // Create : Creates a new build
 func (c *Build) Create(definition []byte) *emodels.Build {
 	build, err := c.cli.Builds.Create(definition)
 	if err != nil {
+		merr, ok := err.(*emodels.Error)
+		if ok {
+			view.PrintValidation(merr.Validation)
+		}
 		h.PrintError(err.Error())
+	}
+	if c.Verbose {
+		view.PrintValidation(build.Validation)
 	}
 	return build
 }
