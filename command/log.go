@@ -8,7 +8,7 @@ import (
 	"runtime"
 
 	"github.com/ernestio/ernest-cli/helper"
-	"github.com/nu7hatch/gouuid"
+	uuid "github.com/nu7hatch/gouuid"
 	"github.com/urfave/cli"
 
 	h "github.com/ernestio/ernest-cli/helper"
@@ -35,9 +35,9 @@ var CmdLog = cli.Command{
 		})
 
 		if c.Bool("raw") {
-			_ = helper.PrintRawLogs(client.Build().Stream(uuid))
+			_ = helper.PrintRawLogs(client.Logger().Stream(uuid))
 		} else {
-			_ = helper.PrintLogs(client.Build().Stream(uuid))
+			_ = helper.PrintLogs(client.Logger().Stream(uuid))
 		}
 
 		defer func() {
