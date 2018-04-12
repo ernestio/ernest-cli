@@ -296,6 +296,9 @@ en:
         sync_interval:
           alias: sync_interval
           desc: sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
+        sync_control:
+          alias: sync_control
+          desc: allows for automatic accept or reject of changes detected by sync. options are [auto-accept|auto-reject]
         submissions:
           alias: submissions
           desc: allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'
@@ -316,6 +319,9 @@ en:
         sync_interval:
           alias: sync_interval
           desc: sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
+        sync_control:
+          alias: sync_control
+          desc: allows for automatic accept or reject of changes detected by sync. options are [auto-accept|auto-reject]
         submissions:
           alias: submissions
           desc: allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'
