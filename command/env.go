@@ -46,6 +46,7 @@ var UpdateEnv = cli.Command{
 	Description: h.T("envs.update.description"),
 	Flags: append([]cli.Flag{
 		tStringFlagND("envs.update.flags.sync_interval"),
+		tStringFlagND("envs.create.flags.sync_control"),
 		tStringFlagND("envs.update.flags.submissions"),
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {
@@ -71,6 +72,7 @@ var CreateEnv = cli.Command{
 	Flags: append([]cli.Flag{
 		tStringFlagND("envs.create.flags.credentials"),
 		tStringFlagND("envs.create.flags.sync_interval"),
+		tStringFlagND("envs.create.flags.sync_control"),
 		tStringFlagND("envs.create.flags.submissions"),
 	}, AllProviderFlags...),
 	Action: func(c *cli.Context) error {

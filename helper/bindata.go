@@ -342,6 +342,9 @@ var _langEnYml = []byte(`en:
         sync_interval:
           alias: sync_interval
           desc: sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
+        sync_control:
+          alias: sync_control
+          desc: allows for automatic accept or reject of changes detected by sync. options are [auto-accept|auto-reject]
         submissions:
           alias: submissions
           desc: allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'
@@ -362,6 +365,9 @@ var _langEnYml = []byte(`en:
         sync_interval:
           alias: sync_interval
           desc: sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
+        sync_control:
+          alias: sync_control
+          desc: allows for automatic accept or reject of changes detected by sync. options are [auto-accept|auto-reject]
         submissions:
           alias: submissions
           desc: allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'
@@ -1099,7 +1105,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 35460, mode: os.FileMode(420), modTime: time.Unix(1521458705, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 35806, mode: os.FileMode(420), modTime: time.Unix(1523537220, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
