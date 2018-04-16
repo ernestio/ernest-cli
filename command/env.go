@@ -139,7 +139,6 @@ var ApplyEnv = cli.Command{
 
 		h.Monitorize(client.Build().Stream(build.ID))
 		view.PrintEnvInfo(
-			client.Project().Get(def.Project),
 			client.Environment().Get(def.Project, def.Name),
 			client.Build().Get(def.Project, def.Name, build.GetID()),
 		)
@@ -509,8 +508,7 @@ var InfoEnv = cli.Command{
 		build := client.Build().BuildByPosition(c.Args()[0], c.Args()[1], c.String("build"))
 		build = client.Build().Get(c.Args()[0], c.Args()[1], build.ID)
 		env := client.Environment().Get(c.Args()[0], c.Args()[1])
-		project := client.Project().Get(c.Args()[0])
-		view.PrintEnvInfo(project, env, build)
+		view.PrintEnvInfo(env, build)
 
 		return nil
 	},
