@@ -21,6 +21,7 @@ func main() {
 	app.Name = "ernest"
 	app.Version = Version
 	app.Usage = "Command line interface for Ernest"
+	app.EnableBashCompletion = true
 	app.Commands = []cli.Command{
 		command.Target,
 		command.Info,
