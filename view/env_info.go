@@ -21,6 +21,11 @@ func PrintEnvInfo(env *emodels.Environment, build *emodels.Build) {
 	fmt.Println("Name : " + parts[1])
 	fmt.Println("Status : " + build.Status)
 	fmt.Println("Project : " + parts[0])
+	if env.Options != nil {
+		if env.Options["sync_interval"] != nil {
+			fmt.Println("Sync Schedule : " + env.Options["sync_interval"].(string))
+		}
+	}
 	fmt.Println("Members:")
 	for _, m := range build.Roles {
 		fmt.Println("  " + m)
