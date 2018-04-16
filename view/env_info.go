@@ -15,14 +15,12 @@ import (
 )
 
 // PrintEnvInfo : Pretty print for build info
-func PrintEnvInfo(project *emodels.Project, env *emodels.Environment, build *emodels.Build) {
+func PrintEnvInfo(env *emodels.Environment, build *emodels.Build) {
 	fmt.Println("================\nPlatform Details\n================\n ")
 	parts := strings.Split(env.Name, "/")
 	fmt.Println("Name : " + parts[1])
 	fmt.Println("Status : " + build.Status)
-	fmt.Println("Project : " + project.Name)
-	fmt.Println("Provider : ")
-	fmt.Println("  Type : " + project.Type)
+	fmt.Println("Project : " + parts[0])
 	fmt.Println("Members:")
 	for _, m := range build.Roles {
 		fmt.Println("  " + m)
