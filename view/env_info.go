@@ -25,6 +25,9 @@ func PrintEnvInfo(env *emodels.Environment, build *emodels.Build) {
 		if env.Options["sync_interval"] != nil {
 			fmt.Println("Sync Schedule : " + env.Options["sync_interval"].(string))
 		}
+		if env.Options["sync_control"] != nil {
+			fmt.Println("Sync Control : " + env.Options["sync_control"].(string))
+		}
 	}
 	fmt.Println("Members:")
 	for _, m := range build.Roles {
