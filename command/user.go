@@ -57,7 +57,7 @@ var CreateUser = cli.Command{
 			Email:    c.String("email"),
 			Password: c.Args()[1],
 			MFA:      &mfa,
-			Disabled: false,
+			Disabled: h.Bool(false),
 		}
 		client.User().Create(user)
 		color.Green("User %s successfully created\n\n", usr)
@@ -104,7 +104,7 @@ var PasswordUser = cli.Command{
 			}
 			user := client.User().Get(username)
 			user.Password = password
-			user.Disabled = false
+			user.Disabled = h.Bool(false)
 			client.User().Update(user)
 			color.Green("`" + username + "` password has been changed")
 
@@ -143,7 +143,7 @@ var PasswordUser = cli.Command{
 			user := client.User().Get(username)
 			user.Password = newpassword
 			user.OldPassword = oldpassword
-			user.Disabled = false
+			user.Disabled = h.Bool(false)
 			client.User().Update(user)
 
 			color.Green("Your password has been changed")
@@ -166,7 +166,7 @@ var DisableUser = cli.Command{
 
 		user := client.User().Get(username)
 		user.Password = randString(16)
-		user.Disabled = true
+		user.Disabled = h.Bool(true)
 		client.User().Update(user)
 
 		color.Green("Account `" + username + "` has been disabled")

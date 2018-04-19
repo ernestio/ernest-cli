@@ -22,11 +22,15 @@ func PrintUserList(users []*emodels.User) {
 		if u.Admin {
 			admin = "yes"
 		}
-		disabled := "no"
-		if u.Disabled {
-			disabled = "yes"
+		if u.Disabled != nil {
+			disabled := "no"
+			if *u.Disabled {
+				disabled = "yes"
+			}
+			table.Append([]string{id, u.Username, u.Type, admin, disabled})
+		} else {
+			table.Append([]string{id, u.Username, u.Type, admin, ""})
 		}
-		table.Append([]string{id, u.Username, u.Type, admin, disabled})
 	}
 	table.Render()
 
