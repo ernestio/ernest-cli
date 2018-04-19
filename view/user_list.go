@@ -15,14 +15,18 @@ func PrintUserList(users []*emodels.User) {
 	w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"ID", "Name", "Type", "Admin"})
+	table.SetHeader([]string{"ID", "Name", "Type", "Admin", "Disabled"})
 	for _, u := range users {
 		id := strconv.Itoa(u.ID)
 		admin := "no"
 		if u.Admin {
 			admin = "yes"
 		}
-		table.Append([]string{id, u.Username, u.Type, admin})
+		disabled := "no"
+		if u.Disabled {
+			disabled = "yes"
+		}
+		table.Append([]string{id, u.Username, u.Type, admin, disabled})
 	}
 	table.Render()
 
