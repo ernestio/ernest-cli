@@ -14,22 +14,6 @@ func MapEnvOptions(c *cli.Context, opts map[string]interface{}) map[string]inter
 		opts = make(map[string]interface{})
 	}
 
-	if c.IsSet("sync_interval") {
-		opts["sync_interval"] = c.String("sync_interval")
-
-		if c.String("sync_interval") == "" {
-			opts["sync_interval"] = nil
-		}
-	}
-
-	if c.IsSet("sync_control") {
-		opts["sync_control"] = c.String("sync_control")
-
-		if c.String("sync_control") == "" {
-			opts["sync_control"] = nil
-		}
-	}
-
 	submissions := c.String("submissions")
 
 	// default submissions to true
