@@ -12,6 +12,7 @@ import (
 	"github.com/fatih/color"
 )
 
+// PrintValidation : prints the validation output
 func PrintValidation(v *models.Validation) {
 	if v == nil {
 		return
@@ -56,17 +57,15 @@ func PrintValidation(v *models.Validation) {
 func fmtpassed(i int) string {
 	if i < 1 {
 		return fmt.Sprintf("%d passed", i)
-	} else {
-		return color.GreenString("%d passed", i)
 	}
+	return color.GreenString("%d passed", i)
 }
 
 func fmtfailed(i int) string {
 	if i > 0 {
 		return color.RedString("%d failed", i)
-	} else {
-		return fmt.Sprintf("%d failed", i)
 	}
+	return fmt.Sprintf("%d failed", i)
 }
 
 func fmtresult(r string) string {
