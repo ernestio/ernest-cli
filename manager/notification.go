@@ -5,6 +5,8 @@
 package manager
 
 import (
+	"fmt"
+
 	h "github.com/ernestio/ernest-cli/helper"
 	eclient "github.com/ernestio/ernest-go-sdk/client"
 	emodels "github.com/ernestio/ernest-go-sdk/models"
@@ -56,28 +58,80 @@ func (c *Notification) Delete(notification string) {
 
 // AddProject : Adds a project to a notification
 func (c *Notification) AddProject(notification, project string) {
-	if err := c.cli.Notifications.AddProject(notification, project); err != nil {
+	n, err := c.cli.Notifications.Get(notification)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+
+	for _, source := range n.Sources {
+		if source == project {
+			h.PrintError("project is already added to notification")
+		}
+	}
+
+	n.Sources = append(n.Sources, project)
+
+	if err := c.cli.Notifications.Update(n); err != nil {
 		h.PrintError(err.Error())
 	}
 }
 
 // RmProject : Removes a project from a notification
 func (c *Notification) RmProject(notification, project string) {
-	if err := c.cli.Notifications.RemoveProject(notification, project); err != nil {
+	n, err := c.cli.Notifications.Get(notification)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+
+	for i := len(n.Sources) - 1; i >= 0; i-- {
+		if n.Sources[i] == project {
+			n.Sources = append(n.Sources[:i], n.Sources[i+1:]...)
+		}
+	}
+
+	if err := c.cli.Notifications.Update(n); err != nil {
 		h.PrintError(err.Error())
 	}
 }
 
 // AddEnv : Adds an environment to a notification
 func (c *Notification) AddEnv(notification, project, env string) {
-	if err := c.cli.Notifications.AddEnv(notification, project, env); err != nil {
+	n, err := c.cli.Notifications.Get(notification)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+
+	name := fmt.Sprintf("%s/%s", project, env)
+
+	for _, source := range n.Sources {
+		if source == name {
+			h.PrintError("environment is already added to notification")
+		}
+	}
+
+	n.Sources = append(n.Sources, name)
+
+	if err := c.cli.Notifications.Update(n); err != nil {
 		h.PrintError(err.Error())
 	}
 }
 
 // RmEnv : Removes an environment from a notification
 func (c *Notification) RmEnv(notification, project, env string) {
-	if err := c.cli.Notifications.RemoveEnv(notification, project, env); err != nil {
+	n, err := c.cli.Notifications.Get(notification)
+	if err != nil {
+		h.PrintError(err.Error())
+	}
+
+	name := fmt.Sprintf("%s/%s", project, env)
+
+	for i := len(n.Sources) - 1; i >= 0; i-- {
+		if n.Sources[i] == name {
+			n.Sources = append(n.Sources[:i], n.Sources[i+1:]...)
+		}
+	}
+
+	if err := c.cli.Notifications.Update(n); err != nil {
 		h.PrintError(err.Error())
 	}
 }

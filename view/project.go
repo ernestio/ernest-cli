@@ -20,8 +20,8 @@ func PrintProjectInfo(project *emodels.Project) {
 		fmt.Println("  ", v)
 	}
 	fmt.Println("Members: ")
-	for _, v := range project.Roles {
-		fmt.Println("  ", v)
+	for _, v := range project.Members {
+		fmt.Printf("  %s (%s)\n", v.User, v.Role)
 	}
 
 }

@@ -85,7 +85,7 @@ func (c *Environment) Reset(project, id string) *emodels.Action {
 	return act
 }
 
-// Reset : Resets a env by name
+// Validate : Validate a env by name
 func (c *Environment) Validate(project, env string) *emodels.Validation {
 	validation, err := c.cli.Environments.Validate(project, env)
 	if err != nil {

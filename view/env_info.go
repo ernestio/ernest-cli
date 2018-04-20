@@ -30,8 +30,8 @@ func PrintEnvInfo(env *emodels.Environment, build *emodels.Build) {
 		}
 	}
 	fmt.Println("Members:")
-	for _, m := range build.Roles {
-		fmt.Println("  " + m)
+	for _, v := range env.Members {
+		fmt.Printf("  %s (%s)\n", v.User, v.Role)
 	}
 
 	fmt.Println("Date : " + build.CreatedAt)

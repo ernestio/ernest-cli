@@ -3,6 +3,7 @@ package view
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/olekukonko/tablewriter"
 
@@ -18,7 +19,7 @@ func PrintNotificationList(notifications []*emodels.Notification) {
 		table := tablewriter.NewWriter(os.Stdout)
 		table.SetHeader([]string{"Name", "Type", "Config", "Members"})
 		for _, s := range notifications {
-			table.Append([]string{s.Name, s.Type, s.Config, s.Members})
+			table.Append([]string{s.Name, s.Type, s.Config, strings.Join(s.Sources, ", ")})
 		}
 		table.Render()
 	}
