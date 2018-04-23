@@ -339,12 +339,6 @@ var _langEnYml = []byte(`en:
         Examples:
           $ ernest env update --credentials project.yml my_project my_environment
       flags:
-        sync_interval:
-          alias: sync_interval
-          desc: sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
-        sync_control:
-          alias: sync_control
-          desc: allows for automatic accept or reject of changes detected by sync. options are [auto-accept|auto-reject]
         submissions:
           alias: submissions
           desc: allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'
@@ -362,12 +356,6 @@ var _langEnYml = []byte(`en:
         credentials:
           alias: credentials
           desc: will override project information
-        sync_interval:
-          alias: sync_interval
-          desc: sets the automatic sync interval. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
-        sync_control:
-          alias: sync_control
-          desc: allows for automatic accept or reject of changes detected by sync. options are [auto-accept|auto-reject]
         submissions:
           alias: submissions
           desc: allows user build submissions from users that have only read only permission to an environment. Options are 'enable' or 'disable'
@@ -571,19 +559,24 @@ var _langEnYml = []byte(`en:
             $ ernest env schedule list <project> <environment>
       add:
         usage: "Adds a new schedule for a specific environment."
-        args: "$ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>"
+        args: "$ ernest env schedule add --action <[power_on|power_off|sync]]> --instances <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>"
         description: |
           Creates a new schedule for a specific environment
 
           Example:
-            $ ernest env schedule add --action <[power_on|power_off|sync]]> --instance_type <type_a> --schedule '0 0 * * * *' <project> <env> <my_schedule>
+            $ ernest env schedule add --action <[power_on|power_off]> --instances <web>,<app> --schedule '0 0 * * * *' <project> <env> <my_schedule>
+            $ ernest env schedule add --action <[sync]> --resolution <[manual|auto-accept|auto-reject]> --schedule '0 0 * * * *' <project> <env> <my_schedule>
         flags:
           action:
             alias: action
             desc: defines what action should be scheduled possible values are [power_on, power_off, sync]
-          instance_type:
-            alias: instance_type
-            desc: power_on and power_off accept an instance_type to be powered on an off
+          resolution:
+            alias: resolution
+            desc: |
+              defines the course of action ernest will take when channges are detected during a sync. The options are to automatically accept the changes, reject them or manually handle the resolution. The default resolution is manual.
+          instances:
+            alias: instances
+            desc: power_on and power_off accept a comma delimited list of instances to be powered on an off. The name given is then matched against any instance group defined in the yaml
           schedule:
             alias: schedule
             desc: sets the automatic schedule. Accepts cron syntax, i.e. '@every 1d', '@weekly' or '0 0 * * * *' (Daily at midnight)
@@ -1105,7 +1098,7 @@ func langEnYml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "lang/en.yml", size: 35806, mode: os.FileMode(420), modTime: time.Unix(1523537220, 0)}
+	info := bindataFileInfo{name: "lang/en.yml", size: 35626, mode: os.FileMode(420), modTime: time.Unix(1524246035, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

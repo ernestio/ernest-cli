@@ -2,6 +2,8 @@ package command
 
 // CmdProject subcommand
 import (
+	"strings"
+
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/view"
 	"github.com/fatih/color"
@@ -36,28 +38,39 @@ var EnvAddSchedule = cli.Command{
 	Description: h.T("envs.schedule.add.description"),
 	Flags: []cli.Flag{
 		tStringFlagND("envs.schedule.add.flags.action"),
-		tStringFlagND("envs.schedule.add.flags.instance_type"),
+		tStringFlagND("envs.schedule.add.flags.resolution"),
+		tStringFlagND("envs.schedule.add.flags.instances"),
 		tStringFlagND("envs.schedule.add.flags.schedule"),
 	},
 	Action: func(c *cli.Context) error {
-		paramsLenValidation(c, 2, "envs.schedule.list.args")
+		paramsLenValidation(c, 3, "envs.schedule.list.args")
 		client := esetup(c, AuthUsersValidation)
 
 		env := client.Environment().Get(c.Args()[0], c.Args()[1])
 
-		if c.String("action") == "sync" {
-			env.Options["sync_interval"] = c.String("schedule")
-		} else {
-			schedule := make(map[string]string, 0)
-			schedule["name"] = c.Args()[2]
-			schedule["action"] = c.String("action")
-			schedule["interval"] = c.String("schedule")
-			schedule["instance_type"] = c.String("instance_type")
-			if env.Schedules == nil {
-				env.Schedules = make(map[string]interface{}, 0)
+		schedule := make(map[string]interface{}, 0)
+		schedule["name"] = c.Args()[2]
+		schedule["type"] = c.String("action")
+		schedule["interval"] = c.String("schedule")
+
+		switch c.String("action") {
+		case "sync":
+			resolution := c.String("resolution")
+			if resolution == "" {
+				resolution = "manual"
 			}
-			env.Schedules[c.Args()[2]] = schedule
+			schedule["resolution"] = resolution
+		case "power_on", "power_off":
+			schedule["instances"] = strings.Split(c.String("instances"), ",")
+		default:
+			h.PrintError("unsupported action type: " + c.String("action"))
 		}
+
+		if env.Schedules == nil {
+			env.Schedules = make(map[string]interface{}, 0)
+		}
+
+		env.Schedules[c.Args()[2]] = schedule
 		client.Environment().Update(env)
 		color.Green(h.T("envs.schedule.add.success"))
 
@@ -77,11 +90,8 @@ var EnvRmSchedule = cli.Command{
 		client := esetup(c, AuthUsersValidation)
 
 		env := client.Environment().Get(c.Args()[0], c.Args()[1])
-		if c.Args()[2] == "sync" {
-			env.Options["sync_interval"] = nil
-		} else {
-			delete(env.Schedules, c.Args()[2])
-		}
+		delete(env.Schedules, c.Args()[2])
+
 		client.Environment().Update(env)
 		color.Green(h.T("envs.schedule.rm.success"))
 
