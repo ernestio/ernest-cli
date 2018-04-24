@@ -614,72 +614,72 @@ en:
         Example:
           $ ernest notification list
     delete:
-      usage: "Deletes an existing notify."
-      args: "$ ernest notify delete <notify_name>"
+      usage: "Deletes an existing notification."
+      args: "$ ernest notification delete <notification_name>"
       description: |
-        Deletes an existing notify on the targeted instance of Ernest.
+        Deletes an existing notification on the targeted instance of Ernest.
 
         Example:
-          $ ernest notify delete <notify_name>
+          $ ernest notification delete <notification_name>
 
 
         Example:
-        $ ernest notify delete my_notify
+        $ ernest notification delete my_notification
       success: "Notify %s successfully delete"
     update:
-      usage: "Update a new notify."
-      args: "$ ernest notify update <notify_name> <notify_config>"
+      usage: "Update an existing notification."
+      args: "$ ernest notification update <notification_name> <notification_config>"
       description: |
-        Update an existing notify on the targeted instance of Ernest.
+        Update an existing notification on the targeted instance of Ernest.
 
         Example:
-          $ ernest notify update <notify_name> <provider-details>
+          $ ernest notification update <notification_name> <provider-details>
 
 
         Example:
-        $ ernest notify update my_notify '{"url":"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"}'
+        $ ernest notification update my_notification '{"url":"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"}'
       success: "Notify %s successfully updated"
     service:
       add:
-        usage: "Add environment to an existing notify."
-        args: "$ ernest notify add <notification_name> <project_name> [<env_name>]"
+        usage: "Add an environment to an existing notification."
+        args: "$ ernest notification add <notification_name> <project_name> [<env_name>]"
         description: |
-          Adds a environment to an existing notify.
+          Adds an environment to an existing notification.
 
           Example:
-            $ ernest notify add <notify_name> <project_name> <environment_name>
+            $ ernest notification add <notification_name> <project_name> <environment_name>
 
 
           Example:
-          $ ernest notify add my_notify my_project
-          $ ernest notify add my_notify my_project my_env
-        success: "Environment %s successfully attached to %s notify"
+          $ ernest notification add my_notification my_project
+          $ ernest notification add my_notification my_project my_env
+        success: "Environment %s successfully attached to %s notification"
       rm:
-        usage: "Removes an environment to an existing notify."
-        args: "$ ernest notify remove <notify_name> <project_name> [<env_name>]"
+        usage: "Removes an environment to an existing notification."
+        args: "$ ernest notification remove <notification_name> <project_name> [<env_name>]"
         description: |
-          Removes an environment to an existing notify.
+          Removes an environment to an existing notification.
 
           Example:
-            $ ernest notify remove <notify_name> <project_name> <env_name>
+            $ ernest notification remove <notification_name> <project_name> <env_name>
 
 
           Example:
-          $ ernest notify remove my_notify my_project
-          $ ernest notify remove my_notify my_project my_env
-        success: "Environment %s successfully removed from %s notify"
+          $ ernest notification remove my_notification my_project
+          $ ernest notification remove my_notification my_project my_env
+        success: "Environment %s successfully removed from %s notification"
     create:
-      usage: "Create a new notify."
-      args: "$ ernest notify create <notify_name> <notify_type> <notify_config>"
+      usage: "Create a new notification."
+      args: "$ ernest notification create <notification_name> <notification_type> <notification_config>"
       description: |
-        Create a new notify on the targeted instance of Ernest.
+        Create a new notification on the targeted instance of Ernest.
 
         Example:
-          $ ernest notify create <notify_name> <provider_type> <provider-details>
+          $ ernest notification create <notification_name> <provider_type> <provider-details>
 
 
         Example:
-        $ ernest notify create my_notify slack '{"url":"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"}'
+        $ ernest notification create my_notification slack '{"url":"https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX"}'
       success: "Notify %s successfully created"
   policy:
     list:

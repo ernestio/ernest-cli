@@ -59,10 +59,10 @@ var UpdateNotification = cli.Command{
 		paramsLenValidation(c, 2, "notification.update.args")
 		client := esetup(c, AuthUsersValidation)
 		name := c.Args()[0]
-		notifyConfig := c.Args()[1]
+		notificationConfig := c.Args()[1]
 
 		n := client.Notification().Get(name)
-		n.Config = notifyConfig
+		n.Config = notificationConfig
 		client.Notification().Update(n)
 		color.Green(fmt.Sprintf(h.T("notification.update.success"), name))
 		return nil
@@ -130,12 +130,12 @@ var CreateNotification = cli.Command{
 		client := esetup(c, AuthUsersValidation)
 
 		name := c.Args()[0]
-		notifyType := c.Args()[1]
-		notifyConfig := c.Args()[2]
+		notificationType := c.Args()[1]
+		notificationConfig := c.Args()[2]
 		notification := emodels.Notification{
 			Name:   name,
-			Type:   notifyType,
-			Config: notifyConfig,
+			Type:   notificationType,
+			Config: notificationConfig,
 		}
 		client.Notification().Create(&notification)
 		color.Green(fmt.Sprintf(h.T("notification.create.success"), name))
@@ -145,7 +145,7 @@ var CreateNotification = cli.Command{
 
 // CmdNotification ...
 var CmdNotification = cli.Command{
-	Name:  "notify",
+	Name:  "notification",
 	Usage: "Notification related subcommands",
 	Subcommands: []cli.Command{
 		ListNotifications,
