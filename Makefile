@@ -19,10 +19,6 @@ deps:
 	dep ensure
 
 dev-deps: deps
-	# BUG: temporarily sidestep golang.org 404
-	mkdir -p ~/.go_workspace/src/golang.org/x
-	git clone https://github.com/golang/lint.git ~/.go_workspace/src/golang.org/x/lint
-	#
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/gorilla/mux
 	go get -u github.com/smartystreets/goconvey/convey
