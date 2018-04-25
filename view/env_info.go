@@ -156,4 +156,33 @@ func PrintEnvInfo(env *emodels.Environment, build *emodels.Build) {
 		table.Render()
 	}
 
+	if len(build.IamPolicies) > 0 {
+		fmt.Println("\nIAM Policies:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "ID", "Path"})
+		for _, v := range build.IamPolicies {
+			table.Append([]string{v.Name, v.ID, v.Path})
+		}
+		table.Render()
+	}
+
+	if len(build.IamRoles) > 0 {
+		fmt.Println("\nIAM Roles:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "ID", "Path", "Policies"})
+		for _, v := range build.IamRoles {
+			table.Append([]string{v.Name, v.ID, v.Path, strings.Join(v.Policies, ",")})
+		}
+		table.Render()
+	}
+
+	if len(build.IamInstanceProfiles) > 0 {
+		fmt.Println("\nIAM Instance Profiles:")
+		table := tablewriter.NewWriter(os.Stdout)
+		table.SetHeader([]string{"Name", "ID", "Path", "Roles"})
+		for _, v := range build.IamInstanceProfiles {
+			table.Append([]string{v.Name, v.ID, v.Path, strings.Join(v.Roles, ",")})
+		}
+		table.Render()
+	}
 }
