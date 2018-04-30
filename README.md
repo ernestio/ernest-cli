@@ -48,6 +48,34 @@ And read our documentation about [how to use the CLI](http://docs.ernest.io/gett
 make test
 ```
 
+## Shell Completion
+
+### Bash
+
+Get completion shim.
+```
+wget https://raw.githubusercontent.com/ernestio/ernest-cli/master/autocomplete/bash_autocomplete -O /etc/bash_completion.d/ernest
+```
+
+Load into shell.
+```
+echo 'PROG=ernest-cli source /etc/bash_completion.d/ernest' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### Zsh
+
+Get completion shim.
+```
+wget https://raw.githubusercontent.com/ernestio/ernest-cli/master/autocomplete/zsh_autocomplete -O ~/.ernest_completion
+```
+
+Load into shell.
+```
+echo 'PROG=ernest-cli source ~/.ernest_completion' >> ~/.zshrc
+source ~/.zshrc
+```
+
 ## Contributing
 
 Please read through our
