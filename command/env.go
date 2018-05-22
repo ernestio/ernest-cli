@@ -268,6 +268,10 @@ var ReviewEnv = cli.Command{
 		action := client.Environment().Review(project, env, resolution)
 		if action.ResourceID != "" {
 			h.Monitorize(client.Build().Stream(action.ResourceID))
+			view.PrintEnvInfo(
+				client.Environment().Get(project, env),
+				client.Build().Get(project, env, action.ResourceID),
+			)
 		}
 
 		return nil
