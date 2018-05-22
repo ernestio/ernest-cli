@@ -99,7 +99,8 @@ func (c *Build) BuildByPosition(project, env, pos string) *emodels.Build {
 		h.PrintError("No builds were found for the specified parameters")
 	}
 
-	num := len(builds) - 1
+	num := 0
+
 	if pos != "" {
 		num, _ = strconv.Atoi(pos)
 		if num < 1 || num > len(builds) {
