@@ -5,9 +5,9 @@
 package helper
 
 import (
+	"github.com/r3labs/sse"
 	"github.com/fatih/color"
 	"github.com/gosuri/uilive"
-	"github.com/r3labs/sse"
 )
 
 const (
@@ -38,7 +38,7 @@ var (
 )
 
 // Monitorize opens a websocket connection to get input messages
-func Monitorize(stream chan *sse.Event) error {
+func Monitorize(stream chan []byte) error {
 	h := buildhandler{
 		writer: uilive.New(),
 		stream: stream,

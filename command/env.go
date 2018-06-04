@@ -6,7 +6,6 @@ package command
 
 // CmdProject subcommand
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -172,11 +171,11 @@ var SyncEnv = cli.Command{
 				h.PrintError("could not monitor sync progress")
 			}
 
-			if msg.Data == nil {
+			if msg == nil {
 				continue
 			}
 
-			if json.Unmarshal(bytes.Trim(msg.Data, "\x00"), &m) != nil {
+			if json.Unmarshal(msg, &m) != nil {
 				h.PrintError("could not parse response")
 			}
 
