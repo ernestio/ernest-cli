@@ -5,7 +5,6 @@
 package helper
 
 import (
-	"github.com/r3labs/sse"
 	"github.com/fatih/color"
 	"github.com/gosuri/uilive"
 )
@@ -51,13 +50,13 @@ func Monitorize(stream chan []byte) error {
 }
 
 // PrintLogs : prints logs inline
-func PrintLogs(stream chan *sse.Event) error {
+func PrintLogs(stream chan []byte) error {
 	h := loghandler{stream: stream}
 	return h.subscribe()
 }
 
 // PrintRawLogs : prints logs inline
-func PrintRawLogs(stream chan *sse.Event) error {
+func PrintRawLogs(stream chan []byte) error {
 	h := rawhandler{stream: stream}
 	return h.subscribe()
 }

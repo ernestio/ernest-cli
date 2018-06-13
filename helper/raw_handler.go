@@ -1,16 +1,14 @@
 package helper
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 
 	"github.com/ernestio/ernest-cli/model"
-	"github.com/r3labs/sse"
 )
 
 type rawhandler struct {
-	stream chan *sse.Event
+	stream chan []byte
 }
 
 func (h *rawhandler) subscribe() error {
@@ -20,16 +18,13 @@ func (h *rawhandler) subscribe() error {
 			if !ok {
 				return nil
 			}
-			if msg.Data == nil {
+			if msg == nil {
 				continue
 			}
 
-			// clean msg body of any null characters
-			cleanedInput := bytes.Trim(msg.Data, "\x00")
-
 			m := model.Message{}
 
-			if err := json.Unmarshal(cleanedInput, &m); err != nil {
+			if err := json.Unmarshal(msg, &m); err != nil {
 				return err
 			}
 

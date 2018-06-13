@@ -1,1 +1,2 @@
 monit:websockets
+logger:websockets

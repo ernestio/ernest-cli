@@ -8,11 +8,9 @@ import (
 	"runtime"
 
 	"github.com/ernestio/ernest-cli/helper"
-	uuid "github.com/nu7hatch/gouuid"
 	"github.com/urfave/cli"
 
 	h "github.com/ernestio/ernest-cli/helper"
-	emodels "github.com/ernestio/ernest-go-sdk/models"
 )
 
 // CmdLog : Preferences setup
@@ -27,22 +25,11 @@ var CmdLog = cli.Command{
 	Action: func(c *cli.Context) error {
 		client := esetup(c, AuthUsersValidation)
 
-		uu, _ := uuid.NewV4()
-		uuid := uu.String()
-		client.Logger().Create(&emodels.Logger{
-			Type: "sse",
-			UUID: uuid,
-		})
-
 		if c.Bool("raw") {
-			_ = helper.PrintRawLogs(client.Logger().Stream(uuid))
+			_ = helper.PrintRawLogs(client.Logger().Stream())
 		} else {
-			_ = helper.PrintLogs(client.Logger().Stream(uuid))
+			_ = helper.PrintLogs(client.Logger().Stream())
 		}
-
-		defer func() {
-			client.Logger().Delete("sse")
-		}()
 
 		runtime.Goexit()
 

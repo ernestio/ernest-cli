@@ -8,7 +8,6 @@ import (
 	h "github.com/ernestio/ernest-cli/helper"
 	eclient "github.com/ernestio/ernest-go-sdk/client"
 	emodels "github.com/ernestio/ernest-go-sdk/models"
-	"github.com/r3labs/sse"
 )
 
 // Logger : ernest-go-sdk Logger wrapper
@@ -41,8 +40,8 @@ func (c *Logger) Delete(name string) {
 }
 
 // Stream : Streams log events
-func (c *Logger) Stream(id string) chan *sse.Event {
-	ch, err := c.cli.Conn.Stream("/logs", id)
+func (c *Logger) Stream() chan []byte {
+	ch, err := c.cli.Conn.WSStream("/logs", "logs")
 	if err != nil {
 		h.PrintError(err.Error())
 	}
