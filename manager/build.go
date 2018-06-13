@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/r3labs/diff"
-	"github.com/r3labs/sse"
 
 	h "github.com/ernestio/ernest-cli/helper"
 	"github.com/ernestio/ernest-cli/view"
@@ -84,7 +83,7 @@ func (c *Build) Changelog(project, env, id string) *diff.Changelog {
 }
 
 // Stream : Streams build progress
-func (c *Build) Stream(id string) chan *sse.Event {
+func (c *Build) Stream(id string) chan []byte {
 	ch, err := c.cli.Builds.Stream(id)
 	if err != nil {
 		h.PrintError(err.Error())

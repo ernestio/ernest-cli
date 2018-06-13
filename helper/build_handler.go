@@ -5,18 +5,16 @@
 package helper
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/gosuri/uilive"
-	"github.com/r3labs/sse"
 )
 
 type buildhandler struct {
-	stream    chan *sse.Event
+	stream    chan []byte
 	writer    *uilive.Writer
 	format    string
 	failures  []error
@@ -33,16 +31,13 @@ func (h *buildhandler) subscribe() error {
 				return nil
 			}
 
-			if msg.Data == nil {
+			if msg == nil {
 				continue
 			}
 
-			// clean msg body of any null characters
-			cleanedInput := bytes.Trim(msg.Data, "\x00")
-
 			m := make(map[string]interface{})
 
-			err := json.Unmarshal(cleanedInput, &m)
+			err := json.Unmarshal(msg, &m)
 			if err != nil {
 				return err
 			}

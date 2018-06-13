@@ -1,18 +1,16 @@
 package helper
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 
 	"github.com/ernestio/ernest-cli/model"
 	"github.com/fatih/color"
 	prettyjson "github.com/hokaccha/go-prettyjson"
-	"github.com/r3labs/sse"
 )
 
 type loghandler struct {
-	stream chan *sse.Event
+	stream chan []byte
 }
 
 func (h *loghandler) subscribe() error {
@@ -22,16 +20,13 @@ func (h *loghandler) subscribe() error {
 			if !ok {
 				return nil
 			}
-			if msg.Data == nil {
+			if msg == nil {
 				continue
 			}
 
-			// clean msg body of any null characters
-			cleanedInput := bytes.Trim(msg.Data, "\x00")
-
 			m := model.Message{}
 
-			if err := json.Unmarshal(cleanedInput, &m); err != nil {
+			if err := json.Unmarshal(msg, &m); err != nil {
 				return err
 			}
 

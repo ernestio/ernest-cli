@@ -7,7 +7,6 @@ package helper
 import (
 	"github.com/fatih/color"
 	"github.com/gosuri/uilive"
-	"github.com/r3labs/sse"
 )
 
 const (
@@ -38,7 +37,7 @@ var (
 )
 
 // Monitorize opens a websocket connection to get input messages
-func Monitorize(stream chan *sse.Event) error {
+func Monitorize(stream chan []byte) error {
 	h := buildhandler{
 		writer: uilive.New(),
 		stream: stream,
@@ -51,13 +50,13 @@ func Monitorize(stream chan *sse.Event) error {
 }
 
 // PrintLogs : prints logs inline
-func PrintLogs(stream chan *sse.Event) error {
+func PrintLogs(stream chan []byte) error {
 	h := loghandler{stream: stream}
 	return h.subscribe()
 }
 
 // PrintRawLogs : prints logs inline
-func PrintRawLogs(stream chan *sse.Event) error {
+func PrintRawLogs(stream chan []byte) error {
 	h := rawhandler{stream: stream}
 	return h.subscribe()
 }
