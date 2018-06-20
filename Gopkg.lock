@@ -131,12 +131,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/nu7hatch/gouuid"
-  packages = ["."]
-  revision = "179d4d0c4d8d407a32af483c2354df1d2c91e6c3"
-
-[[projects]]
-  branch = "master"
   name = "github.com/olekukonko/tablewriter"
   packages = ["."]
   revision = "65fec0d89a572b4367094e2058d3ebe667de3b60"
@@ -241,6 +235,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "fd047cd7b5b5c02174d0505f13d16a816dd91f6505e6c4c459726cea6ae4c5ab"
+  inputs-digest = "654e1e40138b792d846bf1ea5f52cc3b0e05c74d486cf367c115c6aad3cb29d0"
   solver-name = "gps-cdcl"
   solver-version = 1

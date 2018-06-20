@@ -50,15 +50,7 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/nu7hatch/gouuid"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/olekukonko/tablewriter"
-
-[[constraint]]
-  name = "github.com/r3labs/sse"
-  version = "1.0.1"
 
 [[constraint]]
   branch = "master"
