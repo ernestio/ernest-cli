@@ -19,7 +19,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:48eda060fa0beaaea6f4a98a99cced63d625a46672696060d3d2ae0de6edbe03"
+  digest = "1:ca99a7364c66da3cd5e5da33eb6b8dda29bd112c7e1d0c201b217141cccd5d9a"
   name = "github.com/ernestio/ernest-go-sdk"
   packages = [
     "client",
@@ -39,7 +39,7 @@
     "models",
   ]
   pruneopts = ""
-  revision = "e64956429df0835c8f94ca5ea1c88d22e4650aff"
+  revision = "62e55b10eed4fe9a1268d80db50e7047211c1797"
 
 [[projects]]
   digest = "1:c9bebdae4ac52d0c3bbe5876de3d72f3bb05b4986865cdb3f15e305e1dc4fbca"
