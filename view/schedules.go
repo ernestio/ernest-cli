@@ -19,18 +19,22 @@ func PrintScheduleList(list map[string]interface{}) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"ID", "Action", "Interval", "Instance", "Resolution"})
 	for k, d := range list {
-		var instances string
+		var instances []string
 
 		opts := d.(map[string]interface{})
 		t := opts["type"].(string)
-		it, ok := opts["instances"].([]string)
-		if ok {
-			instances = strings.Join(it, ", ")
-		}
+
+		inst, ok := opts["instances"].([]interface{})
+        	if ok {
+            		for _, v := range inst {
+                		instances = append(instances, v.(string))
+            		}
+        	}
+		
 		resolution, _ := opts["resolution"].(string)
 
 		i := opts["interval"].(string)
-		table.Append([]string{k, t, i, instances, resolution})
+		table.Append([]string{k, t, i, strings.Join(instances, ","), resolution})
 	}
 	table.Render()
 }
