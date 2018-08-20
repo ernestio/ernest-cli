@@ -24,12 +24,13 @@ func PrintScheduleList(list map[string]interface{}) {
 		opts := d.(map[string]interface{})
 		t := opts["type"].(string)
 
-		if len(opts["instances"].([]interface{})) != 0 {
-			for _, v := range opts["instances"].([]interface{}) {
-				instances = append(instances, v.(string))
-			}
-		}
-
+		inst, ok := opts["instances"].([]interface{})
+        	if ok {
+            		for _, v := range inst {
+                		instances = append(instances, v.(string))
+            		}
+        	}
+		
 		resolution, _ := opts["resolution"].(string)
 
 		i := opts["interval"].(string)
