@@ -19,12 +19,6 @@ deps:
 	dep ensure
 
 dev-deps: deps
-	go get -u github.com/golang/lint/golint
-	go get -u github.com/gorilla/mux
-	go get -u github.com/smartystreets/goconvey/convey
-	go get -u golang.org/x/tools/cmd/cover
-	go get -u github.com/ernestio/ernest-config-client
-	go get -u github.com/ernestio/crypto
 	go get github.com/alecthomas/gometalinter
 	gometalinter --install
 
